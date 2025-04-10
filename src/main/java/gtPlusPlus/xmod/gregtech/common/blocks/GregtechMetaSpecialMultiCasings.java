@@ -2,6 +2,7 @@ package gtPlusPlus.xmod.gregtech.common.blocks;
 
 import java.util.List;
 
+import gregtech.common.tileentities.machines.multi.MTELargeTurbineSteam;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -92,10 +93,10 @@ public class GregtechMetaSpecialMultiCasings extends GregtechMetaCasingBlocksAbs
     public static IIcon getStaticIcon(final int ordinalSide, final int aMeta) {
         return switch (aMeta) {
             case 0 -> TexturesGtBlock.Casing_Redox_1.getIcon();
-            case 1 -> Textures.BlockIcons.MACHINE_CASING_TURBINE_STEEL.getIcon();
-            case 2 -> Textures.BlockIcons.MACHINE_CASING_TURBINE_TITANIUM.getIcon();
-            case 3 -> Textures.BlockIcons.MACHINE_CASING_TURBINE_STAINLESSSTEEL.getIcon();
-            case 4 -> Textures.BlockIcons.MACHINE_CASING_TURBINE_TUNGSTENSTEEL.getIcon();
+            case 1 -> TexturesGtBlock.Turbine_S_Material_Casing.getIcon();
+            case 2 -> TexturesGtBlock.Turbine_SH_Material_Casing.getIcon();
+            case 3 -> TexturesGtBlock.Turbine_G_Material_Casing.getIcon();
+            case 4 -> TexturesGtBlock.Turbine_PL_Material_Casing.getIcon();
             case 5 -> TexturesGtBlock.Casing_Material_RedSteel.getIcon();
             case 6 -> TexturesGtBlock.Casing_Material_MaragingSteel.getIcon();
             case 7 -> TexturesGtBlock.Casing_Material_Stellite.getIcon();

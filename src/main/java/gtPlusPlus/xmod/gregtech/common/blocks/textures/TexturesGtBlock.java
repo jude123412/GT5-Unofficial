@@ -83,6 +83,10 @@ public class TexturesGtBlock {
     public static final CustomIcon Casing_Machine_Dimensional = new CustomIcon("TileEntities/adv_machine_dimensional");
 
     // Material Casings
+    public static final CustomIcon Turbine_S_Material_Casing = new TexturesGtBlock.CustomIcon("iconsets/S_TURBINE");
+    public static final CustomIcon Turbine_SH_Material_Casing = new TexturesGtBlock.CustomIcon("iconsets/SH_TURBINE");
+    public static final CustomIcon Turbine_G_Material_Casing = new TexturesGtBlock.CustomIcon("iconsets/G_TURBINE");
+    public static final CustomIcon Turbine_PL_Material_Casing = new TexturesGtBlock.CustomIcon("iconsets/PL_TURBINE");
     public static final CustomIcon Casing_Material_Tantalloy61 = new CustomIcon(
         "TileEntities/MACHINE_CASING_STABLE_TANTALLOY61");
     public static final CustomIcon Casing_Material_MaragingSteel = new CustomIcon(
