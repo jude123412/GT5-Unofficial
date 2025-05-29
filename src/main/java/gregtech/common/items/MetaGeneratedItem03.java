@@ -260,18 +260,14 @@ import static gregtech.common.items.IDMetaItem03.White_Dwarf_Shape_Extruder_Wire
 import static gregtech.common.items.IDMetaItem03.WovenKevlar;
 import static gregtech.common.items.IDMetaItem03.ZPM_Coil;
 
+import gregtech.api.enums.*;
+import gregtech.common.render.items.CosmicNeutroniumMetaItemRenderer;
+import gregtech.common.render.items.UniversiumMetaItemRenderer;
 import net.minecraft.item.ItemStack;
 
 import cpw.mods.fml.common.Optional;
 import gregtech.api.covers.CoverPlacer;
 import gregtech.api.covers.CoverRegistry;
-import gregtech.api.enums.GTValues;
-import gregtech.api.enums.ItemList;
-import gregtech.api.enums.Materials;
-import gregtech.api.enums.Mods;
-import gregtech.api.enums.OrePrefixes;
-import gregtech.api.enums.SubTag;
-import gregtech.api.enums.TCAspects;
 import gregtech.api.items.MetaGeneratedItemX32;
 import gregtech.api.objects.ItemData;
 import gregtech.api.render.TextureFactory;
@@ -853,7 +849,7 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFi
                 "Cosmic Processor",
                 "A Cosmic Circuit",
                 OrePrefixes.circuit.get(Materials.UEV),
-                SubTag.NO_UNIFICATION));
+                SubTag.NO_UNIFICATION)).setRender(new InfinityMetaItemRenderer());
 
         ItemList.Circuit_CosmicAssembly.set(
             addItem(
@@ -861,7 +857,7 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFi
                 "Cosmic Assembly",
                 "A Cosmic Circuit",
                 OrePrefixes.circuit.get(Materials.UIV),
-                SubTag.NO_UNIFICATION));
+                SubTag.NO_UNIFICATION)).setRender(new InfinityMetaItemRenderer());
 
         ItemList.Circuit_CosmicComputer.set(
             addItem(
@@ -869,7 +865,7 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFi
                 "Cosmic Supercomputer",
                 "A Cosmic Circuit",
                 OrePrefixes.circuit.get(Materials.UMV),
-                SubTag.NO_UNIFICATION));
+                SubTag.NO_UNIFICATION)).setRender(new InfinityMetaItemRenderer());
 
         ItemList.Circuit_CosmicMainframe.set(
             addItem(
@@ -877,7 +873,7 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFi
                 "Cosmic Mainframe",
                 "A Cosmic Circuit",
                 OrePrefixes.circuit.get(Materials.UXV),
-                SubTag.NO_UNIFICATION));
+                SubTag.NO_UNIFICATION)).setRender(new InfinityMetaItemRenderer());
 
         // Transcendent circuits
         ItemList.Circuit_TranscendentProcessor.set(
@@ -886,7 +882,7 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFi
                 "Temporally Transcendent Processor",
                 "A circuit operating outside of known spacetime",
                 OrePrefixes.circuit.get(Materials.UIV),
-                SubTag.NO_UNIFICATION));
+                SubTag.NO_UNIFICATION)).setRender(new UniversiumMetaItemRenderer(Textures.ItemIcons.MASK_PROCESSOR, 0.5F));
 
         ItemList.Circuit_TranscendentAssembly.set(
             addItem(
@@ -894,7 +890,7 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFi
                 "Temporally Transcendent Assembly",
                 "A circuit operating outside of known spacetime",
                 OrePrefixes.circuit.get(Materials.UMV),
-                SubTag.NO_UNIFICATION));
+                SubTag.NO_UNIFICATION)).setRender(new UniversiumMetaItemRenderer(Textures.ItemIcons.MASK_ASSEMBLY, 0.5F));
 
         ItemList.Circuit_TranscendentComputer.set(
             addItem(
@@ -902,7 +898,7 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFi
                 "Temporally Transcendent Supercomputer",
                 "A circuit operating outside of known spacetime",
                 OrePrefixes.circuit.get(Materials.UXV),
-                SubTag.NO_UNIFICATION));
+                SubTag.NO_UNIFICATION)).setRender(new UniversiumMetaItemRenderer(Textures.ItemIcons.MASK_COMPUTER, 0.5F));
 
         ItemList.Circuit_TranscendentMainframe.set(
             addItem(
@@ -910,7 +906,7 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFi
                 "Temporally Transcendent Mainframe",
                 "A circuit operating outside of known spacetime",
                 OrePrefixes.circuit.get(Materials.MAX),
-                SubTag.NO_UNIFICATION));
+                SubTag.NO_UNIFICATION)).setRender(new UniversiumMetaItemRenderer(Textures.ItemIcons.MASK_MAINFRAME, 0.5F));
 
         ItemList.Tube_Wires.set(addItem(Tube_Wires.ID, "Tube Wires", "For the Vacuum Tubes", o));
 

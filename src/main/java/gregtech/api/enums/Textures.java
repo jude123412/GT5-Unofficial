@@ -2006,7 +2006,11 @@ public class Textures {
         HALO,
         HALO_FUZZY,
         TROWEL,
-        HANDLE_TROWEL;
+        HANDLE_TROWEL,
+        MASK_PROCESSOR,
+        MASK_ASSEMBLY,
+        MASK_COMPUTER,
+        MASK_MAINFRAME;
 
         public static final IIconContainer[] DURABILITY_BAR = { DURABILITY_BAR_0, DURABILITY_BAR_1, DURABILITY_BAR_2,
             DURABILITY_BAR_3, DURABILITY_BAR_4, DURABILITY_BAR_5, DURABILITY_BAR_6, DURABILITY_BAR_7,
