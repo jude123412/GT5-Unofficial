@@ -18,6 +18,7 @@ import java.util.stream.IntStream;
 
 import javax.annotation.Nonnull;
 
+import gregtech.common.render.items.*;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumChatFormatting;
@@ -36,14 +37,6 @@ import gregtech.api.util.CustomGlyphs;
 import gregtech.api.util.GTOreDictUnificator;
 import gregtech.api.util.GTUtility;
 import gregtech.common.config.Gregtech;
-import gregtech.common.render.items.CosmicNeutroniumRenderer;
-import gregtech.common.render.items.GaiaSpiritRenderer;
-import gregtech.common.render.items.GeneratedMaterialRenderer;
-import gregtech.common.render.items.GlitchEffectRenderer;
-import gregtech.common.render.items.InfinityRenderer;
-import gregtech.common.render.items.RainbowOverlayRenderer;
-import gregtech.common.render.items.TranscendentMetalRenderer;
-import gregtech.common.render.items.UniversiumRenderer;
 import gregtech.loaders.materialprocessing.ProcessingConfig;
 import gregtech.loaders.materialprocessing.ProcessingModSupport;
 import gregtech.loaders.materials.MaterialsInit1;
@@ -2776,6 +2769,8 @@ public class Materials implements IColorModulationContainer, ISubTagContainer {
         MaterialsUEVplus.ExoHalkonite.renderer = new InfinityRenderer();
         MaterialsUEVplus.HotExoHalkonite.renderer = new InfinityRenderer();
         Materials.PrismaticNaquadah.renderer = new RainbowOverlayRenderer(Materials.PrismaticNaquadah.getRGBA());
+        MaterialsUEVplus.WhiteDwarfMatter.renderer = new WarpedMaterialRenderer();
+
     }
 
     private static void fillGeneratedMaterialsMap() {
