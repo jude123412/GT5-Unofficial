@@ -17,27 +17,29 @@ public class WarpedMaterialRenderer extends GeneratedMaterialRenderer {
             GL11.glEnable(GL11.GL_BLEND);
             GL11.glColor3f(255, 255, 255);
 
-            float uDistortion = (float) Math.max(-0.05f, Math.min(0.05f, (Math.sin(System.currentTimeMillis() * 0.001) * 0.1f)));
-            float vDistortion = (float) Math.max(-0.05f, Math.min(0.05f, (Math.cos(System.currentTimeMillis() * 0.001) * 0.1f)));
+            float distortionFactor = 0.0005f;
+            float uDistortion = (float) Math.sin(System.currentTimeMillis() * 0.001) * distortionFactor;
 
             float minU = icon.getMinU();
             float maxU = icon.getMaxU();
             float minV = icon.getMinV();
             float maxV = icon.getMaxV();
 
+            float centerX = 8.0f / 16.0f;
+            float centerY = 8.0f / 16.0f;
 
             t.startDrawingQuads();
             t.setColorRGBA_F(1.0f, 1.0f, 1.0f, 0.6f);
-            t.addVertexWithUV(0 ,  0, 0, minU + uDistortion, minV + vDistortion);
-            t.addVertexWithUV(0 , 16, 0, minU + uDistortion, maxV + vDistortion);
-            t.addVertexWithUV(16, 16, 0, maxU + uDistortion, maxV + vDistortion);
-            t.addVertexWithUV(16,  0, 0, maxU + uDistortion, minV + vDistortion);
+            t.addVertexWithUV(0 ,  0, 0, minU + (uDistortion * (0 - centerX)), minV + (uDistortion * (0 - centerY)));
+            t.addVertexWithUV(0 , 16, 0, minU + (uDistortion * (1 - centerX)), maxV + (uDistortion * (0 - centerY)));
+            t.addVertexWithUV(16, 16, 0, maxU + (uDistortion * (1 - centerX)), maxV + (uDistortion * (1 - centerY)));
+            t.addVertexWithUV(16,  0, 0, maxU + (uDistortion * (0 - centerX)), minV + (uDistortion * (1 - centerY)));
             t.draw();
 
-//            tessellator.addVertexWithUV(x            , y         , z                 , uMin + uDistortion, vMin + vDistortion);
-//            tessellator.addVertexWithUV(x + width    , y         , z                 , uMax + uDistortion, vMin + vDistortion);
-//            tessellator.addVertexWithUV(x + width    , y + height, z                 , uMax + uDistortion, vMax + vDistortion);
-//            tessellator.addVertexWithUV(x            , y + height, z                 , uMin + uDistortion, vMax + vDistortion);
+//            tessellator.addVertexWithUV(x        , y         , z, uMin + (bendAmount * (0 - centerX)), vMin + (bendAmount * (0 - centerY)));
+//            tessellator.addVertexWithUV(x + width, y         , z, uMax + (bendAmount * (1 - centerX)), vMin + (bendAmount * (0 - centerY)));
+//            tessellator.addVertexWithUV(x + width, y + height, z, uMax + (bendAmount * (1 - centerX)), vMax + (bendAmount * (1 - centerY)));
+//            tessellator.addVertexWithUV(x        , y + height, z, uMin + (bendAmount * (0 - centerX)), vMax + (bendAmount * (1 - centerY)));
 
             GL11.glPopMatrix();
         } else {
