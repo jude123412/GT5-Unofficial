@@ -55,7 +55,7 @@ public class BaseOreComponent extends Item {
         GameRegistry.registerItem(this, this.unlocalName);
         registerComponent();
         GTOreDictUnificator
-            .registerOre(componentType.getComponent() + material.getUnlocalizedName(), new ItemStack(this));
+            .registerOre(componentType.getOrePrefix() + material.getUnlocalizedName(), new ItemStack(this, 1));
     }
 
     public boolean registerComponent() {
@@ -136,15 +136,11 @@ public class BaseOreComponent extends Item {
     public void onUpdate(final ItemStack iStack, final World world, final Entity entityHolding, final int p_77663_4_,
         final boolean p_77663_5_) {
         if (this.componentMaterial != null) {
-            if (entityHolding instanceof EntityPlayer) {
-                if (!((EntityPlayer) entityHolding).capabilities.isCreativeMode) {
-                    EntityUtils.applyRadiationDamageToEntity(
-                        iStack.stackSize,
-                        this.componentMaterial.vRadiationLevel,
-                        world,
-                        entityHolding);
-                }
-            }
+            EntityUtils.applyRadiationDamageToEntity(
+                iStack.stackSize,
+                this.componentMaterial.vRadiationLevel,
+                world,
+                entityHolding);
         }
     }
 
@@ -218,22 +214,25 @@ public class BaseOreComponent extends Item {
 
     public enum ComponentTypes {
 
-        DUST("dust", "", " Dust", true),
-        DUSTIMPURE("dustImpure", "Impure ", " Dust", true),
-        DUSTPURE("dustPure", "Purified ", " Dust", true),
-        CRUSHED("crushed", "Crushed ", " Ore", true),
-        CRUSHEDCENTRIFUGED("crushedCentrifuged", "Centrifuged Crushed ", " Ore", true),
-        CRUSHEDPURIFIED("crushedPurified", "Purified Crushed ", " Ore", true),
-        RAWORE("oreRaw", "Raw ", " Ore", true),
-        MILLED("milled", "Milled ", " Ore", true);
+        DUST("dust", OrePrefixes.dust, "", " Dust", true),
+        DUSTIMPURE("dustImpure", OrePrefixes.dustImpure, "Impure ", " Dust", true),
+        DUSTPURE("dustPure", OrePrefixes.dustPure, "Purified ", " Dust", true),
+        CRUSHED("crushed", OrePrefixes.crushed, "Crushed ", " Ore", true),
+        CRUSHEDCENTRIFUGED("crushedCentrifuged", OrePrefixes.crushedCentrifuged, "Centrifuged Crushed ", " Ore", true),
+        CRUSHEDPURIFIED("crushedPurified", OrePrefixes.crushedPurified, "Purified Crushed ", " Ore", true),
+        RAWORE("oreRaw", OrePrefixes.rawOre, "Raw ", " Ore", true),
+        MILLED("milled", OrePrefixes.milled, "Milled ", " Ore", true);
 
         private final String COMPONENT_NAME;
         private final String PREFIX;
         private final String DISPLAY_NAME;
         private final boolean HAS_OVERLAY;
+        private final String orePrefix;
 
-        ComponentTypes(final String LocalName, final String prefix, final String DisplayName, final boolean overlay) {
+        ComponentTypes(final String LocalName, final OrePrefixes orePrefix, final String prefix,
+            final String DisplayName, final boolean overlay) {
             this.COMPONENT_NAME = LocalName;
+            this.orePrefix = orePrefix.name();
             this.PREFIX = prefix;
             this.DISPLAY_NAME = DisplayName;
             this.HAS_OVERLAY = overlay;
@@ -243,6 +242,10 @@ public class BaseOreComponent extends Item {
 
         public String getComponent() {
             return this.COMPONENT_NAME;
+        }
+
+        public String getOrePrefix() {
+            return orePrefix;
         }
 
         public String getName() {

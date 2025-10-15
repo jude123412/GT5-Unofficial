@@ -1,7 +1,12 @@
 package gregtech.api.metatileentity.implementations;
 
 import static gregtech.api.enums.GTValues.V;
-import static gregtech.api.enums.GTValues.ticksBetweenSounds;
+import static gregtech.api.enums.MetaTileEntityIDs.ASSEMBLER_IV;
+import static gregtech.api.enums.MetaTileEntityIDs.ASSEMBLER_LV;
+import static gregtech.api.enums.MetaTileEntityIDs.ASSEMBLING_MACHINE_LuV;
+import static gregtech.api.enums.MetaTileEntityIDs.ASSEMBLING_MACHINE_UMV;
+import static gregtech.api.enums.MetaTileEntityIDs.CIRCUIT_ASSEMBLER_LV;
+import static gregtech.api.enums.MetaTileEntityIDs.CIRCUIT_ASSEMBLER_UV;
 import static gregtech.api.objects.XSTR.XSTR_INSTANCE;
 import static net.minecraftforge.common.util.ForgeDirection.UP;
 
@@ -25,7 +30,6 @@ import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
-import gregtech.api.metatileentity.BaseMetaTileEntity;
 import gregtech.api.recipe.BasicUIProperties;
 import gregtech.api.recipe.RecipeMap;
 import gregtech.api.render.TextureFactory;
@@ -44,15 +48,15 @@ public class MTEBasicMachineWithRecipe extends MTEBasicMachine {
     private final RecipeMap<?> mRecipes;
     private final int mTankCapacity;
     private final SpecialEffects mSpecialEffect;
-    private final ResourceLocation mSoundResourceLocation;
+    private final SoundResource mSoundResource;
     private FallbackableUITexture progressBarTexture;
     private int recipeCatalystPriority;
 
     /**
-     * Registers machine with single-line description, specific tank capacity, and sound specified by ResourceLocation.
+     * Registers machine with single-line description, specific tank capacity, and sound specified by SoundResource.
      */
     public MTEBasicMachineWithRecipe(int aID, String aName, String aNameRegional, int aTier, String aDescription,
-        RecipeMap<?> aRecipes, int aInputSlots, int aOutputSlots, int aTankCapacity, ResourceLocation aSound,
+        RecipeMap<?> aRecipes, int aInputSlots, int aOutputSlots, int aTankCapacity, SoundResource aSound,
         SpecialEffects aSpecialEffect, String aOverlays, Object[] aRecipe) {
         this(
             aID,
@@ -68,13 +72,14 @@ public class MTEBasicMachineWithRecipe extends MTEBasicMachine {
             aSpecialEffect,
             aOverlays,
             aRecipe);
+
     }
 
     /**
-     * Registers machine with multi-line descriptions, specific tank capacity, and sound specified by ResourceLocation.
+     * Registers machine with multi-line descriptions, specific tank capacity, and sound specified by SoundResource.
      */
     public MTEBasicMachineWithRecipe(int aID, String aName, String aNameRegional, int aTier, String[] aDescription,
-        RecipeMap<?> aRecipes, int aInputSlots, int aOutputSlots, int aTankCapacity, ResourceLocation aSound,
+        RecipeMap<?> aRecipes, int aInputSlots, int aOutputSlots, int aTankCapacity, SoundResource aSound,
         SpecialEffects aSpecialEffect, String aOverlays, Object[] aRecipe) {
         super(
             aID,
@@ -159,9 +164,9 @@ public class MTEBasicMachineWithRecipe extends MTEBasicMachine {
                     .glow()
                     .build()));
         this.mTankCapacity = aTankCapacity;
+        this.mSoundResource = aSound;
         this.mSpecialEffect = aSpecialEffect;
         this.mRecipes = aRecipes;
-        this.mSoundResourceLocation = aSound;
         this.progressBarTexture = mRecipes.getFrontend()
             .getUIProperties().progressBarTexture;
 
@@ -169,11 +174,12 @@ public class MTEBasicMachineWithRecipe extends MTEBasicMachine {
     }
 
     /**
-     * Registers machine with single-line description, auto-scaled fluid tank, and sound specified by SoundResource.
+     * Registers machine with multi-line descriptions, auto-scaled fluid tank, and sound specified by SoundResource. Has
+     * no recipe.
      */
-    public MTEBasicMachineWithRecipe(int aID, String aName, String aNameRegional, int aTier, String aDescription,
+    public MTEBasicMachineWithRecipe(int aID, String aName, String aNameRegional, int aTier, String[] aDescription,
         RecipeMap<?> aRecipes, int aInputSlots, int aOutputSlots, boolean usesFluids, SoundResource aSound,
-        SpecialEffects aSpecialEffect, String aOverlays, Object[] aRecipe) {
+        SpecialEffects aSpecialEffect, String aOverlays) {
         this(
             aID,
             aName,
@@ -184,40 +190,19 @@ public class MTEBasicMachineWithRecipe extends MTEBasicMachine {
             aInputSlots,
             aOutputSlots,
             usesFluids ? getCapacityForTier(aTier) : 0,
-            aSound.resourceLocation,
+            aSound,
             aSpecialEffect,
             aOverlays,
-            aRecipe);
+            null);
     }
 
     /**
-     * Registers machine with multi-line descriptions, auto-scaled fluid tank, and sound specified by SoundResource.
-     */
-    public MTEBasicMachineWithRecipe(int aID, String aName, String aNameRegional, int aTier, String[] aDescription,
-        RecipeMap<?> aRecipes, int aInputSlots, int aOutputSlots, boolean usesFluids, SoundResource aSound,
-        SpecialEffects aSpecialEffect, String aOverlays, Object[] aRecipe) {
-        this(
-            aID,
-            aName,
-            aNameRegional,
-            aTier,
-            aDescription,
-            aRecipes,
-            aInputSlots,
-            aOutputSlots,
-            usesFluids ? getCapacityForTier(aTier) : 0,
-            aSound.resourceLocation,
-            aSpecialEffect,
-            aOverlays,
-            aRecipe);
-    }
-
-    /**
-     * Registers machine with single-line description, specific tank capacity, and sound specified by SoundResource.
+     * Registers machine with single-line description, specific tank capacity, and sound specified by SoundResource. Has
+     * no recipe.
      */
     public MTEBasicMachineWithRecipe(int aID, String aName, String aNameRegional, int aTier, String aDescription,
         RecipeMap<?> aRecipes, int aInputSlots, int aOutputSlots, int aTankCapacity, SoundResource aSound,
-        SpecialEffects aSpecialEffect, String aOverlays, Object[] aRecipe) {
+        SpecialEffects aSpecialEffect, String aOverlays) {
         this(
             aID,
             aName,
@@ -228,18 +213,19 @@ public class MTEBasicMachineWithRecipe extends MTEBasicMachine {
             aInputSlots,
             aOutputSlots,
             aTankCapacity,
-            aSound.resourceLocation,
+            aSound,
             aSpecialEffect,
             aOverlays,
-            aRecipe);
+            null);
     }
 
     /**
-     * Registers machine with multi-line descriptions, specific tank capacity, and sound specified by SoundResource.
+     * Registers machine with multi-line descriptions, specific tank capacity, and sound specified by SoundResource. has
+     * no recipe.
      */
     public MTEBasicMachineWithRecipe(int aID, String aName, String aNameRegional, int aTier, String[] aDescription,
         RecipeMap<?> aRecipes, int aInputSlots, int aOutputSlots, int aTankCapacity, SoundResource aSound,
-        SpecialEffects aSpecialEffect, String aOverlays, Object[] aRecipe) {
+        SpecialEffects aSpecialEffect, String aOverlays) {
         this(
             aID,
             aName,
@@ -250,10 +236,10 @@ public class MTEBasicMachineWithRecipe extends MTEBasicMachine {
             aInputSlots,
             aOutputSlots,
             aTankCapacity,
-            aSound.resourceLocation,
+            aSound,
             aSpecialEffect,
             aOverlays,
-            aRecipe);
+            null);
     }
 
     /**
@@ -261,12 +247,29 @@ public class MTEBasicMachineWithRecipe extends MTEBasicMachine {
      */
     public MTEBasicMachineWithRecipe(String aName, int aTier, String[] aDescription, RecipeMap<?> aRecipes,
         int aInputSlots, int aOutputSlots, int aTankCapacity, int aAmperage, ITexture[][][] aTextures,
-        ResourceLocation aSound, SpecialEffects aSpecialEffect) {
+        SoundResource aSound, SpecialEffects aSpecialEffect) {
         super(aName, aTier, aAmperage, aDescription, aTextures, aInputSlots, aOutputSlots);
         this.mTankCapacity = aTankCapacity;
         this.mSpecialEffect = aSpecialEffect;
         this.mRecipes = aRecipes;
-        this.mSoundResourceLocation = aSound;
+        this.mSoundResource = aSound;
+    }
+
+    public MTEBasicMachineWithRecipe(String aName, int aTier, String[] aDescription, RecipeMap<?> aRecipes,
+        int aInputSlots, int aOutputSlots, int aTankCapacity, int aAmperage, ITexture[][][] aTextures,
+        ResourceLocation aSound, SpecialEffects aSpecialEffect) {
+        this(
+            aName,
+            aTier,
+            aDescription,
+            aRecipes,
+            aInputSlots,
+            aOutputSlots,
+            aTankCapacity,
+            aAmperage,
+            aTextures,
+            SoundResource.get(aSound.toString()),
+            aSpecialEffect);
     }
 
     @Override
@@ -281,7 +284,7 @@ public class MTEBasicMachineWithRecipe extends MTEBasicMachine {
             this.mTankCapacity,
             this.mAmperage,
             this.mTextures,
-            this.mSoundResourceLocation,
+            this.mSoundResource,
             this.mSpecialEffect).setProgressBarTexture(this.progressBarTexture)
                 .setRecipeCatalystPriority(this.recipeCatalystPriority);
     }
@@ -343,14 +346,16 @@ public class MTEBasicMachineWithRecipe extends MTEBasicMachine {
             default -> {
                 int tID = this.getBaseMetaTileEntity()
                     .getMetaTileID();
-                if (tID >= 211 && tID <= 218 || tID >= 1180 && tID <= 1187 || tID >= 10780 && tID <= 10786) { // assembler
+                if (tID >= ASSEMBLER_LV.ID && tID <= ASSEMBLER_IV.ID
+                    || tID >= CIRCUIT_ASSEMBLER_LV.ID && tID <= CIRCUIT_ASSEMBLER_UV.ID
+                    || tID >= ASSEMBLING_MACHINE_LuV.ID && tID <= ASSEMBLING_MACHINE_UMV.ID) { // assembler
                     // lv-iv;
                     // circuit
                     // asseblers
                     // lv -
                     // uv;
                     // assemblers
-                    // luv-uev
+                    // luv-umv
                     if (GTUtility.isStackValid(aStack)) for (int oreID : OreDictionary.getOreIDs(aStack)) {
                         if (OreDictionary.getOreName(oreID)
                             .startsWith("circuit")) return true;
@@ -478,26 +483,10 @@ public class MTEBasicMachineWithRecipe extends MTEBasicMachine {
         return this.mTankCapacity;
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
-    public void startSoundLoop(byte aIndex, double aX, double aY, double aZ) {
-        super.startSoundLoop(aIndex, aX, aY, aZ);
-        if (aIndex == 1 && this.mSoundResourceLocation != null
-            && GTUtility.isStringValid(this.mSoundResourceLocation.getResourceDomain())
-            && GTUtility.isStringValid(this.mSoundResourceLocation.getResourcePath()))
-            GTUtility.doSoundAtClient(this.mSoundResourceLocation, 100, 1.0F, aX, aY, aZ);
-    }
-
-    @Override
-    public void startProcess() {
-        BaseMetaTileEntity myMetaTileEntity = ((BaseMetaTileEntity) this.getBaseMetaTileEntity());
-        // Added to throttle sounds. To reduce lag, this is on the server side so BlockUpdate packets aren't sent.
-        if (myMetaTileEntity.mTickTimer > (myMetaTileEntity.mLastSoundTick + ticksBetweenSounds)) {
-            if (this.mSoundResourceLocation != null
-                && GTUtility.isStringValid(this.mSoundResourceLocation.getResourceDomain())
-                && GTUtility.isStringValid(this.mSoundResourceLocation.getResourcePath())) this.sendLoopStart((byte) 1);
-            // Does not have overflow protection, but they are longs.
-            myMetaTileEntity.mLastSoundTick = myMetaTileEntity.mTickTimer;
-        }
+    protected SoundResource getActivitySoundLoop() {
+        return mSoundResource;
     }
 
     @Override

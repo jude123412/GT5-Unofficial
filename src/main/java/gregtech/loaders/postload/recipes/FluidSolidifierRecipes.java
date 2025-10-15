@@ -24,7 +24,6 @@ import gregtech.api.GregTechAPI;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;
-import gregtech.api.enums.MaterialsKevlar;
 import gregtech.api.enums.MaterialsUEVplus;
 import gregtech.api.enums.OrePrefixes;
 import gregtech.api.enums.TierEU;
@@ -32,6 +31,7 @@ import gregtech.api.util.GTModHandler;
 import gregtech.api.util.GTOreDictUnificator;
 import gregtech.api.util.GTUtility;
 
+@SuppressWarnings({ "PointlessArithmeticExpression" })
 public class FluidSolidifierRecipes implements Runnable {
 
     @Override
@@ -284,7 +284,7 @@ public class FluidSolidifierRecipes implements Runnable {
         GTValues.RA.stdBuilder()
             .itemInputs(ItemList.Spinneret.get(0L))
             .itemOutputs(ItemList.KevlarFiber.get(8L))
-            .fluidInputs(MaterialsKevlar.LiquidCrystalKevlar.getFluid(1 * INGOTS))
+            .fluidInputs(Materials.LiquidCrystalKevlar.getFluid(1 * INGOTS))
             .duration(40 * SECONDS)
             .eut(TierEU.RECIPE_EV)
             .addTo(fluidSolidifierRecipes);
@@ -303,6 +303,23 @@ public class FluidSolidifierRecipes implements Runnable {
             .fluidInputs(Materials.Glass.getMolten(288L))
             .duration(15 * SECONDS)
             .eut(16)
+            .addTo(fluidSolidifierRecipes);
+
+        // Red Granite Block
+        GTValues.RA.stdBuilder()
+            .itemInputs(ItemList.Shape_Mold_Block.get(0L))
+            .itemOutputs(GTOreDictUnificator.get(OrePrefixes.stone, Materials.GraniteRed, 1L))
+            .fluidInputs(Materials.GraniteRed.getMolten(1 * INGOTS))
+            .duration(5 * SECONDS)
+            .eut(TierEU.RECIPE_LV)
+            .addTo(fluidSolidifierRecipes);
+        // Black Granite Block
+        GTValues.RA.stdBuilder()
+            .itemInputs(ItemList.Shape_Mold_Block.get(0L))
+            .itemOutputs(GTOreDictUnificator.get(OrePrefixes.stone, Materials.GraniteBlack, 1L))
+            .fluidInputs(Materials.GraniteBlack.getMolten(1 * INGOTS))
+            .duration(5 * SECONDS)
+            .eut(TierEU.RECIPE_LV)
             .addTo(fluidSolidifierRecipes);
 
         final int whiteDwarfShapeSolidifierTime = 10 * SECONDS;

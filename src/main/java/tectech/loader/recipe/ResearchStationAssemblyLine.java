@@ -41,6 +41,7 @@ import static kubatech.api.enums.ItemList.DEFCWyvernSchematic;
 import static kubatech.api.enums.ItemList.DraconicEvolutionFusionCrafter;
 import static kubatech.loaders.BlockLoader.defcCasingBlock;
 import static tectech.loader.recipe.BaseRecipeLoader.getItemContainer;
+import static tectech.thing.CustomItemList.eM_dynamoTunnel5_UMV;
 
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -55,8 +56,6 @@ import goodgenerator.items.GGMaterial;
 import goodgenerator.util.ItemRefer;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;
-import gregtech.api.enums.MaterialsBotania;
-import gregtech.api.enums.MaterialsKevlar;
 import gregtech.api.enums.MaterialsUEVplus;
 import gregtech.api.enums.OrePrefixes;
 import gregtech.api.enums.TierEU;
@@ -1090,7 +1089,7 @@ public class ResearchStationAssemblyLine implements Runnable {
                 (int) TierEU.RECIPE_UHV,
                 8,
                 new Object[] { ItemList.AssemblingMachineUHV.get(1), new ItemStack(defcCasingBlock, 1, 8),
-                    GTOreDictUnificator.get(OrePrefixes.plateDense, MaterialsBotania.GaiaSpirit, 1L),
+                    GTOreDictUnificator.get(OrePrefixes.plateDense, Materials.GaiaSpirit, 1L),
                     ItemList.Casing_Coil_AwakenedDraconium.get(8L), ItemList.Electric_Motor_UHV.get(8L),
                     ItemList.Robot_Arm_UHV.get(4L), new Object[] { OrePrefixes.circuit.get(Materials.UHV), 4 },
                     ItemList.Gravistar.get(4, new Object() {}), getModItem(Thaumcraft.ID, "ItemEldritchObject", 1, 3),
@@ -2156,7 +2155,7 @@ public class ResearchStationAssemblyLine implements Runnable {
                     .get(OrePrefixes.plate, MaterialsUEVplus.MagnetohydrodynamicallyConstrainedStarMatter, 4L),
                 GTOreDictUnificator
                     .get(OrePrefixes.screw, MaterialsUEVplus.MagnetohydrodynamicallyConstrainedStarMatter, 16L),
-                GTOreDictUnificator.get(OrePrefixes.ring, MaterialsKevlar.Kevlar, 64L),
+                GTOreDictUnificator.get(OrePrefixes.ring, Materials.Kevlar, 64L),
                 GTOreDictUnificator.get("ringRadoxPoly", 64L),
                 GTOreDictUnificator
                     .get(OrePrefixes.rotor, MaterialsUEVplus.MagnetohydrodynamicallyConstrainedStarMatter, 4L),
@@ -2187,7 +2186,7 @@ public class ResearchStationAssemblyLine implements Runnable {
                 GTOreDictUnificator
                     .get(OrePrefixes.round, MaterialsUEVplus.MagnetohydrodynamicallyConstrainedStarMatter, 64L),
                 GTOreDictUnificator.get(OrePrefixes.wireGt04, MaterialsUEVplus.SpaceTime, 4L),
-                MaterialsKevlar.Kevlar.getPlates(64), MaterialsKevlar.Kevlar.getPlates(16),
+                Materials.Kevlar.getPlates(64), Materials.Kevlar.getPlates(16),
                 GTOreDictUnificator.get("plateRadoxPoly", 64L), GTOreDictUnificator.get("plateRadoxPoly", 16L),
                 Materials.Neutronium.getNanite(4) },
             new FluidStack[] { moltenMHDCSM_576, moltenSpaceTime_576, moltenUniversium_576,
@@ -3426,15 +3425,6 @@ public class ResearchStationAssemblyLine implements Runnable {
             CustomItemList.eM_energyWirelessTunnel6_UXV.get(1), CustomItemList.eM_energyWirelessTunnel7_UXV.get(1),
             CustomItemList.eM_energyWirelessTunnel8_UXV.get(1), CustomItemList.eM_energyWirelessTunnel9_UXV.get(1) };
 
-        ItemStack[] wirelessDynamos = { ItemList.Wireless_Dynamo_Energy_ULV.get(1),
-            ItemList.Wireless_Dynamo_Energy_LV.get(1), ItemList.Wireless_Dynamo_Energy_MV.get(1),
-            ItemList.Wireless_Dynamo_Energy_HV.get(1), ItemList.Wireless_Dynamo_Energy_EV.get(1),
-            ItemList.Wireless_Dynamo_Energy_IV.get(1), ItemList.Wireless_Dynamo_Energy_LuV.get(1),
-            ItemList.Wireless_Dynamo_Energy_ZPM.get(1), ItemList.Wireless_Dynamo_Energy_UV.get(1),
-            ItemList.Wireless_Dynamo_Energy_UHV.get(1), ItemList.Wireless_Dynamo_Energy_UEV.get(1),
-            ItemList.Wireless_Dynamo_Energy_UIV.get(1), ItemList.Wireless_Dynamo_Energy_UMV.get(1),
-            ItemList.Wireless_Dynamo_Energy_UXV.get(1) };
-
         // ------------------------ Wireless EU hatches ------------------------
 
         for (int i = 0; i < wirelessHatches.length; i++) {
@@ -3664,26 +3654,23 @@ public class ResearchStationAssemblyLine implements Runnable {
 
         // ------------------------ Wireless EU dynamos ------------------------
 
-        for (int i = 0; i < wirelessHatches.length; i++) {
+        // Wireless Dynamo Powerful
+        TTRecipeAdder.addResearchableAssemblylineRecipe(
+            CustomItemList.eM_dynamoTunnel8_UMV.get(1),
+            24_000_000,
+            3200,
+            (int) TierEU.RECIPE_UMV,
+            64,
+            new Object[] { eM_dynamoTunnel5_UMV.get(1), ItemList.ZPM3.get(1),
+                new Object[] { OrePrefixes.circuit.get(Materials.UMV), 4L }, ItemList.Field_Generator_UMV.get(1),
+                GTOreDictUnificator.get(OrePrefixes.wireGt04, MaterialsUEVplus.SpaceTime, 16),
+                CustomItemList.Machine_Multi_Transformer.get(1) },
+            new FluidStack[] { MaterialMisc.MUTATED_LIVING_SOLDER.getFluidStack(20 * INGOTS),
+                MaterialsUEVplus.ExcitedDTSC.getFluid(8000), GGMaterial.shirabon.getMolten(20 * INGOTS) },
+            CustomItemList.eM_dynamoWirelessMulti.get(1),
+            30 * SECONDS,
+            (int) TierEU.RECIPE_UMV);
 
-            TTRecipeAdder.addResearchableAssemblylineRecipe(
-                (i == 0) ? ItemList.EnergisedTesseract.get(1) : wirelessDynamos[i - 1],
-                totalComputation,
-                compPerSecond,
-                researchEuPerTick,
-                researchAmperage,
-                new Object[] { dynamoHatches[i], new ItemStack(compactFusionCoil, 1),
-                    ItemList.Casing_Coil_Superconductor.get(1), CustomItemList.Machine_Multi_Transformer.get(1),
-                    CustomItemList.eM_Power.get(2),
-                    GTOreDictUnificator.get(OrePrefixes.wireGt01, MaterialsUEVplus.SpaceTime, 2),
-                    GTOreDictUnificator.get(OrePrefixes.plateDense, Materials.Infinity, 1), circuitsTierPlusTwo[i],
-                    ItemList.EnergisedTesseract.get(1) },
-                new FluidStack[] { MaterialMisc.MUTATED_LIVING_SOLDER.getFluidStack(9 * INGOTS),
-                    MaterialsUEVplus.ExcitedDTEC.getFluid(500) },
-                wirelessDynamos[i],
-                recipeDurationTicks,
-                recipeEuPerTick);
-        }
     }
 
     public void runLateRecipes() {
