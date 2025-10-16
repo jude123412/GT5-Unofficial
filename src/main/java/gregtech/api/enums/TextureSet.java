@@ -74,10 +74,10 @@ public class TextureSet {
         SET_STELLAR = new TextureSet("stellar", true), SET_VIVID = new TextureSet("vivid", true),
         SET_DRACONIUM = new TextureSet("draconium", false),
         SET_AWOKEN_DRACONIUM = new TextureSet("awakeneddraconium", false),
-        SET_ELECTROTINE = new TextureSet("electrotine", false), SET_REDSTONE = new TextureSet("redstone", false),
-        SET_GLOWSTONE = new TextureSet("glowstone", false), SET_PYROTHEUM = new TextureSet("pyrotheum", false),
-        SET_CRYOTHEUM = new TextureSet("cryotheum", false), SET_BLAZE = new TextureSet("blaze", false),
-        SET_BLIZZ = new TextureSet("blizz", false);
+        SET_ELECTROTINE = new TextureSet("electrotine", false).withBlockTextures("ROUGH"),
+        SET_REDSTONE = new TextureSet("redstone", false).withBlockTextures("ROUGH"), SET_GLOWSTONE = new TextureSet("glowstone", false),
+        SET_PYROTHEUM = new TextureSet("pyrotheum", false), SET_CRYOTHEUM = new TextureSet("cryotheum", false),
+        SET_BLAZE = new TextureSet("blaze", false), SET_BLIZZ = new TextureSet("blizz", false);
 
     /**
      * For the Indices of OrePrefixes you need to look into the OrePrefix Enum.
@@ -122,8 +122,14 @@ public class TextureSet {
      * <p>
      * This assumes you want to construct a custom texture set.
      */
-    private TextureSet(String aSetName, TextureSet origin, boolean overrideBlock, boolean overrideItem) {
-        mSetName = "CUSTOM/" + aSetName;
+    private TextureSet(String aSetName, TextureSet origin, boolean overrideBlock, boolean overrideItem,
+        boolean isCustom) {
+        if (isCustom) {
+            mSetName = "CUSTOM/" + aSetName;
+        } else {
+            mSetName = aSetName;
+        }
+
         this.is_custom = true;
 
         for (int i = 0; i < 128; i++) {
@@ -143,8 +149,19 @@ public class TextureSet {
         }
     }
 
+
+    /**
+     * Use this one if block textures are not custom
+     */
     public TextureSet withBlockTextures(String aNewSetName) {
-        return new TextureSet(aNewSetName, this, true, false);
+        return new TextureSet(aNewSetName, this, true, false, false);
+    }
+
+    /**
+     * Use this one if block textures are custom
+     */
+    public TextureSet withCustomBlockTextures(String aNewSetName) {
+        return new TextureSet(aNewSetName, this, true, false, true);
     }
 
     private enum TextureType {
