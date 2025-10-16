@@ -40,6 +40,7 @@ import gtPlusPlus.core.material.Material;
 import gtPlusPlus.core.util.data.LocaleUtils;
 import gtPlusPlus.xmod.gregtech.common.MetaGTProxy;
 import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
+import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtTools;
 import gtPlusPlus.xmod.gregtech.loaders.RecipeGenBlastSmelterGTNH;
 import gtPlusPlus.xmod.gregtech.loaders.RecipeGenMultisUsingFluidInsteadOfCells;
 import gtPlusPlus.xmod.thaumcraft.commands.CommandDumpAspects;
@@ -119,6 +120,14 @@ public class GTplusplus {
     @SideOnly(value = Side.CLIENT)
     public static void loadTextures() {
         Logger.INFO("Loading some textures on the client.");
+        // Tools
+        Logger.WARNING(
+            "Processing texture: " + TexturesGtTools.ANGLE_GRINDER.getTextureFile()
+                .getResourcePath());
+        Logger.WARNING(
+            "Processing texture: " + TexturesGtTools.ELECTRIC_SNIPS.getTextureFile()
+                .getResourcePath());
+
         // Blocks
         Logger.WARNING(
             "Processing texture: " + TexturesGtBlock.Casing_Machine_Dimensional.getTextureFile()

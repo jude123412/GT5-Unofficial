@@ -165,8 +165,7 @@ public class DetravToolElectricProspectorBase implements IToolStats {
     }
 
     public IIconContainer getIcon(boolean aIsToolHead, ItemStack aStack) {
-        return aIsToolHead ? MetaGeneratedTool.getPrimaryMaterial(aStack).mIconSet.mTextures[Textures01.mTextures[0]]
-            : null;
+        return Textures01.mTextures[0];
     }
 
     public short[] getRGBa(boolean aIsToolHead, ItemStack aStack) {

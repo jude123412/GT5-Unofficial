@@ -7,7 +7,6 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 
-import gregtech.api.enums.TextureSet;
 import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.items.MetaGeneratedTool;
 
@@ -23,8 +22,7 @@ public abstract class ToolTurbine extends GTTool {
 
     @Override
     public IIconContainer getIcon(boolean aIsToolHead, ItemStack aStack) {
-        return aIsToolHead ? MetaGeneratedTool.getPrimaryMaterial(aStack).mIconSet.mTextures[TextureSet.INDEX_turbine]
-            : null;
+        return aIsToolHead ? getTurbineIcon() : null;
     }
 
     @Override
@@ -44,6 +42,8 @@ public abstract class ToolTurbine extends GTTool {
                 + EnumChatFormatting.WHITE
                 + " head into a turbine");
     }
+
+    public abstract IIconContainer getTurbineIcon();
 
     @Override
     public abstract float getSpeedMultiplier();

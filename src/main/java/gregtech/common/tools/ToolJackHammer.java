@@ -13,9 +13,8 @@ import net.minecraft.util.IChatComponent;
 import net.minecraftforge.event.world.BlockEvent;
 
 import gregtech.GTMod;
-import gregtech.api.enums.TextureSet;
+import gregtech.api.enums.Textures;
 import gregtech.api.interfaces.IIconContainer;
-import gregtech.api.items.MetaGeneratedTool;
 import gregtech.api.recipe.RecipeMaps;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTToolHarvestHelper;
@@ -117,9 +116,7 @@ public class ToolJackHammer extends ToolDrillLV {
 
     @Override
     public IIconContainer getIcon(boolean aIsToolHead, ItemStack aStack) {
-        return aIsToolHead
-            ? MetaGeneratedTool.getPrimaryMaterial(aStack).mIconSet.mTextures[TextureSet.INDEX_jackHammer]
-            : null;
+        return aIsToolHead ? Textures.ItemIcons.JACKHAMMER : null;
     }
 
     @Override

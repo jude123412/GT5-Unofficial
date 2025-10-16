@@ -1,5 +1,8 @@
 package gregtech.common.tools;
 
+import gregtech.api.enums.Textures;
+import gregtech.api.interfaces.IIconContainer;
+
 public class ToolTurbineSmall extends ToolTurbine {
 
     @Override
@@ -15,5 +18,10 @@ public class ToolTurbineSmall extends ToolTurbine {
     @Override
     public float getBaseDamage() {
         return 0.0F;
+    }
+
+    @Override
+    public IIconContainer getTurbineIcon() {
+        return Textures.ItemIcons.TURBINE_SMALL;
     }
 }

@@ -15,7 +15,8 @@ import net.minecraft.util.IChatComponent;
 import net.minecraftforge.common.IShearable;
 import net.minecraftforge.event.world.BlockEvent;
 
-import gregtech.api.enums.TextureSet;
+import gregtech.api.enums.SoundResource;
+import gregtech.api.enums.Textures;
 import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.items.MetaGeneratedTool;
 import gregtech.api.util.GTToolHarvestHelper;
@@ -40,6 +41,16 @@ public class ToolSaw extends GTTool {
     @Override
     public float getBaseDamage() {
         return 1.75F;
+    }
+
+    @Override
+    public String getCraftingSound() {
+        return SoundResource.GTCEU_OP_SAW.toString();
+    }
+
+    @Override
+    public String getMiningSound() {
+        return SoundResource.GTCEU_OP_SAW.toString();
     }
 
     @Override
@@ -84,7 +95,7 @@ public class ToolSaw extends GTTool {
         return aIsToolHead
             ? MetaGeneratedTool
                 .getPrimaryMaterial(aStack).mIconSet.mTextures[gregtech.api.enums.OrePrefixes.toolHeadSaw.mTextureIndex]
-            : MetaGeneratedTool.getSecondaryMaterial(aStack).mIconSet.mTextures[TextureSet.INDEX_handleSaw];
+            : Textures.ItemIcons.HANDLE_SAW;
     }
 
     @Override
