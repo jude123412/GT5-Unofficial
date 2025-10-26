@@ -67,6 +67,10 @@ public enum SoundResource {
     IC2_MACHINES_KA_CHING(211, IndustrialCraft2.ID, "machines.KaChing"),
     IC2_MACHINES_MAGNETIZER_LOOP(212, IndustrialCraft2.ID, "machines.MagnetizerLoop"),
 
+    IC2_REACTOR_LOW_LOOP(213, IndustrialCraft2.ID, "reactor.NuclearReactorLowEULoop"),
+    IC2_REACTOR_MID_LOOP(214, IndustrialCraft2.ID, "reactor.NuclearReactorMidEULoop"),
+    IC2_REACTOR_HIGH_LOOP(215, IndustrialCraft2.ID, "reactor.NuclearReactorHighEULoop"),
+
     GT_MACHINES_FUSION_LOOP(230, GregTech.ID, "machines.FusionLoop"),
     GT_MACHINES_DISTILLERY_LOOP(231, GregTech.ID, "machines.DistilleryLoop"),
     GT_MACHINES_PLASMAFORGE_LOOP(232, GregTech.ID, "machines.PlasmaForgeLoop"),

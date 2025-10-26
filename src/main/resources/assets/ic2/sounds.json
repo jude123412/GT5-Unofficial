@@ -89,6 +89,33 @@
       }
     ]
   },
+  "reactor.NuclearReactorLowEULoop": {
+    "category": "block",
+    "sounds": [
+      {
+        "name": "NuclearReactorLowEULoop",
+        "stream": false
+      }
+    ]
+  },
+  "reactor.NuclearReactorMidEULoop": {
+    "category": "block",
+    "sounds": [
+      {
+        "name": "NuclearReactorMidEULoop",
+        "stream": false
+      }
+    ]
+  },
+  "reactor.NuclearReactorHighEULoop": {
+    "category": "block",
+    "sounds": [
+      {
+        "name": "NuclearReactorHighEULoop",
+        "stream": false
+      }
+    ]
+  },
   "machines.MinerOp": {
     "category": "block",
     "sounds": [

@@ -1,5 +1,6 @@
 package gregtech.mixin;
 
+import com.mitchej123.hodgepodge.config.TweaksConfig;
 import org.jetbrains.annotations.NotNull;
 
 import com.gtnewhorizon.gtnhmixins.builders.IMixins;
@@ -97,6 +98,11 @@ public enum Mixin implements IMixins {
         .addCommonMixins("ic2.MixinIc2FissionFuelRemoval")
         .addRequiredMod(TargetedMod.IC2)
         .setPhase(Phase.LATE)),
+    IC2_FIX_REACTOR_SOUND(
+        new MixinBuilder("Fixes Nuclear Reactors having no audio when running")
+            .addCommonMixins("ic2.MixinIc2NuclearReactorSound")
+            .addRequiredMod(TargetedMod.IC2)
+            .setPhase(Phase.LATE)),
     // Hazmat armors
     IC2_HAZMAT(new MixinBuilder()
         .setPhase(Phase.LATE)
