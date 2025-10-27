@@ -1,6 +1,5 @@
 package gregtech.mixin;
 
-import com.mitchej123.hodgepodge.config.TweaksConfig;
 import org.jetbrains.annotations.NotNull;
 
 import com.gtnewhorizon.gtnhmixins.builders.IMixins;
