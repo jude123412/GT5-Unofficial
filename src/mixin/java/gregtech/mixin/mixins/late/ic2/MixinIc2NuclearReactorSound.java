@@ -32,9 +32,9 @@ public abstract class MixinIc2NuclearReactorSound extends TileEntityInventory {
             boolean playAudio = false;
             // Check reactor is running before starting the loop
             if (getReactorEnergyOutput() > 0.0F) {
-                long limit = getWorld().getWorldTime() % 63;
+                long loop = getWorld().getWorldTime() % 63;
 
-                if (limit == 20) {
+                if (loop == 20) {
                     playAudio = true;
                 }
             }
@@ -50,7 +50,7 @@ public abstract class MixinIc2NuclearReactorSound extends TileEntityInventory {
                     GTUtility.sendSoundToPlayers(
                         getWorld(),
                         SoundResource.IC2_REACTOR_LOW_LOOP,
-                        0.2F,
+                        0.4F,
                         1.0F,
                         getPosition().posX,
                         getPosition().posY,
@@ -59,7 +59,7 @@ public abstract class MixinIc2NuclearReactorSound extends TileEntityInventory {
                     GTUtility.sendSoundToPlayers(
                         getWorld(),
                         SoundResource.IC2_REACTOR_MID_LOOP,
-                        0.2F,
+                        0.4F,
                         1.0F,
                         getPosition().posX,
                         getPosition().posY,
@@ -68,7 +68,7 @@ public abstract class MixinIc2NuclearReactorSound extends TileEntityInventory {
                     GTUtility.sendSoundToPlayers(
                         getWorld(),
                         SoundResource.IC2_REACTOR_HIGH_LOOP,
-                        0.2F,
+                        0.4F,
                         1.0F,
                         getPosition().posX,
                         getPosition().posY,
