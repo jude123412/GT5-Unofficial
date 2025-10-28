@@ -32,22 +32,21 @@ public abstract class MixinIc2NuclearReactorSound extends TileEntityInventory {
             boolean playAudio = false;
             // Check reactor is running before starting the loop
             if (getReactorEnergyOutput() > 0.0F) {
-                int limit = (int) (getWorld().getWorldTime() % 63);
+                long limit = getWorld().getWorldTime() % 63;
 
-                // Check every 62 ticks to run audio
-                if (limit == 62) {
+                if (limit == 20) {
                     playAudio = true;
                 }
             }
 
-            if (getReactorEnergyOutput() > 0.0F && playAudio) {
+            if (playAudio) {
 
                 float euFactor = 0.2f;
                 float euLow = euFactor * 512; // 1amp HV
                 float euMid = euFactor * 2048; // 1amp EV
                 float euHigh = euFactor * 8192; // 1amp IV
 
-                if (getReactorEnergyOutput() < euLow) {
+                if (getReactorEnergyOutput() > 0.0F && getReactorEnergyOutput() < euLow) {
                     GTUtility.sendSoundToPlayers(
                         getWorld(),
                         SoundResource.IC2_REACTOR_LOW_LOOP,
