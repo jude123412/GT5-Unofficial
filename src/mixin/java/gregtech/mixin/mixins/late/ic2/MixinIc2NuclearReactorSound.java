@@ -56,9 +56,7 @@ public abstract class MixinIc2NuclearReactorSound extends TileEntityInventory {
                         getPosition().posX,
                         getPosition().posY,
                         getPosition().posZ);
-                }
-
-                if (getReactorEnergyOutput() >= euMid && getReactorEnergyOutput() < euHigh) {
+                } else if (getReactorEnergyOutput() >= euLow && getReactorEnergyOutput() < euMid) {
                     GTUtility.sendSoundToPlayers(
                         getWorld(),
                         SoundResource.IC2_REACTOR_MID_LOOP,
@@ -67,9 +65,7 @@ public abstract class MixinIc2NuclearReactorSound extends TileEntityInventory {
                         getPosition().posX,
                         getPosition().posY,
                         getPosition().posZ);
-                }
-
-                if (getReactorEnergyOutput() >= euHigh) {
+                } else if (getReactorEnergyOutput() >= euHigh) {
                     GTUtility.sendSoundToPlayers(
                         getWorld(),
                         SoundResource.IC2_REACTOR_HIGH_LOOP,
