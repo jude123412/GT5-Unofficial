@@ -26,7 +26,7 @@ public abstract class MixinIc2NuclearReactorSound extends TileEntityInventory {
     @Shadow
     public abstract ChunkCoordinates getPosition();
 
-    @Inject(method = "updateEntityServer", at = @At("RETURN"), cancellable = true, remap = false)
+    @Inject(method = "updateEntityServer", at = @At("RETURN"), remap = false)
     public void gT5_Unofficial$fixReactorSound(CallbackInfo ci) {
         if (!getWorld().isRemote) {
             boolean playAudio = false;
