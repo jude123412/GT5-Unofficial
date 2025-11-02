@@ -1175,6 +1175,11 @@ public final class RecipeMaps {
         .maxIO(1, 1, 0, 0)
         .neiSpecialInfoFormatter(FuelSpecialValueFormatter.INSTANCE)
         .build();
+    public static final RecipeMap<FuelBackend> endergenicFuels = RecipeMapBuilder
+        .of("gt.recipe.endergenicengine", FuelBackend::new)
+        .maxIO(1, 1, 0, 0)
+        .neiSpecialInfoFormatter(FuelSpecialValueFormatter.INSTANCE)
+        .build();
     public static final RecipeMap<LargeBoilerFuelBackend> largeBoilerFakeFuels = RecipeMapBuilder
         .of("gt.recipe.largeboilerfakefuels", LargeBoilerFuelBackend::new)
         .maxIO(1, 1, 0, 0)

@@ -665,6 +665,46 @@ public class GTValues {
             EnumChatFormatting.RED + BOLD,
             EnumChatFormatting.YELLOW + BOLD));
 
+    public static final Supplier<String> AuthorJude = chain(
+        animatedText(
+            "x",
+            0,
+            200,
+            EnumChatFormatting.DARK_PURPLE + BOLD,
+            EnumChatFormatting.LIGHT_PURPLE + BOLD,
+            EnumChatFormatting.DARK_PURPLE + BOLD),
+        animatedText(
+            "X",
+            0,
+            200,
+            EnumChatFormatting.LIGHT_PURPLE + BOLD,
+            EnumChatFormatting.DARK_PURPLE + BOLD,
+            EnumChatFormatting.DARK_PURPLE + BOLD),
+        animatedText(
+            "jude",
+            0,
+            200,
+            EnumChatFormatting.DARK_BLUE + BOLD,
+            EnumChatFormatting.DARK_BLUE + BOLD,
+            EnumChatFormatting.DARK_BLUE + BOLD,
+            EnumChatFormatting.BLUE + BOLD,
+            EnumChatFormatting.BLUE + BOLD,
+            EnumChatFormatting.BLUE + BOLD),
+        animatedText(
+            "X",
+            0,
+            200,
+            EnumChatFormatting.LIGHT_PURPLE + BOLD,
+            EnumChatFormatting.DARK_PURPLE + BOLD,
+            EnumChatFormatting.DARK_PURPLE + BOLD),
+        animatedText(
+            "x",
+            0,
+            200,
+            EnumChatFormatting.DARK_PURPLE + BOLD,
+            EnumChatFormatting.LIGHT_PURPLE + BOLD,
+            EnumChatFormatting.DARK_PURPLE + BOLD));
+
     private static Supplier<String> createChromLetter(String letter, String... injectedUnicode) {
 
         XSTR random = XSTR.XSTR_INSTANCE;

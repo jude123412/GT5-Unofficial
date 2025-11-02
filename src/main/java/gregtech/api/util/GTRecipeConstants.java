@@ -718,7 +718,8 @@ public class GTRecipeConstants {
         HotFuel(RecipeMaps.hotFuels),
         SemiFluid(RecipeMaps.denseLiquidFuels),
         PlasmaTurbine(RecipeMaps.plasmaFuels),
-        Magic(RecipeMaps.magicFuels),;
+        Magic(RecipeMaps.magicFuels),
+        Endergenic(RecipeMaps.endergenicFuels);
 
         private static final FuelType[] VALUES = values();
         private final IRecipeMap target;

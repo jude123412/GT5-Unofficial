@@ -1,9 +1,6 @@
 package gregtech.loaders.postload.recipes;
 
-import static gregtech.api.enums.Mods.ForbiddenMagic;
-import static gregtech.api.enums.Mods.TaintedMagic;
-import static gregtech.api.enums.Mods.Thaumcraft;
-import static gregtech.api.enums.Mods.ThaumicTinkerer;
+import static gregtech.api.enums.Mods.*;
 import static gregtech.api.util.GTModHandler.getModItem;
 import static gregtech.api.util.GTRecipeConstants.FUEL_TYPE;
 import static gregtech.api.util.GTRecipeConstants.FUEL_VALUE;
@@ -20,6 +17,31 @@ public class FuelRecipes implements Runnable {
     // todo: add an enum for the fuel type, int values are mysterious
     @Override
     public void run() {
+
+        GTValues.RA.stdBuilder()
+            .itemInputs(getModItem(EnderIO.ID, "bucketHootch", 1L))
+            .metadata(FUEL_VALUE, 90)
+            .metadata(FUEL_TYPE, 0)
+            .addTo(GTRecipeConstants.Fuel);
+
+        GTValues.RA.stdBuilder()
+            .itemInputs(getModItem(EnderIO.ID, "bucketFire_water", 1L))
+            .metadata(FUEL_VALUE, 375)
+            .metadata(FUEL_TYPE, 0)
+            .addTo(GTRecipeConstants.Fuel);
+
+        GTValues.RA.stdBuilder()
+            .itemInputs(getModItem(EnderIO.ID, "bucketNutrient_distillation", 1L))
+            .metadata(FUEL_VALUE, 200)
+            .metadata(FUEL_TYPE, 6)
+            .addTo(GTRecipeConstants.Fuel);
+
+        GTValues.RA.stdBuilder()
+            .itemInputs(getModItem(EnderIO.ID, "bucketEnder_distillation", 1L))
+            .metadata(FUEL_VALUE, 8640)
+            .metadata(FUEL_TYPE, 6)
+            .addTo(GTRecipeConstants.Fuel);
+
         GTValues.RA.stdBuilder()
             .itemInputs(GTModHandler.getIC2Item("biogasCell", 1L))
             .metadata(FUEL_VALUE, 40)
