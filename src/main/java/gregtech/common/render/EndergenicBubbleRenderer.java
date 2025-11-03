@@ -7,11 +7,12 @@ public class EndergenicBubbleRenderer extends EntityBubbleFX {
 
     private final double yLimit;
 
-    public EndergenicBubbleRenderer(World aWorld, double aXCoord, double aYCoord, double aZCoord, double aMotionX, double aMotionY, double aMotionZ) {
+    public EndergenicBubbleRenderer(World aWorld, double aXCoord, double aYCoord, double aZCoord, double aMotionX,
+        double aMotionY, double aMotionZ) {
         super(aWorld, aXCoord, aYCoord, aZCoord, aMotionX, aMotionY, aMotionZ);
         setRBGColorF(0.6f, 0.6f, 0.5f);
         yLimit = Math.floor(aYCoord) + 2.75F;
-        this.particleMaxAge = (int)(4.0F / (this.rand.nextFloat() * 0.9F + 0.1F));
+        this.particleMaxAge = (int) (4.0F / (this.rand.nextFloat() * 0.9F + 0.1F));
     }
 
     @Override

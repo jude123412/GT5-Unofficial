@@ -148,6 +148,7 @@ import gregtech.common.tileentities.machines.multi.MTEDecayWarehouse;
 import gregtech.common.tileentities.machines.multi.MTEDieselEngine;
 import gregtech.common.tileentities.machines.multi.MTEDistillationTower;
 import gregtech.common.tileentities.machines.multi.MTEElectricBlastFurnace;
+import gregtech.common.tileentities.machines.multi.MTEEndergenicEngine;
 import gregtech.common.tileentities.machines.multi.MTEEntropicProcessor;
 import gregtech.common.tileentities.machines.multi.MTEExtremeDieselEngine;
 import gregtech.common.tileentities.machines.multi.MTEFusionComputer1;

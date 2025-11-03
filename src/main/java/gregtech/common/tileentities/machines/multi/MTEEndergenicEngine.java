@@ -8,17 +8,11 @@ import static gregtech.api.util.GTModHandler.getModItem;
 import static gregtech.api.util.GTStructureUtility.buildHatchAdder;
 import static gregtech.api.util.GTStructureUtility.chainAllGlasses;
 import static gregtech.api.util.GTUtility.validMTEList;
-import static net.minecraftforge.fluids.FluidRegistry.getFluidStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import crazypants.enderio.machine.generator.zombie.BubbleFX;
-import gregtech.api.enums.Mods;
-import gregtech.api.metatileentity.implementations.MTEHatchInputBus;
-import gregtech.common.render.EndergenicBubbleRenderer;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EntityFX;
 import net.minecraft.item.ItemStack;
@@ -37,11 +31,8 @@ import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import com.gtnewhorizon.structurelib.structure.StructureDefinition;
 
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import crazypants.enderio.EnderIO;
-import gregtech.api.enums.SoundResource;
+import gregtech.api.enums.Mods;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
@@ -57,6 +48,7 @@ import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.MultiblockTooltipBuilder;
+import gregtech.common.render.EndergenicBubbleRenderer;
 
 public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenicEngine>
     implements ISurvivalConstructable {
@@ -71,13 +63,11 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                 .addShape(
                     STRUCTURE_PIECE_MAIN,
                     transpose(
-                        new String[][] {
-                            { "ccccc", "chhhc", "chdhc", "chhhc", "chhhc" },
+                        new String[][] { { "ccccc", "chhhc", "chdhc", "chhhc", "chhhc" },
                             { "cgcgc", "gnnng", "cninc", "gnnng", "cgcgc" },
                             { "cg~gc", "gnnng", "cninc", "gnnng", "cgcgc" },
                             { "cgcgc", "gnnng", "cninc", "gnnng", "cgcgc" },
-                            { "ccccc", "chhhc", "chhhc", "chhhc", "chhhc" },
-                        }))
+                            { "ccccc", "chhhc", "chhhc", "chhhc", "chhhc" }, }))
                 .addElement('i', ofBlock(sBlockCasings4, 13))
                 .addElement('c', ofBlock(sBlockCasings4, 2))
                 .addElement('g', chainAllGlasses())
@@ -85,12 +75,18 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                 .addElement(
                     'h',
                     lazy(
-                        t -> buildHatchAdder(MTEEndergenicEngine.class)
-                            .atLeast(InputHatch, InputHatch, Maintenance)
+                        t -> buildHatchAdder(MTEEndergenicEngine.class).atLeast(InputHatch, InputHatch, Maintenance)
                             .casingIndex(50)
                             .dot(1)
                             .buildAndChain(sBlockCasings4, 2)))
-                .addElement('n', ofChain(isAir(), ofBlock(FluidRegistry.getFluid("nutrient_distillation").getBlock(), 0)))
+                .addElement(
+                    'n',
+                    ofChain(
+                        isAir(),
+                        ofBlock(
+                            FluidRegistry.getFluid("nutrient_distillation")
+                                .getBlock(),
+                            0)))
                 .build();
         }
     };
@@ -223,13 +219,18 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                     float bOffset = 0.1F * random;
                     float cOffset = random > 0.25f ? (float) 0.25 : random;
 
-
-                    EntityFX bubbleFX = new EndergenicBubbleRenderer(world, xCoord + x + cOffset + -0.5F, yCoord + aOffset, zCoord + z + cOffset + 1.5F, bOffset, 0.5f, bOffset);
+                    EntityFX bubbleFX = new EndergenicBubbleRenderer(
+                        world,
+                        xCoord + x + cOffset + -0.5F,
+                        yCoord + aOffset,
+                        zCoord + z + cOffset + 1.5F,
+                        bOffset,
+                        0.5f,
+                        bOffset);
                     minecraft.effectRenderer.addEffect(bubbleFX);
                 }
             }
         }
-
 
         // fast track lookup
         if (!tFluids.isEmpty()) {
@@ -249,7 +250,8 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                     boostedFuelValue = GTUtility.safeInt((long) (fuelValue * getCapacitorTier(controllerSlot)));
                     boostedOutput = getNominalOutput() * getCapacitorTier(controllerSlot);
 
-                    fuelConsumption = tLiquid.amount = (int) (getCapacitorTier(controllerSlot) * getNominalOutput() / fuelValue);
+                    fuelConsumption = tLiquid.amount = (int) (getCapacitorTier(controllerSlot) * getNominalOutput()
+                        / fuelValue);
 
                     if (boostedFuelValue * 2 > boostedOutput) {
                         extraFuelFraction = boostedOutput / boostedFuelValue;
@@ -265,7 +267,7 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                 }
 
                 // Deplete that amount
-                if (getCapacitorTier(controllerSlot) != 1 ) {
+                if (getCapacitorTier(controllerSlot) != 1) {
                     boostedEu = true;
                 }
 
