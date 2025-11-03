@@ -4,14 +4,19 @@ import static com.gtnewhorizon.structurelib.structure.StructureUtility.*;
 import static gregtech.api.GregTechAPI.*;
 import static gregtech.api.enums.HatchElement.*;
 import static gregtech.api.enums.Textures.BlockIcons.*;
+import static gregtech.api.util.GTModHandler.getModItem;
 import static gregtech.api.util.GTStructureUtility.buildHatchAdder;
 import static gregtech.api.util.GTStructureUtility.chainAllGlasses;
 import static gregtech.api.util.GTUtility.validMTEList;
 import static net.minecraftforge.fluids.FluidRegistry.getFluidStack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import crazypants.enderio.machine.generator.zombie.BubbleFX;
+import gregtech.api.enums.Mods;
+import gregtech.api.metatileentity.implementations.MTEHatchInputBus;
 import gregtech.common.render.EndergenicBubbleRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -107,11 +112,11 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
     protected MultiblockTooltipBuilder createTooltip() {
         final MultiblockTooltipBuilder tooltipBuilder = new MultiblockTooltipBuilder();
         tooltipBuilder.addMachineType("Endergenic Engine, LEE")
-            .addInfo("Supply Nutrient Distillation or Dew of the void to produce power")
+            .addInfo("Supply various Ender IO fluids to produce power")
             .addInfo("Supply 40L/s of Liquid Sunshine to boost output (optional)")
+            .addInfo("Boosting is required on fuels that produce more than 1 million Eu/bucket")
             .addInfo("Produces 2048 Eu/t when not boosted, or 8192 Eu/t when boosted")
             .addInfo("Takes 50 seconds to produce full power output or 200 seconds when boosted")
-            .addInfo("Boosting is required on fuels that produce more than 1 million Eu/bucket")
             .addPollutionAmount(getPollutionPerSecond(null))
             .beginStructureBlock(5, 5, 5, true)
             .addController("Middle center")
@@ -178,10 +183,6 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
         return 2048;
     }
 
-    protected int getBoostFactor() {
-        return 4;
-    }
-
     protected int getEfficiencyIncrease() {
         return 10;
     }
@@ -241,12 +242,14 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                 if (tRecipe == null) continue;
                 fuelValue = tRecipe.mSpecialValue;
 
+                ItemStack controllerSlot = this.getControllerSlot();
                 FluidStack tLiquid = tFluid.copy();
                 if (boostedEu) {
-                    boostedFuelValue = GTUtility.safeInt((long) (fuelValue * 1.5));
-                    boostedOutput = getNominalOutput() * 3;
 
-                    fuelConsumption = tLiquid.amount = getBoostFactor() * getNominalOutput() / fuelValue;
+                    boostedFuelValue = GTUtility.safeInt((long) (fuelValue * getCapacitorTier(controllerSlot)));
+                    boostedOutput = getNominalOutput() * getCapacitorTier(controllerSlot);
+
+                    fuelConsumption = tLiquid.amount = (int) (getCapacitorTier(controllerSlot) * getNominalOutput() / fuelValue);
 
                     if (boostedFuelValue * 2 > boostedOutput) {
                         extraFuelFraction = boostedOutput / boostedFuelValue;
@@ -262,8 +265,9 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                 }
 
                 // Deplete that amount
-                if (!depleteInput(tLiquid)) return CheckRecipeResultRegistry.NO_FUEL_FOUND;
-                boostedEu = depleteInput(getFluidStack("liquid_sunshine", 2));
+                if (getCapacitorTier(controllerSlot) != 1 ) {
+                    boostedEu = true;
+                }
 
                 // Check to prevent burning DOTV without consuming it, if not boosted
                 if (!boostedEu && fuelValue > getNominalOutput()) {
@@ -281,6 +285,32 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
         this.mEUt = 0;
         this.mEfficiency = 0;
         return CheckRecipeResultRegistry.NO_FUEL_FOUND;
+    }
+
+    public static float getCapacitorTier(ItemStack capacitor) {
+        Map<ItemStack, Float> capacitorMap = new HashMap<>();
+
+        ItemStack capacitorBasic = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 0);
+        ItemStack capacitorDouble = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 1);
+        ItemStack capacitorOctadic = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 2);
+        ItemStack capacitorCrystalline = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 3);
+        ItemStack capacitorMelodic = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 4);
+        ItemStack capacitorStellar = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 5);
+        ItemStack capacitorSilver = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 7);
+        ItemStack capacitorEndergetic = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 8);
+        ItemStack capacitorEndergized = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 9);
+
+        capacitorMap.put(capacitorBasic, 1.0F);
+        capacitorMap.put(capacitorSilver, 1.0F);
+        capacitorMap.put(capacitorDouble, 2.0F);
+        capacitorMap.put(capacitorEndergetic, 2.0F);
+        capacitorMap.put(capacitorOctadic, 3.0F);
+        capacitorMap.put(capacitorEndergized, 3.0F);
+        capacitorMap.put(capacitorCrystalline, 3.5F);
+        capacitorMap.put(capacitorMelodic, 4.0F);
+        capacitorMap.put(capacitorStellar, 5.0F);
+
+        return capacitor != null ? capacitorMap.get(capacitor) : 1.0F;
     }
 
     @Override

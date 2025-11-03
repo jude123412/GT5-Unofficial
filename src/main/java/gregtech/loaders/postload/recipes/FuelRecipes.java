@@ -21,18 +21,24 @@ public class FuelRecipes implements Runnable {
         GTValues.RA.stdBuilder()
             .itemInputs(getModItem(EnderIO.ID, "bucketHootch", 1L))
             .metadata(FUEL_VALUE, 90)
-            .metadata(FUEL_TYPE, 0)
-            .addTo(GTRecipeConstants.Fuel);
-
-        GTValues.RA.stdBuilder()
-            .itemInputs(getModItem(EnderIO.ID, "bucketFire_water", 1L))
-            .metadata(FUEL_VALUE, 375)
-            .metadata(FUEL_TYPE, 0)
+            .metadata(FUEL_TYPE, 6)
             .addTo(GTRecipeConstants.Fuel);
 
         GTValues.RA.stdBuilder()
             .itemInputs(getModItem(EnderIO.ID, "bucketNutrient_distillation", 1L))
             .metadata(FUEL_VALUE, 200)
+            .metadata(FUEL_TYPE, 6)
+            .addTo(GTRecipeConstants.Fuel);
+
+        GTValues.RA.stdBuilder()
+            .itemInputs(getModItem(EnderIO.ID, "bucketRocket_fuel", 1L))
+            .metadata(FUEL_VALUE, 280)
+            .metadata(FUEL_TYPE, 6)
+            .addTo(GTRecipeConstants.Fuel);
+
+        GTValues.RA.stdBuilder()
+            .itemInputs(getModItem(EnderIO.ID, "bucketFire_water", 1L))
+            .metadata(FUEL_VALUE, 300)
             .metadata(FUEL_TYPE, 6)
             .addTo(GTRecipeConstants.Fuel);
 
