@@ -44,7 +44,7 @@ public class FuelRecipes implements Runnable {
 
         GTValues.RA.stdBuilder()
             .itemInputs(getModItem(EnderIO.ID, "bucketEnder_distillation", 1L))
-            .metadata(FUEL_VALUE, 8640)
+            .metadata(FUEL_VALUE, 800)
             .metadata(FUEL_TYPE, 6)
             .addTo(GTRecipeConstants.Fuel);
 
