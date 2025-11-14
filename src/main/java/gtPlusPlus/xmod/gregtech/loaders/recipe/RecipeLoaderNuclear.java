@@ -661,19 +661,6 @@ public class RecipeLoaderNuclear {
             .eut(TierEU.RECIPE_HV)
             .addTo(sifterRecipes);
         GTValues.RA.stdBuilder()
-            .itemInputs(ItemUtils.getItemStackOfAmountFromOreDict("crushedPurifiedUranium", 1))
-            .itemOutputs(
-                ItemUtils.getItemStackOfAmountFromOreDict("dustUranium", 1),
-                ItemUtils.getItemStackOfAmountFromOreDict("dustLead", 1),
-                ItemUtils.getItemStackOfAmountFromOreDict("dustRadium226", 1),
-                ItemUtils.getItemStackOfAmountFromOreDict("dustRadium226", 1),
-                ItemUtils.getItemStackOfAmountFromOreDict("dustRadium226", 1),
-                ItemUtils.getItemStackOfAmountFromOreDict("dustRadium226", 1))
-            .outputChances(10000, 556, 1000, 500, 500, 500)
-            .duration(30 * SECONDS)
-            .eut(TierEU.RECIPE_HV)
-            .addTo(sifterRecipes);
-        GTValues.RA.stdBuilder()
             .itemInputs(ItemUtils.getItemStackOfAmountFromOreDict("crushedPurifiedUraninite", 1))
             .itemOutputs(
                 ItemUtils.getItemStackOfAmountFromOreDict("dustUraninite", 1),
