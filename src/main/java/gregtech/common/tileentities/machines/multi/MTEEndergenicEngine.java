@@ -10,8 +10,6 @@ import static gregtech.api.util.GTStructureUtility.chainAllGlasses;
 import static gregtech.api.util.GTUtility.validMTEList;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EntityFX;
@@ -94,7 +92,7 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
     protected int fuelConsumption = 0;
     protected int fuelValue = 0;
     protected int fuelRemaining = 0;
-    protected boolean boostedEu = false;
+    protected float capacitorTier = 1.0f;
 
     public MTEEndergenicEngine(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
@@ -194,39 +192,66 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
             World world = minecraft.thePlayer.worldObj;
             float random = world.rand.nextFloat();
 
-            int xCoord = getBaseMetaTileEntity().getXCoord();
-            int yCoord = getBaseMetaTileEntity().getYCoord();
-            int zCoord = getBaseMetaTileEntity().getZCoord();
+            int xCoord = getBaseMetaTileEntity().getBackFacing().offsetX;
+            int yCoord = getBaseMetaTileEntity().getBackFacing().offsetY;
+
+            // Get Facing direction
+            IGregTechTileEntity aBaseMetaTileEntity = this.getBaseMetaTileEntity();
+            int mDirectionX = aBaseMetaTileEntity.getBackFacing().offsetX;
+            int mCurrentDirectionX;
+            int mCurrentDirectionZ;
+            int mOffsetX_Lower = -1;
+            int mOffsetX_Upper = -1;
+            int mOffsetZ_Lower = -1;
+            int mOffsetZ_Upper = -1;
+
+            if (mDirectionX == 0) {
+                mCurrentDirectionX = 0;
+                mCurrentDirectionZ = 3;
+                mOffsetX_Lower = 3;
+                mOffsetX_Upper = 0;
+                mOffsetZ_Lower = 3;
+                mOffsetZ_Upper = 0;
+            } else {
+                mCurrentDirectionX = 3;
+                mCurrentDirectionZ = 0;
+                mOffsetX_Lower = 0;
+                mOffsetX_Upper = 3;
+                mOffsetZ_Lower = 0;
+                mOffsetZ_Upper = 3;
+            }
+
+            final int xDir = aBaseMetaTileEntity.getBackFacing().offsetX * mCurrentDirectionX;
+            final int zDir = aBaseMetaTileEntity.getBackFacing().offsetZ * mCurrentDirectionZ;
 
             // Play bubble sound every 15 ticks with random pitch
             world.playSound(
-                xCoord + 0.5,
+                xDir + 0.5,
                 yCoord + 1,
-                zCoord + 0.5,
+                zDir + 0.5,
                 EnderIO.MODID + ":generator.zombie.bubble",
                 0.100F,
                 world.rand.nextFloat() * 0.75F,
                 false);
 
             // Spawn bubbles in sync with bubble sound
-            for (float x = 0; x < 3; x++) {
-                for (float z = 0; z < 3; z++) {
+            for (float x = mOffsetX_Lower; x < mOffsetX_Upper; x++) {
+                for (float z = mOffsetZ_Lower; z < mOffsetZ_Upper; z++) {
                     if (x == 1 && z == 1) {
-                        continue; // Skip this iteration, Thanks ChatGPT xD.
+                        continue; // Skip center of 3x3, Thanks ChatGPT xD.
                     }
 
-                    float aOffset = -1.0F;
-                    float bOffset = 0.1F * random;
-                    float cOffset = random > 0.25f ? (float) 0.25 : random;
+                    float aOffset = 0.1F * random;
+                    float bOffset = random > 0.25f ? (float) 0.25 : random;
 
                     EntityFX bubbleFX = new EndergenicBubbleRenderer(
                         world,
-                        xCoord + x + cOffset + -0.5F,
-                        yCoord + aOffset,
-                        zCoord + z + cOffset + 1.5F,
-                        bOffset,
+                        xDir + x,
+                        yCoord,
+                        zDir + z,
+                        aOffset,
                         0.5f,
-                        bOffset);
+                        aOffset);
                     minecraft.effectRenderer.addEffect(bubbleFX);
                 }
             }
@@ -245,8 +270,9 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
 
                 ItemStack controllerSlot = this.getControllerSlot();
                 FluidStack tLiquid = tFluid.copy();
-                if (boostedEu) {
-
+                // Check capacitor tier before boost
+                if (controllerSlot != null && getCapacitorTier(controllerSlot) > 1.0F) {
+                    capacitorTier = getCapacitorTier(controllerSlot);
                     boostedFuelValue = GTUtility.safeInt((long) (fuelValue * getCapacitorTier(controllerSlot)));
                     boostedOutput = getNominalOutput() * getCapacitorTier(controllerSlot);
 
@@ -261,27 +287,29 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                             tLiquid.amount += 1;
                         }
                     }
-
                 } else {
+                    // Return capacitor tier to default if removed
+                    if (controllerSlot == null) {
+                        capacitorTier = 1.0F;
+                    }
                     fuelConsumption = tLiquid.amount = getNominalOutput() / fuelValue;
                 }
 
-                // Deplete that amount
-                if (getCapacitorTier(controllerSlot) != 1) {
-                    boostedEu = true;
-                }
-
-                // Check to prevent burning DOTV without consuming it, if not boosted
-                if (!boostedEu && fuelValue > getNominalOutput()) {
-                    return SimpleCheckRecipeResult.ofFailure("fuel_quality_too_high");
+                // Check to prevent consuming DOTV or VOL if capacitor tier is less than melodic
+                if (fuelValue > getNominalOutput() && capacitorTier < 4.0F) {
+                    return SimpleCheckRecipeResult.ofFailure("capacitor_tier_too_low");
                 }
 
                 fuelRemaining = tFluid.amount;
                 this.mEUt = getNominalOutput();
                 this.mProgresstime = 1;
                 this.mMaxProgresstime = 1;
-                this.mEfficiencyIncrease = getEfficiencyIncrease();
+                this.mEfficiencyIncrease = (int) (getEfficiencyIncrease() * capacitorTier);
                 return CheckRecipeResultRegistry.GENERATING;
+            }
+
+            if (this.mEfficiency > 10000 && capacitorTier > 1.0F) {
+                this.mEfficiency = (int) (10000 * capacitorTier);
             }
         }
         this.mEUt = 0;
@@ -290,29 +318,28 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
     }
 
     public static float getCapacitorTier(ItemStack capacitor) {
-        Map<ItemStack, Float> capacitorMap = new HashMap<>();
-
-        ItemStack capacitorBasic = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 0);
         ItemStack capacitorDouble = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 1);
         ItemStack capacitorOctadic = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 2);
         ItemStack capacitorCrystalline = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 3);
         ItemStack capacitorMelodic = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 4);
         ItemStack capacitorStellar = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 5);
-        ItemStack capacitorSilver = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 7);
+        ItemStack capacitorTotemic = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 7);
         ItemStack capacitorEndergetic = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 8);
         ItemStack capacitorEndergized = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 9);
 
-        capacitorMap.put(capacitorBasic, 1.0F);
-        capacitorMap.put(capacitorSilver, 1.0F);
-        capacitorMap.put(capacitorDouble, 2.0F);
-        capacitorMap.put(capacitorEndergetic, 2.0F);
-        capacitorMap.put(capacitorOctadic, 3.0F);
-        capacitorMap.put(capacitorEndergized, 3.0F);
-        capacitorMap.put(capacitorCrystalline, 3.5F);
-        capacitorMap.put(capacitorMelodic, 4.0F);
-        capacitorMap.put(capacitorStellar, 5.0F);
-
-        return capacitor != null ? capacitorMap.get(capacitor) : 1.0F;
+        if (capacitor.isItemEqual(capacitorDouble) || capacitor.isItemEqual(capacitorEndergetic)) {
+            return 2.0F;
+        } else if (capacitor.isItemEqual(capacitorOctadic) || capacitor.isItemEqual(capacitorEndergized)) {
+            return 3.0F;
+        } else if (capacitor.isItemEqual(capacitorCrystalline) || capacitor.isItemEqual(capacitorTotemic)) {
+            return 3.5F;
+        } else if (capacitor.isItemEqual(capacitorMelodic)) {
+            return 4.0F;
+        } else if (capacitor.isItemEqual(capacitorStellar)) {
+            return 5.0F;
+        } else {
+            return 1.0F;
+        }
     }
 
     @Override
@@ -347,7 +374,7 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
 
     @Override
     public int getMaxEfficiency(ItemStack aStack) {
-        return boostedEu ? 40000 : 10000;
+        return (int) (10000 * capacitorTier);
     }
 
     @Override
