@@ -92,6 +92,7 @@ import gregtech.common.tileentities.boilers.MTEBoilerSolarSteel;
 import gregtech.common.tileentities.boilers.MTEBoilerSteel;
 import gregtech.common.tileentities.debug.MTEAdvDebugStructureWriter;
 import gregtech.common.tileentities.generators.MTEDieselGenerator;
+import gregtech.common.tileentities.generators.MTEEnergyPylon;
 import gregtech.common.tileentities.generators.MTEGasTurbine;
 import gregtech.common.tileentities.generators.MTELightningRod;
 import gregtech.common.tileentities.generators.MTEMagicEnergyConverter;
@@ -10617,6 +10618,12 @@ public class LoaderMetaTileEntities implements Runnable { // TODO CHECK CIRCUIT 
                 8).getStackForm(1L));
     }
 
+    private static void registerEnergyPylon() {
+        ItemList.EnergyPylon.set(
+            new MTEEnergyPylon(ENERGY_PYLON.ID, "basicgenerator.energypylon", "Energy Pylon Interface", 8)
+                .getStackForm(1L));
+    }
+
     private static void registerNameRemover() {
         ItemList.NameRemover
             .set(new MTENameRemover(NAME_REMOVER.ID, "fix.name.remover", "Name Remover", 0).getStackForm(1L));
@@ -10697,6 +10704,7 @@ public class LoaderMetaTileEntities implements Runnable { // TODO CHECK CIRCUIT 
         registerMagicEnergyAbsorbers();
         registerMagicEnergyConverters();
         registerPlasmaGenerators();
+        registerEnergyPylon();
         registerMultiblockControllers();
         registerWorldAccelerator();
         registerAlloySmelter();

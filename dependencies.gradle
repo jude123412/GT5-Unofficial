@@ -45,6 +45,7 @@ dependencies {
     api("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-775-GTNH:dev")
     api("com.github.GTNewHorizons:AE2FluidCraft-Rework:1.5.39-gtnh:dev")
     api("com.github.GTNewHorizons:Postea:1.1.5:dev")
+    api("com.github.GTNewHorizons:Draconic-Evolution:1.5.6-GTNH:dev")
 
     compileOnlyApi('com.github.GTNewHorizons:ThaumicTinkerer:2.12.4:dev')
     compileOnlyApi("com.github.GTNewHorizons:Mobs-Info:0.5.9-GTNH:dev")

@@ -2321,6 +2321,9 @@ public enum ItemList implements IItemContainer {
     Generator_Plasma_UEV,
     Generator_Plasma_UIV,
     Generator_Plasma_UMV,
+
+    EnergyPylon,
+
     AlloySmelterLuV,
     AlloySmelterZPM,
     AlloySmelterUV,
