@@ -52,8 +52,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     private int selectedCore = 0;
     private long mCoreEU = 0;
     private long mMaxCoreEu = 0;
-    private long mMaxStoredEu = 0;
-
 
     public MTEEnergyPylon(int aID, String aName, String aNameRegional, int aTier) {
         super(
@@ -260,7 +258,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
             // Dynamically request exactly what we need to fill the buffer
             long stored = getBaseMetaTileEntity().getStoredEU();
-            long spaceLeft = mMaxStoredEu - stored;
+            long spaceLeft = getBaseMetaTileEntity().getEUCapacity() - stored;
 
             if (getBaseMetaTileEntity().isAllowedToWork()) {
                 // Pull from core if we have space
@@ -279,7 +277,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
     private void extractEnergy(long requested, TileEnergyStorageCore core) {
         long stored = getBaseMetaTileEntity().getStoredEU();
-        long space = mMaxStoredEu - stored;
+        long space = getBaseMetaTileEntity().getEUCapacity() - stored;
         if (space <= 0 || requested <= 0) return;
 
         long coreAvailable = mCoreEU;
@@ -314,10 +312,8 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         IGregTechTileEntity aBase = getBaseMetaTileEntity();
         tag.setBoolean("foundCore", foundCore);
         tag.setBoolean("mode", getBaseMetaTileEntity().isAllowedToWork());
-        tag.setLong("coreEu", mCoreEU);
-        tag.setLong("maxCoreEu", mMaxCoreEu);
-        tag.setLong("storedEu", getBaseMetaTileEntity().getStoredEU());
-        tag.setLong("maxStoredEu", mMaxStoredEu);
+        tag.setLong("storedEu", (getBaseMetaTileEntity().getStoredEU() + mCoreEU));
+        tag.setLong("maxStoredEu", (getBaseMetaTileEntity().getEUCapacity() + mMaxCoreEu));
         super.getWailaNBTData(player, tile, tag, world, x, y, z);
     }
 
@@ -333,14 +329,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
             tag.getBoolean("mode")
                 ? EnumChatFormatting.GREEN + StatCollector.translateToLocal("GT5U.waila.generating.exportMode")
                 : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.importMode"));
-        if (tag.hasKey("coreEu") && tag.hasKey("maxCoreEu")) currenttip.add(
-            EnumChatFormatting.GREEN + formatNumbers(tag.getLong("coreEu"))
-                + EnumChatFormatting.GRAY
-                + " / "
-                + EnumChatFormatting.YELLOW
-                + formatNumbers(tag.getLong("maxCoreEu"))
-                + EnumChatFormatting.GRAY
-                + " EU");
         if (tag.hasKey("storedEu") && tag.hasKey("maxStoredEu")) currenttip.add(
             EnumChatFormatting.GREEN + formatNumbers(tag.getLong("storedEu"))
                 + EnumChatFormatting.GRAY
@@ -359,10 +347,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         long voltage = DECoreTierSpecs.fromTier(core.getTier()).voltage;
         long amperage = DECoreTierSpecs.fromTier(core.getTier()).amperage;
         long maxPower = voltage * amperage;
-
-        mMaxStoredEu = maxPower * 200;
-
-        return mMaxStoredEu;
+        return maxPower * 200;
     }
 
     @Override
