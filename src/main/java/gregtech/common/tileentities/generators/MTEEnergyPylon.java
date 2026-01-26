@@ -1,12 +1,14 @@
 package gregtech.common.tileentities.generators;
 
 import static gregtech.api.enums.GTValues.V;
+import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_IN;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_OUT;
 import static gregtech.api.util.GTUtility.formatNumbers;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import gregtech.api.util.GTUtility;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -48,8 +50,11 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
     private List<MultiblockHelper.TileLocation> coreLocations = new ArrayList<>();
     private int selectedCore = 0;
-    private long mStored = 0;
-    private long mMax = 0;
+    private long mCoreEU = 0;
+    private long mMaxCoreEu = 0;
+    private long mStoredEu = 0;
+    private long mMaxStoredEu = 0;
+
 
     public MTEEnergyPylon(int aID, String aName, String aNameRegional, int aTier) {
         super(
@@ -58,7 +63,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
             aNameRegional,
             aTier,
             4,
-            new String[] { "Intefaces between GregTechs ENet and the DE Energy Core" });
+            new String[] { "Inserts or Extracts energy from Draconic Evolution's Energy Core" });
     }
 
     public MTEEnergyPylon(String aName, int aTier, int aInvSlotCount, String[] aDescription, ITexture[][][] aTextures) {
@@ -69,12 +74,21 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     public ITexture[] getTexture(IGregTechTileEntity baseMetaTileEntity, ForgeDirection sideDirection,
         ForgeDirection facingDirection, int colorIndex, boolean active, boolean redstoneLevel) {
         if (sideDirection == ForgeDirection.UP) {
-            return new ITexture[] { Textures.BlockIcons.MACHINE_CASINGS[mTier][colorIndex + 1],
-                TextureFactory.of(Textures.BlockIcons.OVERLAY_SOLAR_PANEL) };
-        }
+            if (getBaseMetaTileEntity().isAllowedToWork()) {
+                return new ITexture[] { Textures.BlockIcons.MACHINE_CASINGS[mTier][colorIndex + 1],
+                    TextureFactory.of(Textures.BlockIcons.OVERLAY_TOP_ENERGY_PYLON_IN) };
+            } else {
+                return new ITexture[] { Textures.BlockIcons.MACHINE_CASINGS[mTier][colorIndex + 1],
+                    TextureFactory.of(Textures.BlockIcons.OVERLAY_TOP_ENERGY_PYLON_OUT) };
+            }}
         if (sideDirection == facingDirection) {
-            return new ITexture[] { Textures.BlockIcons.MACHINE_CASINGS[mTier][colorIndex + 1],
-                OVERLAYS_ENERGY_OUT[mTier + 1] };
+            if (getBaseMetaTileEntity().isAllowedToWork()) {
+                return new ITexture[] { Textures.BlockIcons.MACHINE_CASINGS[mTier][colorIndex + 1],
+                    OVERLAYS_ENERGY_IN[mTier + 1] };
+            } else {
+                return new ITexture[] { Textures.BlockIcons.MACHINE_CASINGS[mTier][colorIndex + 1],
+                    OVERLAYS_ENERGY_OUT[mTier + 1] };
+            }
         }
         return new ITexture[] { Textures.BlockIcons.MACHINE_CASINGS[mTier][colorIndex + 1] };
     }
@@ -123,31 +137,29 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         addGregTechLogo(builder);
         addConditionalImages(builder);
         builder.widget(
-            SlotGroup.ofItemHandler(inventoryHandler, 2)
-                .startFromSlot(0)
-                .endAtSlot(3)
-                .slotCreator(index -> new BaseSlot(inventoryHandler, index) {
-
-                    @Override
-                    public int getSlotStackLimit() {
-                        return 1;
-                    }
-                })
-                .background(getGUITextureSet().getItemSlot(), GTUITextures.OVERLAY_SLOT_CHARGER)
-                .build()
-                .setPos(100, 15))
+                new ProgressBar().setProgress(() -> (float) mCoreEU / mMaxCoreEu)
+                    .setDirection(ProgressBar.Direction.RIGHT)
+                    .setTexture(GTUITextures.PROGRESSBAR_STORED_EU, 147)
+                    .setPos(14, 54)
+                    .setSize(147, 5))
             .widget(
-                new ProgressBar().setProgress(() -> (float) mStored / mMax)
+                new TextWidget().setStringSupplier(() -> formatNumbers(mCoreEU) + "/" + formatNumbers(mMaxCoreEu) + " Core EU")
+                    .setTextAlignment(Alignment.Center)
+                    .setPos(14, 46)
+                    .setSize(147, 5))
+            .widget(new FakeSyncWidget.LongSyncer(() -> mStoredEu, val -> mCoreEU = val))
+            .widget(
+                new ProgressBar().setProgress(() -> (float) getBaseMetaTileEntity().getStoredEU() / mMaxStoredEu)
                     .setDirection(ProgressBar.Direction.RIGHT)
                     .setTexture(GTUITextures.PROGRESSBAR_STORED_EU, 147)
                     .setPos(14, 74)
                     .setSize(147, 5))
             .widget(
-                new TextWidget().setStringSupplier(() -> formatNumbers(clientEU) + "/" + formatNumbers(mMax) + " EU")
+                new TextWidget().setStringSupplier(() -> formatNumbers(getBaseMetaTileEntity().getStoredEU()) + "/" + formatNumbers(mMaxStoredEu) + " Internal EU")
                     .setTextAlignment(Alignment.Center)
                     .setPos(14, 66)
                     .setSize(147, 5))
-            .widget(new FakeSyncWidget.LongSyncer(() -> mStored, val -> clientEU = val));
+            .widget(new FakeSyncWidget.LongSyncer(() -> mStoredEu, val -> clientEU = val));
     }
 
     public void addConditionalImages(ModularWindow.Builder builder) {
@@ -158,7 +170,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
                         () -> foundCore ? GTUITextures.OVERLAY_BUTTON_CHECKMARK : GTUITextures.OVERLAY_BUTTON_CROSS)
                     .setPos(5, 26)
                     .setSize(16, 16))
-            .widget(new TextWidget(StatCollector.translateToLocal("GT5U.machines.foundcoreindicator")).setPos(21, 31))
+            .widget(new TextWidget(StatCollector.translateToLocal("GT5U.machines.energy_pylon.core_found")).setPos(21, 31))
             .widget(new FakeSyncWidget.BooleanSyncer(() -> foundCore, val -> foundCore = val));
     }
 
@@ -173,18 +185,18 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     @Override
     public void onPostTick(IGregTechTileEntity aBaseMetaTileEntity, long aTick) {
         // Keep energy level synced to the core
-        syncEnergy();
+        syncEnergy(aBaseMetaTileEntity);
 
         // Check every 5 seconds to find Another core
         if (aTick % 100 == 0) {
-            nextCore();
+            nextCore(aBaseMetaTileEntity);
         }
         super.onPostTick(aBaseMetaTileEntity, aTick);
     }
 
     @Override
     public void onFirstTick(IGregTechTileEntity aBaseMetaTileEntity) {
-        nextCore();
+        nextCore(aBaseMetaTileEntity);
         super.onFirstTick(aBaseMetaTileEntity);
     }
 
@@ -226,14 +238,14 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         }
     }
 
-    public void nextCore() {
+    public void nextCore(IGregTechTileEntity aBaseMetaTileEntity) {
         findCores();
         selectedCore++;
         if (selectedCore >= coreLocations.size()) selectedCore = 0;
         getWorld().markBlockForUpdate(getXCoord(), getYCoord(), getZCoord());
 
         if (!coreLocations.isEmpty()) foundCore = true;
-        syncEnergy();
+        syncEnergy(aBaseMetaTileEntity);
     }
 
     private int getXCoord() {
@@ -252,15 +264,60 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         return getBaseMetaTileEntity().getWorld();
     }
 
-    private void syncEnergy() {
+    private void syncEnergy(IGregTechTileEntity aBaseMetaTileEntity) {
         TileEnergyStorageCore core = getMaster();
         if (core != null) {
-            mStored = core.getEnergyStored();
-            mMax = core.getMaxEnergyStored();
-            if (mStored > GTValues.V[mTier]) {
-                core.extractEnergy((int) GTValues.V[mTier], false);
-                this.setEUVar(getBaseMetaTileEntity().getStoredEU() + GTValues.V[mTier]);
+            mCoreEU = core.getEnergyStored();
+            mMaxCoreEu = core.getMaxEnergyStored();
+            aBaseMetaTileEntity.setActive(aBaseMetaTileEntity.isAllowedToWork());
+
+            // Dynamically request exactly what we need to fill the buffer
+            long stored = getBaseMetaTileEntity().getStoredEU();
+            long spaceLeft = mMaxStoredEu - stored;
+
+            if (getBaseMetaTileEntity().isAllowedToWork()) {
+                // Pull from core if we have space
+                if (spaceLeft > 0 && mCoreEU > 0) {
+                    extractEnergy(spaceLeft, core);
+                }
+
+            } else {
+                // Push to core if we are over some threshold
+                if (stored > 0 && mCoreEU < mMaxCoreEu) {
+                    receiveEnergy(stored, core);
+                }
             }
+        }
+    }
+
+    private void extractEnergy(long requested, TileEnergyStorageCore core) {
+        long stored = getBaseMetaTileEntity().getStoredEU();
+        long space = mMaxStoredEu - stored;
+        if (space <= 0 || requested <= 0) return;
+
+        long coreAvailable = mCoreEU;
+
+        long amount = Math.min(requested, Math.min(coreAvailable, space));
+
+        if (amount > 0) {
+            core.extractEnergy((int) amount, false);
+            this.setEUVar(stored + amount);
+        }
+    }
+
+    private void receiveEnergy(long requested, TileEnergyStorageCore core) {
+        long stored = getBaseMetaTileEntity().getStoredEU();
+        if (stored <= 0 || requested <= 0) return;
+
+        long coreSpace = mMaxCoreEu - mCoreEU;
+        if (coreSpace <= 0) return;
+
+        // Final safe amount to send
+        long amount = Math.min(requested, Math.min(stored, coreSpace));
+
+        if (amount > 0) {
+            core.receiveEnergy((int) amount, false);
+            this.setEUVar(stored - amount);
         }
     }
 
@@ -269,8 +326,11 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         int z) {
         IGregTechTileEntity aBase = getBaseMetaTileEntity();
         tag.setBoolean("foundCore", foundCore);
-        tag.setLong("storedeu", mStored);
-        tag.setLong("maxeu", mMax);
+        tag.setBoolean("mode", getBaseMetaTileEntity().isAllowedToWork());
+        tag.setLong("coreEu", mCoreEU);
+        tag.setLong("maxCoreEu", mMaxCoreEu);
+        tag.setLong("storedEu", getBaseMetaTileEntity().getStoredEU());
+        tag.setLong("maxStoredEu", mMaxStoredEu);
         super.getWailaNBTData(player, tile, tag, world, x, y, z);
     }
 
@@ -280,14 +340,26 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         final NBTTagCompound tag = accessor.getNBTData();
         if (tag.hasKey("foundCore")) currenttip.add(
             tag.getBoolean("foundCore")
-                ? EnumChatFormatting.GREEN + StatCollector.translateToLocal("GT5U.waila.generating.on")
-                : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.off"));
-        if (tag.hasKey("storedeu") && tag.hasKey("maxeu")) currenttip.add(
-            EnumChatFormatting.GREEN + formatNumbers(tag.getLong("storedeu"))
+                ? EnumChatFormatting.GREEN + StatCollector.translateToLocal("GT5U.waila.generating.foundCore")
+                : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.missingCore"));
+        if (tag.hasKey("mode")) currenttip.add(
+            tag.getBoolean("mode")
+                ? EnumChatFormatting.GREEN + StatCollector.translateToLocal("GT5U.waila.generating.exportMode")
+                : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.importMode"));
+        if (tag.hasKey("coreEu") && tag.hasKey("maxCoreEu")) currenttip.add(
+            EnumChatFormatting.GREEN + formatNumbers(tag.getLong("coreEu"))
                 + EnumChatFormatting.GRAY
                 + " / "
                 + EnumChatFormatting.YELLOW
-                + formatNumbers(tag.getLong("maxeu"))
+                + formatNumbers(tag.getLong("maxCoreEu"))
+                + EnumChatFormatting.GRAY
+                + " EU");
+        if (tag.hasKey("storedEu") && tag.hasKey("maxStoredEu")) currenttip.add(
+            EnumChatFormatting.GREEN + formatNumbers(tag.getLong("storedEu"))
+                + EnumChatFormatting.GRAY
+                + " / "
+                + EnumChatFormatting.YELLOW
+                + formatNumbers(tag.getLong("maxStoredEu"))
                 + EnumChatFormatting.GRAY
                 + " EU");
         super.getWailaBody(itemStack, currenttip, accessor, config);
@@ -298,12 +370,9 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         TileEnergyStorageCore core = getMaster();
         if (core == null || !core.isOnline()) return V[mTier] * 32;
 
-        return core.getMaxEnergyStored();
-    }
+        mMaxStoredEu = DECoreTierSpecs.fromTier(core.getTier()).voltage * 200;
 
-    @Override
-    public long maxEUOutput() {
-        return GTValues.V[mTier];
+        return core.getMaxEnergyStored();
     }
 
     @Override
@@ -312,13 +381,71 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     }
 
     @Override
+    public boolean isEnetInput() {
+        return true;
+    }
+
+    @Override
+    public long maxEUOutput() {
+        TileEnergyStorageCore core = getMaster();
+        if (core == null || !core.isOnline()) return 0;
+        long voltage = DECoreTierSpecs.fromTier(core.getTier()).voltage;
+
+        return getBaseMetaTileEntity().isAllowedToWork() ? voltage : 0;
+    }
+
+    @Override
+    public long maxEUInput() {
+        TileEnergyStorageCore core = getMaster();
+        if (core == null || !core.isOnline()) return 0;
+        long voltage = DECoreTierSpecs.fromTier(core.getTier()).voltage;
+
+        return getBaseMetaTileEntity().isAllowedToWork() ? 0 : voltage;
+    }
+
+    @Override
+    public long maxAmperesOut() {
+        TileEnergyStorageCore core = getMaster();
+        if (core == null || !core.isOnline()) return 0;
+        long amperage = DECoreTierSpecs.fromTier(core.getTier()).amperage;
+
+        return getBaseMetaTileEntity().isAllowedToWork() ? amperage : 0;
+    }
+
+    @Override
+    public long maxAmperesIn() {
+        TileEnergyStorageCore core = getMaster();
+        if (core == null || !core.isOnline()) return 0;
+        long amperage = DECoreTierSpecs.fromTier(core.getTier()).amperage;
+
+        return getBaseMetaTileEntity().isAllowedToWork() ? 0 : amperage;
+    }
+
+    @Override
     public boolean isFacingValid(ForgeDirection side) {
         return side != ForgeDirection.UP;
     }
 
     @Override
+    public boolean isInputFacing(ForgeDirection side) {
+        ForgeDirection blockFrontFacing = getBaseMetaTileEntity().getFrontFacing();
+
+        if (getBaseMetaTileEntity().isAllowedToWork()) {
+            return false;
+        } else {
+            return side == blockFrontFacing;
+        }
+    }
+
+    @Override
     public boolean isOutputFacing(ForgeDirection side) {
-        return side == getBaseMetaTileEntity().getFrontFacing();
+        ForgeDirection blockFrontFacing = getBaseMetaTileEntity().getFrontFacing();
+
+        if (getBaseMetaTileEntity().isAllowedToWork()) {
+            return side == blockFrontFacing;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -333,4 +460,45 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         return false;
     }
 
+    @Override
+    public boolean hasAlternativeModeText() {
+        return true;
+    }
+
+    @Override
+    public String getAlternativeModeText() {
+        return (getBaseMetaTileEntity().isAllowedToWork() ? StatCollector.translateToLocal("Extracting Energy From Core")
+            : StatCollector.translateToLocal("Injecting Energy Into Core"));
+    }
+
+    @Override
+    public boolean shouldJoinIc2Enet() {
+        return true;
+    }
+
+    public enum DECoreTierSpecs {
+
+        TIER_0(512, 4),
+        TIER_1(2048, 8),
+        TIER_2(8192, 16),
+        TIER_3(32768, 32),
+        TIER_4(131072, 64),
+        TIER_5(524288, 128),
+        TIER_6(2097152, 256),
+        TIER_7(8388608, 512);
+
+        public final long voltage;
+        public final long amperage;
+
+        DECoreTierSpecs(long voltage, long amperage) {
+            this.voltage = voltage;
+            this.amperage = amperage;
+        }
+
+        public static DECoreTierSpecs fromTier(int tier) {
+            if (tier < 0 || tier >= values().length) return TIER_0;
+            return values()[tier];
+        }
+
+    }
 }

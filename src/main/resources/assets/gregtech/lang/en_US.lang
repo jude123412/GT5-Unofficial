@@ -1355,6 +1355,7 @@ GT5U.machines.antimatter_forge.disableRender=Disable Antimatter Forge Render
 GT5U.machines.coke_oven_hatch.mode.input=Hatch now inputs items
 GT5U.machines.coke_oven_hatch.mode.output=Hatch now outputs items
 GT5U.machines.coke_oven_hatch.mode.output_fluid=Hatch now outputs fluids
+GT5U.machines.energy_pylon.core_found=Found Energy Core!
 
 
 GT5U.recipe_filter.empty_representation_slot.tooltip=§7Click with a machine to set filter
@@ -2174,6 +2175,10 @@ GT5U.waila.producing=Producing:
 GT5U.waila.producing.andmore=  And %d More...
 GT5U.waila.generating.on=Generating Energy
 GT5U.waila.generating.off=Not Generating
+GT5U.waila.generating.foundCore=Energy Core Found!
+GT5U.waila.generating.missingCore=Unable to find core?
+GT5U.waila.generating.importMode=Importing Energy to Core
+GT5U.waila.generating.exportMode=Extracting Energy from Core
 GT5U.waila.status.insufficient_energy=Status: Insufficient energy
 GT5U.waila.status.obstructed_steam_vent=Status: Obstructed steam vent
 GT5U.waila.machine.working_disabled=Working Disabled

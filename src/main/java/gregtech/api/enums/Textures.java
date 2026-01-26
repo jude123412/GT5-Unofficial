@@ -1989,6 +1989,9 @@ public class Textures {
         OVERLAY_FRONT_MASS_SOLIDIFIER_ACTIVE_GLOW,
         OVERLAY_FRONT_MASS_SOLIDIFIER_GLOW,
 
+        OVERLAY_TOP_ENERGY_PYLON_OUT,
+        OVERLAY_TOP_ENERGY_PYLON_IN,
+
         // semicolon after the comment to reduce merge conflicts
         ;
 

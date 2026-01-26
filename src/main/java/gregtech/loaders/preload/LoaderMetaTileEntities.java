@@ -10622,6 +10622,7 @@ public class LoaderMetaTileEntities implements Runnable { // TODO CHECK CIRCUIT 
         ItemList.EnergyPylon.set(
             new MTEEnergyPylon(ENERGY_PYLON.ID, "basicgenerator.energypylon", "Energy Pylon Interface", 8)
                 .getStackForm(1L));
+        addItemTooltip(ItemList.EnergyPylon.get(1), chain(() -> "Author: ", GTValues.AuthorJude));
     }
 
     private static void registerNameRemover() {
