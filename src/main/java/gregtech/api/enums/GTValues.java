@@ -686,44 +686,35 @@ public class GTValues {
             EnumChatFormatting.YELLOW + BOLD));
 
     public static final Supplier<String> AuthorJude = chain(
-        animatedText(
-            "x",
+        createJudeOuterText("x", EnumChatFormatting.DARK_PURPLE, EnumChatFormatting.LIGHT_PURPLE, EnumChatFormatting.DARK_PURPLE),
+        createJudeOuterText("X", EnumChatFormatting.LIGHT_PURPLE, EnumChatFormatting.DARK_PURPLE, EnumChatFormatting.DARK_PURPLE),
+        createJudeCenterText("jude", EnumChatFormatting.DARK_BLUE, EnumChatFormatting.BLUE),
+        createJudeOuterText("X", EnumChatFormatting.LIGHT_PURPLE, EnumChatFormatting.DARK_PURPLE, EnumChatFormatting.DARK_PURPLE),
+        createJudeOuterText("x", EnumChatFormatting.DARK_PURPLE, EnumChatFormatting.LIGHT_PURPLE, EnumChatFormatting.DARK_PURPLE)
+    );
+
+    private static Supplier<String> createJudeOuterText(String text, EnumChatFormatting colorA, EnumChatFormatting colorB, EnumChatFormatting colorC) {
+        return animatedText(
+            text,
             0,
             200,
-            EnumChatFormatting.DARK_PURPLE + BOLD,
-            EnumChatFormatting.LIGHT_PURPLE + BOLD,
-            EnumChatFormatting.DARK_PURPLE + BOLD),
-        animatedText(
-            "X",
+            colorA + BOLD,
+            colorB + BOLD,
+            colorC + BOLD);
+    }
+
+    private static Supplier<String> createJudeCenterText(String text, EnumChatFormatting colorA, EnumChatFormatting colorB) {
+        return animatedText(
+            text,
             0,
             200,
-            EnumChatFormatting.LIGHT_PURPLE + BOLD,
-            EnumChatFormatting.DARK_PURPLE + BOLD,
-            EnumChatFormatting.DARK_PURPLE + BOLD),
-        animatedText(
-            "jude",
-            0,
-            200,
-            EnumChatFormatting.DARK_BLUE + BOLD,
-            EnumChatFormatting.DARK_BLUE + BOLD,
-            EnumChatFormatting.DARK_BLUE + BOLD,
-            EnumChatFormatting.BLUE + BOLD,
-            EnumChatFormatting.BLUE + BOLD,
-            EnumChatFormatting.BLUE + BOLD),
-        animatedText(
-            "X",
-            0,
-            200,
-            EnumChatFormatting.LIGHT_PURPLE + BOLD,
-            EnumChatFormatting.DARK_PURPLE + BOLD,
-            EnumChatFormatting.DARK_PURPLE + BOLD),
-        animatedText(
-            "x",
-            0,
-            200,
-            EnumChatFormatting.DARK_PURPLE + BOLD,
-            EnumChatFormatting.LIGHT_PURPLE + BOLD,
-            EnumChatFormatting.DARK_PURPLE + BOLD));
+            colorA + BOLD,
+            colorA + BOLD,
+            colorA + BOLD,
+            colorB + OBFUSCATED + BOLD,
+            colorB + BOLD,
+            colorB + OBFUSCATED + BOLD);
+    }
 
     private static Supplier<String> createChromLetter(String letter, String... injectedUnicode) {
 

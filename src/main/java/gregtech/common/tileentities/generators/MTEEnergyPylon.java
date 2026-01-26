@@ -52,7 +52,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     private int selectedCore = 0;
     private long mCoreEU = 0;
     private long mMaxCoreEu = 0;
-    private long mStoredEu = 0;
     private long mMaxStoredEu = 0;
 
 
@@ -137,29 +136,17 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         addGregTechLogo(builder);
         addConditionalImages(builder);
         builder.widget(
-                new ProgressBar().setProgress(() -> (float) mCoreEU / mMaxCoreEu)
-                    .setDirection(ProgressBar.Direction.RIGHT)
-                    .setTexture(GTUITextures.PROGRESSBAR_STORED_EU, 147)
-                    .setPos(14, 54)
-                    .setSize(147, 5))
-            .widget(
-                new TextWidget().setStringSupplier(() -> formatNumbers(mCoreEU) + "/" + formatNumbers(mMaxCoreEu) + " Core EU")
-                    .setTextAlignment(Alignment.Center)
-                    .setPos(14, 46)
-                    .setSize(147, 5))
-            .widget(new FakeSyncWidget.LongSyncer(() -> mStoredEu, val -> mCoreEU = val))
-            .widget(
-                new ProgressBar().setProgress(() -> (float) getBaseMetaTileEntity().getStoredEU() / mMaxStoredEu)
+                new ProgressBar().setProgress(() -> (float) (getBaseMetaTileEntity().getStoredEU() + mCoreEU) / (getBaseMetaTileEntity().getEUCapacity() + mMaxCoreEu))
                     .setDirection(ProgressBar.Direction.RIGHT)
                     .setTexture(GTUITextures.PROGRESSBAR_STORED_EU, 147)
                     .setPos(14, 74)
                     .setSize(147, 5))
             .widget(
-                new TextWidget().setStringSupplier(() -> formatNumbers(getBaseMetaTileEntity().getStoredEU()) + "/" + formatNumbers(mMaxStoredEu) + " Internal EU")
+                new TextWidget().setStringSupplier(() -> formatNumbers(clientEU) + "/" + formatNumbers((getBaseMetaTileEntity().getEUCapacity()) + mMaxCoreEu) + " EU")
                     .setTextAlignment(Alignment.Center)
                     .setPos(14, 66)
                     .setSize(147, 5))
-            .widget(new FakeSyncWidget.LongSyncer(() -> mStoredEu, val -> clientEU = val));
+            .widget(new FakeSyncWidget.LongSyncer(() -> (getBaseMetaTileEntity().getStoredEU() + mCoreEU) , val -> clientEU = val));
     }
 
     public void addConditionalImages(ModularWindow.Builder builder) {
@@ -369,10 +356,13 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     public long maxEUStore() {
         TileEnergyStorageCore core = getMaster();
         if (core == null || !core.isOnline()) return V[mTier] * 32;
+        long voltage = DECoreTierSpecs.fromTier(core.getTier()).voltage;
+        long amperage = DECoreTierSpecs.fromTier(core.getTier()).amperage;
+        long maxPower = voltage * amperage;
 
-        mMaxStoredEu = DECoreTierSpecs.fromTier(core.getTier()).voltage * 200;
+        mMaxStoredEu = maxPower * 200;
 
-        return core.getMaxEnergyStored();
+        return mMaxStoredEu;
     }
 
     @Override
