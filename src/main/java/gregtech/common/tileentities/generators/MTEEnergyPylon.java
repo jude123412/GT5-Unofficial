@@ -4,11 +4,21 @@ import static gregtech.api.enums.GTValues.V;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_IN;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_OUT;
 import static gregtech.api.util.GTUtility.formatNumbers;
+import static net.minecraft.util.EnumChatFormatting.DARK_GRAY;
+import static net.minecraft.util.EnumChatFormatting.DARK_GREEN;
+import static net.minecraft.util.EnumChatFormatting.GREEN;
+import static net.minecraft.util.EnumChatFormatting.YELLOW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
+import com.brandon3055.draconicevolution.client.handler.ParticleHandler;
+import com.brandon3055.draconicevolution.client.render.particle.Particles;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.util.GTUtility;
+import gregtech.api.util.tooltip.TooltipHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -52,6 +62,9 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     private int selectedCore = 0;
     private long mCoreEU = 0;
     private long mMaxCoreEu = 0;
+    public float modelRotation = 0;
+    public float modelScale = 0;
+    private byte particleRate = 0;
 
     public MTEEnergyPylon(int aID, String aName, String aNameRegional, int aTier) {
         super(
@@ -59,12 +72,18 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
             aName,
             aNameRegional,
             aTier,
-            4,
-            new String[] { "Inserts or Extracts energy from Draconic Evolution's Energy Core" });
+            0,
+            new String[] {
+                "Inserts or Extracts energy from Draconic Evolution's Energy Core",
+                "Send -> <- Receive (Use a soft mallet to change mode)",
+                "Capacity, Voltage & Amperage is based on the Energy Core's tier",
+                "Tier " + TooltipHelper.coloredText("0", YELLOW) + " : "  + TooltipHelper.coloredText("512", YELLOW) + " EU/t : " + TooltipHelper.coloredText("4", YELLOW) + " Amps",
+                "Tier " + TooltipHelper.coloredText("1", DARK_GRAY) + " : "  + TooltipHelper.coloredText("2048", DARK_GRAY) + " EU/t : " + TooltipHelper.coloredText("8", DARK_GRAY) + " Amps"
+            });
     }
 
-    public MTEEnergyPylon(String aName, int aTier, int aInvSlotCount, String[] aDescription, ITexture[][][] aTextures) {
-        super(aName, aTier, aInvSlotCount, aDescription, aTextures);
+    public MTEEnergyPylon(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {
+        super(aName, aTier, 0, aDescription, aTextures);
     }
 
     @Override
@@ -100,7 +119,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         return new MTEEnergyPylon(
             this.mName,
             this.mTier,
-            this.mInventory.length,
             this.mDescriptionArray,
             this.mTextures);
     }
@@ -116,11 +134,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     }
 
     @Override
-    public int rechargerSlotCount() {
-        return 4;
-    }
-
-    @Override
     public boolean onRightclick(IGregTechTileEntity aBaseMetaTileEntity, EntityPlayer aPlayer, ForgeDirection side,
         float aX, float aY, float aZ) {
         openGui(aPlayer);
@@ -131,20 +144,22 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
     @Override
     public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
+        TileEnergyStorageCore core = getMaster();
+        if (core == null || !core.isOnline()) return;
         addGregTechLogo(builder);
         addConditionalImages(builder);
         builder.widget(
-                new ProgressBar().setProgress(() -> (float) (getBaseMetaTileEntity().getStoredEU() + mCoreEU) / (getBaseMetaTileEntity().getEUCapacity() + mMaxCoreEu))
+                new ProgressBar().setProgress(() -> (float) (getBaseMetaTileEntity().getStoredEU() + core.getEnergyStored()) / (getBaseMetaTileEntity().getEUCapacity() + core.getMaxEnergyStored()))
                     .setDirection(ProgressBar.Direction.RIGHT)
                     .setTexture(GTUITextures.PROGRESSBAR_STORED_EU, 147)
                     .setPos(14, 74)
                     .setSize(147, 5))
             .widget(
-                new TextWidget().setStringSupplier(() -> formatNumbers(clientEU) + "/" + formatNumbers((getBaseMetaTileEntity().getEUCapacity()) + mMaxCoreEu) + " EU")
+                new TextWidget().setStringSupplier(() -> formatNumbers(clientEU) + "/" + formatNumbers(getBaseMetaTileEntity().getEUCapacity() + core.getMaxEnergyStored()) + " EU")
                     .setTextAlignment(Alignment.Center)
                     .setPos(14, 66)
                     .setSize(147, 5))
-            .widget(new FakeSyncWidget.LongSyncer(() -> (getBaseMetaTileEntity().getStoredEU() + mCoreEU) , val -> clientEU = val));
+            .widget(new FakeSyncWidget.LongSyncer(() -> (getBaseMetaTileEntity().getStoredEU() + core.getEnergyStored()) , val -> clientEU = val));
     }
 
     public void addConditionalImages(ModularWindow.Builder builder) {
@@ -169,20 +184,120 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
     @Override
     public void onPostTick(IGregTechTileEntity aBaseMetaTileEntity, long aTick) {
-        // Keep energy level synced to the core
-        syncEnergy(aBaseMetaTileEntity);
+        if (aBaseMetaTileEntity.isServerSide()) {
 
-        // Check every 5 seconds to find Another core
-        if (aTick % 100 == 0) {
-            nextCore(aBaseMetaTileEntity);
+            // Spawn Link Particles
+            if (!coreLocations.isEmpty()) {
+                modelRotation += 1.5;
+                modelScale += !aBaseMetaTileEntity.isAllowedToWork() ? 0.01F : -0.01F;
+                if (modelScale < 0) {
+                    modelScale = !aBaseMetaTileEntity.isAllowedToWork() ? 0F : 10000F;
+                }
+                spawnParticles();
+            } else {
+                modelScale = 0.5F;
+            }
+
+
+            // Keep energy level synced to the core
+            syncEnergy(aBaseMetaTileEntity);
+
+            // Check every 5 seconds to find Another core
+            if (aTick % 100 == 0) {
+                nextCore();
+            }
+        }
+        if (!coreLocations.isEmpty() && !aBaseMetaTileEntity.isAllowedToWork()) {
+            if (particleRate > 0) particleRate--;
         }
         super.onPostTick(aBaseMetaTileEntity, aTick);
     }
 
     @Override
     public void onFirstTick(IGregTechTileEntity aBaseMetaTileEntity) {
-        nextCore(aBaseMetaTileEntity);
+        nextCore();
         super.onFirstTick(aBaseMetaTileEntity);
+    }
+
+    @SideOnly(Side.CLIENT)
+    private void spawnParticles() {
+        Random rand = getWorld().rand;
+
+        TileEnergyStorageCore core = getMaster();
+        if (core == null || !core.isOnline()) return;
+
+        int x = core.xCoord;
+        int y = core.yCoord;
+        int z = core.zCoord;
+        int cYCoord = getWorld().getBlockMetadata(getXCoord(), getYCoord(), getZCoord()) == 1 ? getYCoord() + 1 : getYCoord() - 1;
+
+        float disMod = switch (core.getTier()) {
+            case 0 -> 0.5F;
+            case 1, 2 -> 1F;
+            case 3, 4 -> 2F;
+            case 5 -> 3F;
+            default -> 4F;
+        };
+
+        if (particleRate > 20) particleRate = 20;
+        double sourceX = x + 0.5 - disMod + (rand.nextFloat() * (disMod * 2));
+        double sourceY = y + 0.5 - disMod + (rand.nextFloat() * (disMod * 2));
+        double sourceZ = z + 0.5 - disMod + (rand.nextFloat() * (disMod * 2));
+        double targetX = getXCoord() + 0.5;
+        double targetY = cYCoord + 0.5;
+        double targetZ = getZCoord() + 0.5;
+        if (rand.nextFloat() < 0.05F) {
+            Particles.EnergyTransferParticle passiveParticle = !getBaseMetaTileEntity().isAllowedToWork()
+                ? new Particles.EnergyTransferParticle(
+                getWorld(),
+                targetX,
+                targetY,
+                targetZ,
+                sourceX,
+                sourceY,
+                sourceZ,
+                true)
+                : new Particles.EnergyTransferParticle(
+                getWorld(),
+                sourceX,
+                sourceY,
+                sourceZ,
+                targetX,
+                targetY,
+                targetZ,
+                true);
+            ParticleHandler.spawnCustomParticle(passiveParticle, 35);
+        }
+        if (particleRate > 0) {
+            if (particleRate > 10 || rand.nextInt(Math.max(1, 10 - particleRate)) == 0) {
+                int iterations = particleRate > 10 ? particleRate / 10 : 1;
+                for (int i = 0; i <= iterations; i++) {
+                    sourceX = x + 0.5 - disMod + (rand.nextFloat() * (disMod * 2));
+                    sourceY = y + 0.5 - disMod + (rand.nextFloat() * (disMod * 2));
+                    sourceZ = z + 0.5 - disMod + (rand.nextFloat() * (disMod * 2));
+                    Particles.EnergyTransferParticle passiveParticle = !getBaseMetaTileEntity().isAllowedToWork()
+                        ? new Particles.EnergyTransferParticle(
+                        getWorld(),
+                        targetX,
+                        targetY,
+                        targetZ,
+                        sourceX,
+                        sourceY,
+                        sourceZ,
+                        false)
+                        : new Particles.EnergyTransferParticle(
+                        getWorld(),
+                        sourceX,
+                        sourceY,
+                        sourceZ,
+                        targetX,
+                        targetY,
+                        targetZ,
+                        false);
+                    ParticleHandler.spawnCustomParticle(passiveParticle, 35);
+                }
+            }
+        }
     }
 
     private boolean foundCore = false;
@@ -223,14 +338,13 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         }
     }
 
-    public void nextCore(IGregTechTileEntity aBaseMetaTileEntity) {
+    public void nextCore() {
         findCores();
         selectedCore++;
         if (selectedCore >= coreLocations.size()) selectedCore = 0;
         getWorld().markBlockForUpdate(getXCoord(), getYCoord(), getZCoord());
 
         if (!coreLocations.isEmpty()) foundCore = true;
-        syncEnergy(aBaseMetaTileEntity);
     }
 
     private int getXCoord() {
@@ -285,6 +399,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         long amount = Math.min(requested, Math.min(coreAvailable, space));
 
         if (amount > 0) {
+            particleRate = (byte) Math.min(20, amount < 500 ? 1 : amount / 500);
             core.extractEnergy((int) amount, false);
             this.setEUVar(stored + amount);
         }
@@ -297,10 +412,10 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         long coreSpace = mMaxCoreEu - mCoreEU;
         if (coreSpace <= 0) return;
 
-        // Final safe amount to send
         long amount = Math.min(requested, Math.min(stored, coreSpace));
 
         if (amount > 0) {
+            particleRate = (byte) Math.min(20, amount < 500 ? 1 : amount / 500);
             core.receiveEnergy((int) amount, false);
             this.setEUVar(stored - amount);
         }
@@ -323,14 +438,14 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         final NBTTagCompound tag = accessor.getNBTData();
         if (tag.hasKey("foundCore")) currenttip.add(
             tag.getBoolean("foundCore")
-                ? EnumChatFormatting.GREEN + StatCollector.translateToLocal("GT5U.waila.generating.foundCore")
+                ? GREEN + StatCollector.translateToLocal("GT5U.waila.generating.foundCore")
                 : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.missingCore"));
         if (tag.hasKey("mode")) currenttip.add(
             tag.getBoolean("mode")
-                ? EnumChatFormatting.GREEN + StatCollector.translateToLocal("GT5U.waila.generating.exportMode")
+                ? GREEN + StatCollector.translateToLocal("GT5U.waila.generating.exportMode")
                 : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.importMode"));
         if (tag.hasKey("storedEu") && tag.hasKey("maxStoredEu")) currenttip.add(
-            EnumChatFormatting.GREEN + formatNumbers(tag.getLong("storedEu"))
+            GREEN + formatNumbers(tag.getLong("storedEu"))
                 + EnumChatFormatting.GRAY
                 + " / "
                 + EnumChatFormatting.YELLOW
@@ -343,7 +458,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     @Override
     public long maxEUStore() {
         TileEnergyStorageCore core = getMaster();
-        if (core == null || !core.isOnline()) return V[mTier] * 32;
+        if (core == null || !core.isOnline()) return 0;
         long voltage = DECoreTierSpecs.fromTier(core.getTier()).voltage;
         long amperage = DECoreTierSpecs.fromTier(core.getTier()).amperage;
         long maxPower = voltage * amperage;
