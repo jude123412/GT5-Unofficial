@@ -214,19 +214,17 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         }
 
         if (aBaseMetaTileEntity.isServerSide()) {
-            // Spawn Link Particles
-            spawnParticles();
-
+            if (foundCore) {
+                // Spawn Link Particles
+                spawnParticles();
+                if (particleRate > 0) particleRate--;
+            }
             // Keep energy level synced to the core
             syncEnergy(aBaseMetaTileEntity);
 
             // Check every 5 seconds to find Another core
             if (aTick % 100 == 0) {
                 nextCore();
-            }
-
-            if (foundCore) {
-                if (particleRate > 0) particleRate--;
             }
         }
         super.onPostTick(aBaseMetaTileEntity, aTick);
@@ -244,10 +242,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
     public float getModelRotation() {
         return modelRotation;
-    }
-
-    public boolean getFoundCore() {
-        return foundCore;
     }
 
     @SideOnly(Side.CLIENT)
