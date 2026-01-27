@@ -12,14 +12,14 @@ import net.minecraftforge.client.model.AdvancedModelLoader;
 import net.minecraftforge.client.model.IModelCustom;
 import org.lwjgl.opengl.GL11;
 
-public class RenderTileEnergyPylon extends TileEntitySpecialRenderer {
+public class RenderEnergyPylon extends TileEntitySpecialRenderer {
 
     private static final ResourceLocation modelTexture = new ResourceLocation(
         References.MODID.toLowerCase(),
         "textures/models/pylon_sphere_texture.png");
     private final IModelCustom model;
 
-    public RenderTileEnergyPylon() {
+    public RenderEnergyPylon() {
         model = AdvancedModelLoader
             .loadModel(new ResourceLocation(References.MODID.toLowerCase(), "models/pylon_sphere.obj"));
     }

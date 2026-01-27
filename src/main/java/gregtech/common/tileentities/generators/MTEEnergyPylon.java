@@ -18,8 +18,6 @@ import java.util.Random;
 
 import com.brandon3055.draconicevolution.client.handler.ParticleHandler;
 import com.brandon3055.draconicevolution.client.render.particle.Particles;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.util.tooltip.TooltipHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -151,30 +149,20 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
     @Override
     public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
-        TileEnergyStorageCore core = getMaster();
-        long coreStoredEnergy;
-        long coreMaxStoredEnergy;
-        if (core == null || !core.isOnline()) {
-            coreStoredEnergy = 0;
-            coreMaxStoredEnergy = 0;
-        } else {
-            coreStoredEnergy = core.getEnergyStored();
-            coreMaxStoredEnergy = core.getMaxEnergyStored();
-        }
         addGregTechLogo(builder);
         addConditionalImages(builder);
         builder.widget(
-                new ProgressBar().setProgress(() -> (float) (getBaseMetaTileEntity().getStoredEU() + coreStoredEnergy) / (getBaseMetaTileEntity().getEUCapacity() + coreMaxStoredEnergy))
+                new ProgressBar().setProgress(() -> (float) (getBaseMetaTileEntity().getStoredEU() + mCoreEU) / (getBaseMetaTileEntity().getEUCapacity() + mMaxCoreEu))
                     .setDirection(ProgressBar.Direction.RIGHT)
                     .setTexture(GTUITextures.PROGRESSBAR_STORED_EU, 147)
                     .setPos(14, 74)
                     .setSize(147, 5))
             .widget(
-                new TextWidget().setStringSupplier(() -> formatNumbers(clientEU) + "/" + formatNumbers(getBaseMetaTileEntity().getEUCapacity() + coreMaxStoredEnergy) + " EU")
+                new TextWidget().setStringSupplier(() -> formatNumbers(clientEU) + "/" + formatNumbers(getBaseMetaTileEntity().getEUCapacity() + mMaxCoreEu) + " EU")
                     .setTextAlignment(Alignment.Center)
                     .setPos(14, 66)
                     .setSize(147, 5))
-            .widget(new FakeSyncWidget.LongSyncer(() -> (getBaseMetaTileEntity().getStoredEU() + coreStoredEnergy) , val -> clientEU = val));
+            .widget(new FakeSyncWidget.LongSyncer(() -> (getBaseMetaTileEntity().getStoredEU() + mCoreEU) , val -> clientEU = val));
     }
 
     public void addConditionalImages(ModularWindow.Builder builder) {
@@ -202,20 +190,16 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
         // Update Render
         if (aBaseMetaTileEntity.isClientSide()) {
-            if (foundCore) {
-                modelRotation += 1.5;
-                modelScale += !aBaseMetaTileEntity.isAllowedToWork() ? 0.01F : -0.01F;
-                if (modelScale < 0) {
-                    modelScale = !aBaseMetaTileEntity.isAllowedToWork() ? 0F : 10000F;
-                }
-            } else {
-                modelScale = 0.5F;
+            modelRotation += 1.5F;
+            modelScale += !aBaseMetaTileEntity.isAllowedToWork() ? 0.01F : -0.01F;
+            if (modelScale < 0) {
+                modelScale = !aBaseMetaTileEntity.isAllowedToWork() ? 0F : 10000F;
             }
         }
 
         if (aBaseMetaTileEntity.isServerSide()) {
             if (foundCore) {
-                // Spawn Link Particles
+                // Spawn Link Particles If core is found
                 spawnParticles();
                 if (particleRate > 0) particleRate--;
             }
@@ -244,7 +228,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         return modelRotation;
     }
 
-    @SideOnly(Side.CLIENT)
     private void spawnParticles() {
         Random rand = getWorld().rand;
 

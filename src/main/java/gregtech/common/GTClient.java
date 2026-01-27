@@ -15,8 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import gregtech.common.render.RenderTileEnergyPylon;
-import gregtech.common.tileentities.generators.MTEEnergyPylon;
+import gregtech.common.render.RenderEnergyPylon;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -325,7 +324,7 @@ public class GTClient extends GTProxy {
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityBlackhole.class, new BlackholeRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityNanoForgeRenderer.class, new NanoForgeRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(BaseMetaTileEntity.class, new BaseMetaTileEntityRenderer());
-        ClientRegistry.bindTileEntitySpecialRenderer(BaseMetaTileEntity.class, new RenderTileEnergyPylon());
+        ClientRegistry.bindTileEntitySpecialRenderer(BaseMetaTileEntity.class, new RenderEnergyPylon());
 
         MetaGeneratedItemRenderer metaItemRenderer = new MetaGeneratedItemRenderer();
         for (MetaGeneratedItem item : MetaGeneratedItem.sInstances.values()) {
