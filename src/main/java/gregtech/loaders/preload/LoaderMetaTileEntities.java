@@ -10616,7 +10616,7 @@ public class LoaderMetaTileEntities implements Runnable { // TODO CHECK CIRCUIT 
 
     private static void registerEnergyPylon() {
         ItemList.EnergyPylon.set(
-            new MTEEnergyPylon(ENERGY_PYLON.ID, "basicgenerator.energypylon", "Energy Pylon Interface", 8)
+            new MTEEnergyPylon(ENERGY_PYLON.ID, "basicgenerator.energycoreinterface", "Energy Core Interface", 8)
                 .getStackForm(1L));
         addItemTooltip(ItemList.EnergyPylon.get(1), chain(() -> "Author: ", GTValues.AuthorJude));
     }
