@@ -1,8 +1,8 @@
 package gregtech.common.tileentities.generators;
 
+import static com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil.formatNumber;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_IN;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_OUT;
-import static gregtech.api.util.GTUtility.formatNumbers;
 import static net.minecraft.util.EnumChatFormatting.AQUA;
 import static net.minecraft.util.EnumChatFormatting.BLUE;
 import static net.minecraft.util.EnumChatFormatting.DARK_GRAY;
@@ -158,7 +158,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
                     .setPos(14, 74)
                     .setSize(147, 5))
             .widget(
-                new TextWidget().setStringSupplier(() -> formatNumbers(clientEU) + "/" + formatNumbers(getBaseMetaTileEntity().getEUCapacity() + mMaxCoreEu) + " EU")
+                new TextWidget().setStringSupplier(() -> formatNumber(clientEU) + "/" + formatNumber(getBaseMetaTileEntity().getEUCapacity() + mMaxCoreEu) + " EU")
                     .setTextAlignment(Alignment.Center)
                     .setPos(14, 66)
                     .setSize(147, 5))
@@ -450,11 +450,11 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
                 ? GREEN + StatCollector.translateToLocal("GT5U.waila.generating.exportMode")
                 : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.importMode"));
         if (tag.hasKey("storedEu") && tag.hasKey("maxStoredEu")) currenttip.add(
-            GREEN + formatNumbers(tag.getLong("storedEu"))
+            GREEN + formatNumber(tag.getLong("storedEu"))
                 + EnumChatFormatting.GRAY
                 + " / "
                 + EnumChatFormatting.YELLOW
-                + formatNumbers(tag.getLong("maxStoredEu"))
+                + formatNumber(tag.getLong("maxStoredEu"))
                 + EnumChatFormatting.GRAY
                 + " EU");
         super.getWailaBody(itemStack, currenttip, accessor, config);
