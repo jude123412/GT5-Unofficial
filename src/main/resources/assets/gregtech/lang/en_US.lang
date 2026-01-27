@@ -1355,7 +1355,7 @@ GT5U.machines.antimatter_forge.disableRender=Disable Antimatter Forge Render
 GT5U.machines.coke_oven_hatch.mode.input=Hatch now inputs items
 GT5U.machines.coke_oven_hatch.mode.output=Hatch now outputs items
 GT5U.machines.coke_oven_hatch.mode.output_fluid=Hatch now outputs fluids
-GT5U.machines.energy_pylon.core_found=Found Energy Core!
+GT5U.machines.energy_pylon.core_found=Energy Core Found
 
 
 GT5U.recipe_filter.empty_representation_slot.tooltip=§7Click with a machine to set filter

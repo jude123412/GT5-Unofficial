@@ -1,12 +1,15 @@
 package gregtech.common.tileentities.generators;
 
-import static gregtech.api.enums.GTValues.V;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_IN;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_OUT;
 import static gregtech.api.util.GTUtility.formatNumbers;
+import static net.minecraft.util.EnumChatFormatting.AQUA;
+import static net.minecraft.util.EnumChatFormatting.BLUE;
 import static net.minecraft.util.EnumChatFormatting.DARK_GRAY;
 import static net.minecraft.util.EnumChatFormatting.DARK_GREEN;
+import static net.minecraft.util.EnumChatFormatting.DARK_RED;
 import static net.minecraft.util.EnumChatFormatting.GREEN;
+import static net.minecraft.util.EnumChatFormatting.LIGHT_PURPLE;
 import static net.minecraft.util.EnumChatFormatting.YELLOW;
 
 import java.util.ArrayList;
@@ -17,7 +20,6 @@ import com.brandon3055.draconicevolution.client.handler.ParticleHandler;
 import com.brandon3055.draconicevolution.client.render.particle.Particles;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import gregtech.api.util.GTUtility;
 import gregtech.api.util.tooltip.TooltipHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -36,14 +38,11 @@ import com.brandon3055.draconicevolution.common.tileentities.multiblocktiles.Til
 import com.gtnewhorizons.modularui.api.math.Alignment;
 import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
-import com.gtnewhorizons.modularui.common.internal.wrapper.BaseSlot;
 import com.gtnewhorizons.modularui.common.widget.DrawableWidget;
 import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
 import com.gtnewhorizons.modularui.common.widget.ProgressBar;
-import com.gtnewhorizons.modularui.common.widget.SlotGroup;
 import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
-import gregtech.api.enums.GTValues;
 import gregtech.api.enums.Textures;
 import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.interfaces.ITexture;
@@ -58,13 +57,14 @@ import mcp.mobius.waila.api.IWailaDataAccessor;
 
 public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtechLogo, IAddUIWidgets {
 
-    private List<MultiblockHelper.TileLocation> coreLocations = new ArrayList<>();
+    private final List<MultiblockHelper.TileLocation> coreLocations = new ArrayList<>();
     private int selectedCore = 0;
     private long mCoreEU = 0;
     private long mMaxCoreEu = 0;
     public float modelRotation = 0;
     public float modelScale = 0;
     private byte particleRate = 0;
+    private boolean foundCore = false;
 
     public MTEEnergyPylon(int aID, String aName, String aNameRegional, int aTier) {
         super(
@@ -76,9 +76,16 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
             new String[] {
                 "Inserts or Extracts energy from Draconic Evolution's Energy Core",
                 "Send -> <- Receive (Use a soft mallet to change mode)",
+                "Has and internal buffer based on this formular",
+                "(Tier Voltage * Tier Amperage) * 200",
                 "Capacity, Voltage & Amperage is based on the Energy Core's tier",
-                "Tier " + TooltipHelper.coloredText("0", YELLOW) + " : "  + TooltipHelper.coloredText("512", YELLOW) + " EU/t : " + TooltipHelper.coloredText("4", YELLOW) + " Amps",
-                "Tier " + TooltipHelper.coloredText("1", DARK_GRAY) + " : "  + TooltipHelper.coloredText("2048", DARK_GRAY) + " EU/t : " + TooltipHelper.coloredText("8", DARK_GRAY) + " Amps"
+                "Tier " + TooltipHelper.coloredText("1", YELLOW) + " : "  + TooltipHelper.coloredText("512", YELLOW) + " EU/t : " + TooltipHelper.coloredText("4", YELLOW) + " Amps",
+                "Tier " + TooltipHelper.coloredText("2", DARK_GRAY) + " : "  + TooltipHelper.coloredText("2,048", DARK_GRAY) + " EU/t : " + TooltipHelper.coloredText("8", DARK_GRAY) + " Amps",
+                "Tier " + TooltipHelper.coloredText("3", BLUE) + " : "  + TooltipHelper.coloredText("8,192", BLUE) + " EU/t : " + TooltipHelper.coloredText("16", BLUE) + " Amps",
+                "Tier " + TooltipHelper.coloredText("4", LIGHT_PURPLE) + " : "  + TooltipHelper.coloredText("32,768", LIGHT_PURPLE) + " EU/t : " + TooltipHelper.coloredText("32", LIGHT_PURPLE) + " Amps",
+                "Tier " + TooltipHelper.coloredText("5", AQUA) + " : "  + TooltipHelper.coloredText("131,072", AQUA) + " EU/t : " + TooltipHelper.coloredText("64", AQUA) + " Amps",
+                "Tier " + TooltipHelper.coloredText("6", DARK_GREEN) + " : "  + TooltipHelper.coloredText("524,288", DARK_GREEN) + " EU/t : " + TooltipHelper.coloredText("128", DARK_GREEN) + " Amps",
+                "Tier " + TooltipHelper.coloredText("7", DARK_RED) + " : "  + TooltipHelper.coloredText("2,097,152", DARK_RED) + " EU/t : " + TooltipHelper.coloredText("256", DARK_RED) + " Amps"
             });
     }
 
@@ -145,21 +152,29 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     @Override
     public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
         TileEnergyStorageCore core = getMaster();
-        if (core == null || !core.isOnline()) return;
+        long coreStoredEnergy;
+        long coreMaxStoredEnergy;
+        if (core == null || !core.isOnline()) {
+            coreStoredEnergy = 0;
+            coreMaxStoredEnergy = 0;
+        } else {
+            coreStoredEnergy = core.getEnergyStored();
+            coreMaxStoredEnergy = core.getMaxEnergyStored();
+        }
         addGregTechLogo(builder);
         addConditionalImages(builder);
         builder.widget(
-                new ProgressBar().setProgress(() -> (float) (getBaseMetaTileEntity().getStoredEU() + core.getEnergyStored()) / (getBaseMetaTileEntity().getEUCapacity() + core.getMaxEnergyStored()))
+                new ProgressBar().setProgress(() -> (float) (getBaseMetaTileEntity().getStoredEU() + coreStoredEnergy) / (getBaseMetaTileEntity().getEUCapacity() + coreMaxStoredEnergy))
                     .setDirection(ProgressBar.Direction.RIGHT)
                     .setTexture(GTUITextures.PROGRESSBAR_STORED_EU, 147)
                     .setPos(14, 74)
                     .setSize(147, 5))
             .widget(
-                new TextWidget().setStringSupplier(() -> formatNumbers(clientEU) + "/" + formatNumbers(getBaseMetaTileEntity().getEUCapacity() + core.getMaxEnergyStored()) + " EU")
+                new TextWidget().setStringSupplier(() -> formatNumbers(clientEU) + "/" + formatNumbers(getBaseMetaTileEntity().getEUCapacity() + coreMaxStoredEnergy) + " EU")
                     .setTextAlignment(Alignment.Center)
                     .setPos(14, 66)
                     .setSize(147, 5))
-            .widget(new FakeSyncWidget.LongSyncer(() -> (getBaseMetaTileEntity().getStoredEU() + core.getEnergyStored()) , val -> clientEU = val));
+            .widget(new FakeSyncWidget.LongSyncer(() -> (getBaseMetaTileEntity().getStoredEU() + coreStoredEnergy) , val -> clientEU = val));
     }
 
     public void addConditionalImages(ModularWindow.Builder builder) {
@@ -168,9 +183,9 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
                 new DrawableWidget()
                     .setDrawable(
                         () -> foundCore ? GTUITextures.OVERLAY_BUTTON_CHECKMARK : GTUITextures.OVERLAY_BUTTON_CROSS)
-                    .setPos(5, 26)
+                    .setPos(5, 6)
                     .setSize(16, 16))
-            .widget(new TextWidget(StatCollector.translateToLocal("GT5U.machines.energy_pylon.core_found")).setPos(21, 31))
+            .widget(new TextWidget(StatCollector.translateToLocal("GT5U.machines.energy_pylon.core_found")).setPos(21, 11))
             .widget(new FakeSyncWidget.BooleanSyncer(() -> foundCore, val -> foundCore = val));
     }
 
@@ -184,20 +199,23 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
     @Override
     public void onPostTick(IGregTechTileEntity aBaseMetaTileEntity, long aTick) {
-        if (aBaseMetaTileEntity.isServerSide()) {
 
-            // Spawn Link Particles
-            if (!coreLocations.isEmpty()) {
+        // Update Render
+        if (aBaseMetaTileEntity.isClientSide()) {
+            if (foundCore) {
                 modelRotation += 1.5;
                 modelScale += !aBaseMetaTileEntity.isAllowedToWork() ? 0.01F : -0.01F;
                 if (modelScale < 0) {
                     modelScale = !aBaseMetaTileEntity.isAllowedToWork() ? 0F : 10000F;
                 }
-                spawnParticles();
             } else {
                 modelScale = 0.5F;
             }
+        }
 
+        if (aBaseMetaTileEntity.isServerSide()) {
+            // Spawn Link Particles
+            spawnParticles();
 
             // Keep energy level synced to the core
             syncEnergy(aBaseMetaTileEntity);
@@ -206,9 +224,10 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
             if (aTick % 100 == 0) {
                 nextCore();
             }
-        }
-        if (!coreLocations.isEmpty() && !aBaseMetaTileEntity.isAllowedToWork()) {
-            if (particleRate > 0) particleRate--;
+
+            if (foundCore) {
+                if (particleRate > 0) particleRate--;
+            }
         }
         super.onPostTick(aBaseMetaTileEntity, aTick);
     }
@@ -217,6 +236,18 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     public void onFirstTick(IGregTechTileEntity aBaseMetaTileEntity) {
         nextCore();
         super.onFirstTick(aBaseMetaTileEntity);
+    }
+
+    public float getModelScale() {
+        return modelScale;
+    }
+
+    public float getModelRotation() {
+        return modelRotation;
+    }
+
+    public boolean getFoundCore() {
+        return foundCore;
     }
 
     @SideOnly(Side.CLIENT)
@@ -229,7 +260,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         int x = core.xCoord;
         int y = core.yCoord;
         int z = core.zCoord;
-        int cYCoord = getWorld().getBlockMetadata(getXCoord(), getYCoord(), getZCoord()) == 1 ? getYCoord() + 1 : getYCoord() - 1;
+        int cYCoord = getWorld().getBlockMetadata(getXCoord(), getYCoord(), getZCoord()) == 1 ? getYCoord() - 1 : getYCoord() + 1;
 
         float disMod = switch (core.getTier()) {
             case 0 -> 0.5F;
@@ -300,8 +331,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         }
     }
 
-    private boolean foundCore = false;
-
     public TileEnergyStorageCore getMaster() {
         if (coreLocations.isEmpty()) return null;
         if (selectedCore >= coreLocations.size()) selectedCore = coreLocations.size() - 1;
@@ -342,9 +371,9 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         findCores();
         selectedCore++;
         if (selectedCore >= coreLocations.size()) selectedCore = 0;
+        TileEnergyStorageCore core = getMaster();
+        foundCore = !coreLocations.isEmpty() && core != null && core.isOnline();
         getWorld().markBlockForUpdate(getXCoord(), getYCoord(), getZCoord());
-
-        if (!coreLocations.isEmpty()) foundCore = true;
     }
 
     private int getXCoord() {
@@ -379,7 +408,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
                 if (spaceLeft > 0 && mCoreEU > 0) {
                     extractEnergy(spaceLeft, core);
                 }
-
             } else {
                 // Push to core if we are over some threshold
                 if (stored > 0 && mCoreEU < mMaxCoreEu) {
@@ -410,7 +438,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         if (stored <= 0 || requested <= 0) return;
 
         long coreSpace = mMaxCoreEu - mCoreEU;
-        if (coreSpace <= 0) return;
+        if (coreSpace == 0) return;
 
         long amount = Math.min(requested, Math.min(stored, coreSpace));
 
@@ -568,14 +596,13 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
     public enum DECoreTierSpecs {
 
-        TIER_0(512, 4),
-        TIER_1(2048, 8),
-        TIER_2(8192, 16),
-        TIER_3(32768, 32),
-        TIER_4(131072, 64),
-        TIER_5(524288, 128),
-        TIER_6(2097152, 256),
-        TIER_7(8388608, 512);
+        TIER_1(512, 4),
+        TIER_2(2048, 8),
+        TIER_3(8192, 16),
+        TIER_4(32768, 32),
+        TIER_5(131072, 64),
+        TIER_6(524288, 128),
+        TIER_7(2097152, 256);
 
         public final long voltage;
         public final long amperage;
@@ -586,7 +613,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         }
 
         public static DECoreTierSpecs fromTier(int tier) {
-            if (tier < 0 || tier >= values().length) return TIER_0;
+            if (tier < 0 || tier >= values().length) return TIER_1;
             return values()[tier];
         }
 
