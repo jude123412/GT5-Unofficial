@@ -2118,6 +2118,8 @@ gt.interact.desc.Energy_Detector.average_out=§8Avg. Output
 gt.interact.desc.Energy_Detector.average_out.tooltip=§fAverage Electric Output
 gt.interact.desc.Energy_Detector.eu_stored=§8EU stored
 gt.interact.desc.Energy_Detector.eu_stored.tooltip=§fElectricity Storage(Including Batteries)
+gt.interact.desc.Energy_Detector.de_energy_core_stored=§8DE Energy Core
+gt.interact.desc.Energy_Detector.de_energy_core_stored.tooltip=§fDE Energy Core Storage
 
 # NEI Display
 GT5U.nei.display.steam_variant.bronze=Bronze

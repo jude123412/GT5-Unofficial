@@ -4,6 +4,7 @@ import static net.minecraft.util.StatCollector.translateToLocal;
 
 import java.util.function.Function;
 
+import gregtech.common.tileentities.generators.MTEEnergyPylon;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -271,7 +272,25 @@ public class CoverEUMeter extends Cover implements Invertable {
                     }
                 }
                 return te.getEUCapacity();
-            });
+            }),
+        DE_ENERGY_CORE_STORAGE(translateToLocal("gt.interact.desc.Energy_Detector.de_energy_core_stored"),
+            translateToLocal("gt.interact.desc.Energy_Detector.de_energy_core_stored.tooltip"), (te) -> {
+            if (te instanceof IGregTechTileEntity) {
+                IMetaTileEntity mte = ((IGregTechTileEntity) te).getMetaTileEntity();
+                if (mte instanceof MTEEnergyPylon buffer) {
+                    return buffer.getmCoreEU();
+                }
+            }
+            return te.getStoredEU();
+        }, (te) -> {
+            if (te instanceof IGregTechTileEntity) {
+                IMetaTileEntity mte = ((IGregTechTileEntity) te).getMetaTileEntity();
+                if (mte instanceof MTEEnergyPylon buffer) {
+                    return buffer.getmMaxCoreEu();
+                }
+            }
+            return te.getEUCapacity();
+        });
 
         private final String title;
         private final String tooltip;

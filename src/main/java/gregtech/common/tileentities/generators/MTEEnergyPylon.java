@@ -371,6 +371,14 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         }
     }
 
+    public long getmCoreEU() {
+        return mCoreEU;
+    }
+
+    public long getmMaxCoreEu() {
+        return mMaxCoreEu;
+    }
+
     @Override
     public void getWailaNBTData(EntityPlayerMP player, TileEntity tile, NBTTagCompound tag, World world, int x, int y,
         int z) {
