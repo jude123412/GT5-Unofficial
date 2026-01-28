@@ -5,6 +5,7 @@
 
 package gregtech.common;
 
+import static gregtech.api.enums.Mods.DraconicEvolution;
 import static gregtech.api.enums.Mods.Forestry;
 import static gregtech.api.enums.Mods.GregTech;
 
@@ -324,7 +325,9 @@ public class GTClient extends GTProxy {
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityBlackhole.class, new BlackholeRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityNanoForgeRenderer.class, new NanoForgeRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(BaseMetaTileEntity.class, new BaseMetaTileEntityRenderer());
-        ClientRegistry.bindTileEntitySpecialRenderer(BaseMetaTileEntity.class, new RenderEnergyPylon());
+        if (DraconicEvolution.isModLoaded()) {
+            ClientRegistry.bindTileEntitySpecialRenderer(BaseMetaTileEntity.class, new RenderEnergyPylon());
+        }
 
         MetaGeneratedItemRenderer metaItemRenderer = new MetaGeneratedItemRenderer();
         for (MetaGeneratedItem item : MetaGeneratedItem.sInstances.values()) {
