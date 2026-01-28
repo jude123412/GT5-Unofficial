@@ -135,9 +135,9 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     public void onPostTick(IGregTechTileEntity aBaseMetaTileEntity, long aTick) {
         if (aBaseMetaTileEntity.isClientSide()) {
             modelRotation += 1.5F;
-            modelScale += !aBaseMetaTileEntity.isAllowedToWork() ? 0.01F : -0.01F;
+            modelScale += aBaseMetaTileEntity.isAllowedToWork() ? 0.01F : -0.01F;
             if (modelScale < 0) {
-                modelScale = !aBaseMetaTileEntity.isAllowedToWork() ? 0F : 10000F;
+                modelScale = aBaseMetaTileEntity.isAllowedToWork() ? 0F : 10000F;
             }
         }
 
