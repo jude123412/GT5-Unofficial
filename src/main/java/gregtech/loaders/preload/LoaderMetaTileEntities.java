@@ -3,6 +3,7 @@ package gregtech.loaders.preload;
 import static com.gtnewhorizon.gtnhlib.util.AnimatedTooltipHandler.addItemTooltip;
 import static com.gtnewhorizon.gtnhlib.util.AnimatedTooltipHandler.chain;
 import static gregtech.api.enums.MetaTileEntityIDs.*;
+import static gregtech.api.enums.Mods.DraconicEvolution;
 import static gregtech.api.enums.Mods.Forestry;
 import static gregtech.api.enums.Mods.Thaumcraft;
 import static gregtech.api.recipe.RecipeMaps.alloySmelterRecipes;
@@ -10615,10 +10616,12 @@ public class LoaderMetaTileEntities implements Runnable { // TODO CHECK CIRCUIT 
     }
 
     private static void registerEnergyPylon() {
-        ItemList.EnergyPylon.set(
-            new MTEEnergyPylon(ENERGY_PYLON.ID, "basicgenerator.energycoreinterface", "Energy Core Interface", 8)
-                .getStackForm(1L));
-        addItemTooltip(ItemList.EnergyPylon.get(1), chain(() -> "Author: ", GTValues.AuthorJude));
+        if (DraconicEvolution.isModLoaded()) {
+            ItemList.EnergyPylon.set(
+                new MTEEnergyPylon(ENERGY_PYLON.ID, "basicgenerator.energycoreinterface", "Energy Core Interface", 8)
+                    .getStackForm(1L));
+            addItemTooltip(ItemList.EnergyPylon.get(1), chain(() -> "Author: ", GTValues.AuthorJude));
+        }
     }
 
     private static void registerNameRemover() {
