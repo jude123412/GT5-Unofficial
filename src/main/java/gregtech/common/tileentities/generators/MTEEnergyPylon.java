@@ -18,7 +18,7 @@ import java.util.Random;
 
 import com.brandon3055.draconicevolution.client.handler.ParticleHandler;
 import com.brandon3055.draconicevolution.client.render.particle.Particles;
-import gregtech.api.interfaces.tileentity.IBasicEnergyContainer;
+import gregtech.api.util.GTUtility;
 import gregtech.api.util.tooltip.TooltipHelper;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -49,6 +49,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
     private final List<MultiblockHelper.TileLocation> coreLocations = new ArrayList<>();
     private int selectedCore = 0;
+    private int mCoreTier = 0;
     private long mCoreEU = 0;
     private long mMaxCoreEu = 0;
     public float modelRotation = 0;
@@ -291,6 +292,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     private void setFoundCore() {
         TileEnergyStorageCore core = getMaster();
         foundCore = !coreLocations.isEmpty() && core != null && core.isOnline();
+        mCoreTier = !coreLocations.isEmpty() && core != null && core.isOnline() ? core.getTier() : 0;
     }
 
     private int getXCoord() {
@@ -378,6 +380,8 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         tag.setLong("maxCoreEu", mMaxCoreEu);
         tag.setLong("storedEu", getBaseMetaTileEntity().getStoredEU());
         tag.setLong("maxStoredEu", getBaseMetaTileEntity().getEUCapacity());
+        tag.setLong("AvgIn", getBaseMetaTileEntity().getAverageElectricInput());
+        tag.setLong("AvgOut", getBaseMetaTileEntity().getAverageElectricOutput());
         super.getWailaNBTData(player, tile, tag, world, x, y, z);
     }
 
@@ -409,6 +413,18 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
                 + formatNumber(tag.getLong("maxStoredEu"))
                 + EnumChatFormatting.GRAY
                 + " EU");
+        if (tag.hasKey("AvgIn")) currenttip.add(
+            StatCollector.translateToLocalFormatted(
+                "GT5U.waila.energy.avg_in_with_amperage",
+                formatNumber(tag.getLong("AvgIn")),
+                GTUtility.getAmperageForTier(tag.getLong("AvgIn"), (byte) DECoreTierSpecs.fromTier(mCoreTier).voltageTier),
+                GTUtility.getColoredTierNameFromTier((byte) DECoreTierSpecs.fromTier(mCoreTier).voltageTier)));
+        if (tag.hasKey("AvgOut")) currenttip.add(
+            StatCollector.translateToLocalFormatted(
+                "GT5U.waila.energy.avg_out_with_amperage",
+                formatNumber(tag.getLong("AvgOut")),
+                GTUtility.getAmperageForTier(tag.getLong("AvgOut"), (byte) DECoreTierSpecs.fromTier(mCoreTier).voltageTier),
+                GTUtility.getColoredTierNameFromTier((byte) DECoreTierSpecs.fromTier(mCoreTier).voltageTier)));
         super.getWailaBody(itemStack, currenttip, accessor, config);
     }
 
@@ -524,18 +540,20 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
     public enum DECoreTierSpecs {
 
-        TIER_1(512, 4),
-        TIER_2(2048, 8),
-        TIER_3(8192, 16),
-        TIER_4(32768, 32),
-        TIER_5(131072, 64),
-        TIER_6(524288, 128),
-        TIER_7(2097152, 256);
+        TIER_1(6, 512, 4),
+        TIER_2(7, 2048, 8),
+        TIER_3(8, 8192, 16),
+        TIER_4(9, 32768, 32),
+        TIER_5(10, 131072, 64),
+        TIER_6(11, 524288, 128),
+        TIER_7(12, 2097152, 256);
 
+        public final long voltageTier;
         public final long voltage;
         public final long amperage;
 
-        DECoreTierSpecs(long voltage, long amperage) {
+        DECoreTierSpecs(long voltageTier, long voltage, long amperage) {
+            this.voltageTier = voltageTier;
             this.voltage = voltage;
             this.amperage = amperage;
         }
@@ -544,6 +562,5 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
             if (tier < 0 || tier >= values().length) return TIER_1;
             return values()[tier];
         }
-
     }
 }
