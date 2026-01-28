@@ -139,55 +139,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     }
 
     @Override
-    public boolean onRightclick(IGregTechTileEntity aBaseMetaTileEntity, EntityPlayer aPlayer, ForgeDirection side,
-        float aX, float aY, float aZ) {
-        openGui(aPlayer);
-        return true;
-    }
-
-    protected long clientEU;
-
-    @Override
-    public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
-        addGregTechLogo(builder);
-        addConditionalImages(builder);
-        builder.widget(
-                new ProgressBar().setProgress(() -> (float) (getBaseMetaTileEntity().getStoredEU() + mCoreEU) / (getBaseMetaTileEntity().getEUCapacity() + mMaxCoreEu))
-                    .setDirection(ProgressBar.Direction.RIGHT)
-                    .setTexture(GTUITextures.PROGRESSBAR_STORED_EU, 147)
-                    .setPos(14, 74)
-                    .setSize(147, 5))
-            .widget(
-                new TextWidget().setStringSupplier(() -> formatNumber(clientEU) + "/" + formatNumber(getBaseMetaTileEntity().getEUCapacity() + mMaxCoreEu) + " EU")
-                    .setTextAlignment(Alignment.Center)
-                    .setPos(14, 66)
-                    .setSize(147, 5))
-            .widget(new FakeSyncWidget.LongSyncer(() -> (getBaseMetaTileEntity().getStoredEU() + mCoreEU) , val -> clientEU = val));
-    }
-
-    public void addConditionalImages(ModularWindow.Builder builder) {
-        builder
-            .widget(
-                new DrawableWidget()
-                    .setDrawable(
-                        () -> foundCore ? GTUITextures.OVERLAY_BUTTON_CHECKMARK : GTUITextures.OVERLAY_BUTTON_CROSS)
-                    .setPos(5, 6)
-                    .setSize(16, 16))
-            .widget(new TextWidget(StatCollector.translateToLocal("GT5U.machines.energy_pylon.core_found")).setPos(21, 11))
-            .widget(new FakeSyncWidget.BooleanSyncer(() -> foundCore, val -> foundCore = val));
-    }
-
-    @Override
-    public void addGregTechLogo(ModularWindow.Builder builder) {
-        builder.widget(
-            new DrawableWidget().setDrawable(GTUITextures.PICTURE_GT_LOGO_17x17_TRANSPARENT)
-                .setSize(17, 17)
-                .setPos(154, 5));
-    }
-
-    @Override
     public void onPostTick(IGregTechTileEntity aBaseMetaTileEntity, long aTick) {
-
         // Update Render
         if (aBaseMetaTileEntity.isClientSide()) {
             modelRotation += 1.5F;
@@ -371,7 +323,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
     private void syncEnergy(IGregTechTileEntity aBaseMetaTileEntity) {
         TileEnergyStorageCore core = getMaster();
-        if (core != null) {
+        if (foundCore) {
             mCoreEU = core.getEnergyStored();
             mMaxCoreEu = core.getMaxEnergyStored();
             aBaseMetaTileEntity.setActive(aBaseMetaTileEntity.isAllowedToWork());
@@ -429,11 +381,12 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     @Override
     public void getWailaNBTData(EntityPlayerMP player, TileEntity tile, NBTTagCompound tag, World world, int x, int y,
         int z) {
-        IGregTechTileEntity aBase = getBaseMetaTileEntity();
         tag.setBoolean("foundCore", foundCore);
         tag.setBoolean("mode", getBaseMetaTileEntity().isAllowedToWork());
-        tag.setLong("storedEu", (getBaseMetaTileEntity().getStoredEU() + mCoreEU));
-        tag.setLong("maxStoredEu", (getBaseMetaTileEntity().getEUCapacity() + mMaxCoreEu));
+        tag.setLong("coreEu", mCoreEU);
+        tag.setLong("maxCoreEu", mMaxCoreEu);
+        tag.setLong("storedEu", getBaseMetaTileEntity().getStoredEU());
+        tag.setLong("maxStoredEu", getBaseMetaTileEntity().getEUCapacity());
         super.getWailaNBTData(player, tile, tag, world, x, y, z);
     }
 
@@ -449,6 +402,14 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
             tag.getBoolean("mode")
                 ? GREEN + StatCollector.translateToLocal("GT5U.waila.generating.exportMode")
                 : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.importMode"));
+        if (tag.hasKey("coreEu") && tag.hasKey("maxCoreEu")) currenttip.add(
+            GREEN + formatNumber(tag.getLong("coreEu"))
+                + EnumChatFormatting.GRAY
+                + " / "
+                + EnumChatFormatting.YELLOW
+                + formatNumber(tag.getLong("maxCoreEu"))
+                + EnumChatFormatting.GRAY
+                + " EU");
         if (tag.hasKey("storedEu") && tag.hasKey("maxStoredEu")) currenttip.add(
             GREEN + formatNumber(tag.getLong("storedEu"))
                 + EnumChatFormatting.GRAY
@@ -485,7 +446,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         TileEnergyStorageCore core = getMaster();
         if (core == null || !core.isOnline()) return 0;
         long voltage = DECoreTierSpecs.fromTier(core.getTier()).voltage;
-
         return getBaseMetaTileEntity().isAllowedToWork() ? voltage : 0;
     }
 
