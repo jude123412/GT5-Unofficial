@@ -18,8 +18,8 @@ import java.util.Random;
 
 import com.brandon3055.draconicevolution.client.handler.ParticleHandler;
 import com.brandon3055.draconicevolution.client.render.particle.Particles;
+import gregtech.api.interfaces.tileentity.IBasicEnergyContainer;
 import gregtech.api.util.tooltip.TooltipHelper;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -33,16 +33,8 @@ import com.brandon3055.draconicevolution.common.ModBlocks;
 import com.brandon3055.draconicevolution.common.blocks.multiblock.MultiblockHelper;
 import com.brandon3055.draconicevolution.common.blocks.multiblock.MultiblockHelper.TileLocation;
 import com.brandon3055.draconicevolution.common.tileentities.multiblocktiles.TileEnergyStorageCore;
-import com.gtnewhorizons.modularui.api.math.Alignment;
-import com.gtnewhorizons.modularui.api.screen.ModularWindow;
-import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
-import com.gtnewhorizons.modularui.common.widget.DrawableWidget;
-import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
-import com.gtnewhorizons.modularui.common.widget.ProgressBar;
-import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
 import gregtech.api.enums.Textures;
-import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.modularui.IAddGregtechLogo;
@@ -140,7 +132,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
     @Override
     public void onPostTick(IGregTechTileEntity aBaseMetaTileEntity, long aTick) {
-        // Update Render
         if (aBaseMetaTileEntity.isClientSide()) {
             modelRotation += 1.5F;
             modelScale += !aBaseMetaTileEntity.isAllowedToWork() ? 0.01F : -0.01F;
@@ -150,19 +141,13 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         }
 
         if (aBaseMetaTileEntity.isServerSide()) {
-            if (foundCore) {
-                // Spawn Link Particles If core is found
-                spawnParticles();
-                if (particleRate > 0) particleRate--;
-            }
-            // Keep energy level synced to the core
+            if (foundCore) spawnParticles();
+            if (foundCore && particleRate > 0) particleRate--;
+            if (aTick % 100 == 0) nextCore();
             syncEnergy(aBaseMetaTileEntity);
-
-            // Check every 5 seconds to find Another core
-            if (aTick % 100 == 0) {
-                nextCore();
-            }
+            setFoundCore();
         }
+
         super.onPostTick(aBaseMetaTileEntity, aTick);
     }
 
@@ -260,7 +245,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         }
     }
 
-    public TileEnergyStorageCore getMaster() {
+    private TileEnergyStorageCore getMaster() {
         if (coreLocations.isEmpty()) return null;
         if (selectedCore >= coreLocations.size()) selectedCore = coreLocations.size() - 1;
         MultiblockHelper.TileLocation location = coreLocations.get(selectedCore);
@@ -296,13 +281,16 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         }
     }
 
-    public void nextCore() {
+    private void nextCore() {
         findCores();
         selectedCore++;
         if (selectedCore >= coreLocations.size()) selectedCore = 0;
+        getWorld().markBlockForUpdate(getXCoord(), getYCoord(), getZCoord());
+    }
+
+    private void setFoundCore() {
         TileEnergyStorageCore core = getMaster();
         foundCore = !coreLocations.isEmpty() && core != null && core.isOnline();
-        getWorld().markBlockForUpdate(getXCoord(), getYCoord(), getZCoord());
     }
 
     private int getXCoord() {
@@ -343,6 +331,9 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
                     receiveEnergy(stored, core);
                 }
             }
+        } else {
+            mCoreEU = 0;
+            mMaxCoreEu = 0;
         }
     }
 
