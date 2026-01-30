@@ -1,8 +1,11 @@
 package gregtech.common.tileentities.generators;
 
 import static com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil.formatNumber;
+import static gregtech.api.enums.GTValues.V;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_IN;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_OUT;
+import static gregtech.api.enums.TierEU.LV;
+import static gregtech.api.enums.VoltageIndex.HV;
 import static net.minecraft.util.EnumChatFormatting.AQUA;
 import static net.minecraft.util.EnumChatFormatting.BLUE;
 import static net.minecraft.util.EnumChatFormatting.DARK_GRAY;
@@ -18,8 +21,17 @@ import java.util.Random;
 
 import com.brandon3055.draconicevolution.client.handler.ParticleHandler;
 import com.brandon3055.draconicevolution.client.render.particle.Particles;
+import com.brandon3055.draconicevolution.common.ModItems;
+import com.gtnewhorizons.modularui.api.screen.ModularWindow;
+import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
+import com.gtnewhorizons.modularui.common.internal.wrapper.BaseSlot;
+import com.gtnewhorizons.modularui.common.widget.SlotGroup;
+import gregtech.api.enums.ItemList;
+import gregtech.api.enums.VoltageIndex;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.tooltip.TooltipHelper;
+import gregtech.common.items.MetaGeneratedItem01;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -49,7 +61,8 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
     private final List<MultiblockHelper.TileLocation> coreLocations = new ArrayList<>();
     private int selectedCore = 0;
-    private int mCoreTier = 0;
+    private long mCoreMaxAmperage = 0;
+    private int mCoreVoltageTier = 0;
     private long mCoreEU = 0;
     private long mMaxCoreEu = 0;
     public float modelRotation = 0;
@@ -63,14 +76,14 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
             aName,
             aNameRegional,
             aTier,
-            0,
+            2,
             new String[] {
                 "Inserts or Extracts energy from Draconic Evolution's Energy Core",
                 "Send -> <- Receive (Use a soft mallet to change mode)",
                 "Has and internal buffer based on this formular",
                 "(Tier Voltage * Tier Amperage) * 200",
                 "Capacity, Voltage & Amperage is based on the Energy Core's tier",
-                "Tier " + TooltipHelper.coloredText("1", YELLOW) + " : "  + TooltipHelper.coloredText("512", YELLOW) + " EU/t : " + TooltipHelper.coloredText("4", YELLOW) + " Amps",
+                "Tier " + GTUtility.getColoredTierNameFromTier((byte) HV) + " : "  + TooltipHelper.coloredText("512", YELLOW) + " EU/t : " + TooltipHelper.coloredText("4", YELLOW) + " Amps",
                 "Tier " + TooltipHelper.coloredText("2", DARK_GRAY) + " : "  + TooltipHelper.coloredText("2,048", DARK_GRAY) + " EU/t : " + TooltipHelper.coloredText("8", DARK_GRAY) + " Amps",
                 "Tier " + TooltipHelper.coloredText("3", BLUE) + " : "  + TooltipHelper.coloredText("8,192", BLUE) + " EU/t : " + TooltipHelper.coloredText("16", BLUE) + " Amps",
                 "Tier " + TooltipHelper.coloredText("4", LIGHT_PURPLE) + " : "  + TooltipHelper.coloredText("32,768", LIGHT_PURPLE) + " EU/t : " + TooltipHelper.coloredText("32", LIGHT_PURPLE) + " Amps",
@@ -80,8 +93,8 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
             });
     }
 
-    public MTEEnergyPylon(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {
-        super(aName, aTier, 0, aDescription, aTextures);
+    public MTEEnergyPylon(String aName, int aTier, int aSlotCount, String[] aDescription, ITexture[][][] aTextures) {
+        super(aName, aTier, aSlotCount, aDescription, aTextures);
     }
 
     @Override
@@ -117,6 +130,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         return new MTEEnergyPylon(
             this.mName,
             this.mTier,
+            this.mInventory.length,
             this.mDescriptionArray,
             this.mTextures);
     }
@@ -129,6 +143,29 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     @Override
     public void loadNBTData(NBTTagCompound aNBT) {
 
+    }
+
+    @Override
+    public boolean onRightclick(IGregTechTileEntity aBaseMetaTileEntity, EntityPlayer aPlayer) {
+        openGui(aPlayer);
+        return true;
+    }
+
+    @Override
+    public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
+        builder.widget(
+            SlotGroup.ofItemHandler(inventoryHandler, 1)
+                .startFromSlot(0)
+                .endAtSlot(1)
+                .slotCreator(index -> new BaseSlot(inventoryHandler, index) {
+                    @Override
+                    public int getSlotStackLimit() {
+                        return index == 1 ? 1 : 64;
+                    }
+                })
+                .background(getGUITextureSet().getItemSlot())
+                .build()
+                .setPos(79, 25));
     }
 
     @Override
@@ -147,6 +184,8 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
             if (aTick % 100 == 0) nextCore();
             syncEnergy(aBaseMetaTileEntity);
             setFoundCore();
+            setCoreMaxAmperage();
+            setCoreMaxVoltage();
         }
 
         super.onPostTick(aBaseMetaTileEntity, aTick);
@@ -292,7 +331,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     private void setFoundCore() {
         TileEnergyStorageCore core = getMaster();
         foundCore = !coreLocations.isEmpty() && core != null && core.isOnline();
-        mCoreTier = !coreLocations.isEmpty() && core != null && core.isOnline() ? core.getTier() : 0;
     }
 
     private int getXCoord() {
@@ -379,11 +417,44 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         return mMaxCoreEu;
     }
 
+    private void setCoreMaxVoltage() {
+        if (mInventory[0] != null) {
+            if (mInventory[0].getItem() == ModItems.draconicCore) mCoreMaxAmperage = mInventory[0].stackSize;
+            else if (mInventory[0].getItem() == ModItems.wyvernCore) mCoreMaxAmperage = mInventory[0].stackSize * 4L;
+            else if (mInventory[0].getItem() == ModItems.awakenedCore) mCoreMaxAmperage = mInventory[0].stackSize * 256L;
+            else if (mInventory[0].getItem() == ModItems.chaoticCore) mCoreMaxAmperage = mInventory[0].stackSize * 16384L;
+        } else {
+            mCoreMaxAmperage = 0;
+        }
+    }
+
+    private void setCoreMaxAmperage() {
+        if (mInventory[1] != null) {
+            if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32670")) mCoreVoltageTier = VoltageIndex.LV;
+            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32671")) mCoreVoltageTier = VoltageIndex.MV;
+            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32672")) mCoreVoltageTier = HV;
+            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32673")) mCoreVoltageTier = VoltageIndex.EV;
+            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32674")) mCoreVoltageTier = VoltageIndex.IV;
+            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32675")) mCoreVoltageTier = VoltageIndex.LuV;
+            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32676")) mCoreVoltageTier = VoltageIndex.ZPM;
+            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32677")) mCoreVoltageTier = VoltageIndex.UV;
+            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32678")) mCoreVoltageTier = VoltageIndex.UHV;
+            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32679")) mCoreVoltageTier = VoltageIndex.UEV;
+            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32045")) mCoreVoltageTier = VoltageIndex.UIV;
+            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32046")) mCoreVoltageTier = VoltageIndex.UMV;
+            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32047")) mCoreVoltageTier = VoltageIndex.UXV;
+            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32048")) mCoreVoltageTier = VoltageIndex.MAX;
+        } else {
+            mCoreVoltageTier = 0;
+        }
+    }
+
     @Override
     public void getWailaNBTData(EntityPlayerMP player, TileEntity tile, NBTTagCompound tag, World world, int x, int y,
         int z) {
         tag.setBoolean("foundCore", foundCore);
         tag.setBoolean("mode", getBaseMetaTileEntity().isAllowedToWork());
+        tag.setByte("CoreVoltageTier", (byte) mCoreVoltageTier);
         tag.setLong("coreEu", mCoreEU);
         tag.setLong("maxCoreEu", mMaxCoreEu);
         tag.setLong("storedEu", getBaseMetaTileEntity().getStoredEU());
@@ -421,18 +492,18 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
                 + formatNumber(tag.getLong("maxStoredEu"))
                 + EnumChatFormatting.GRAY
                 + " EU");
-        if (tag.hasKey("AvgIn")) currenttip.add(
+        if (tag.hasKey("AvgIn") && tag.hasKey("CoreVoltageTier")) currenttip.add(
             StatCollector.translateToLocalFormatted(
                 "GT5U.waila.energy.avg_in_with_amperage",
                 formatNumber(tag.getLong("AvgIn")),
-                GTUtility.getAmperageForTier(tag.getLong("AvgIn"), (byte) DECoreTierSpecs.fromTier(mCoreTier).voltageTier),
-                GTUtility.getColoredTierNameFromTier((byte) DECoreTierSpecs.fromTier(mCoreTier).voltageTier)));
-        if (tag.hasKey("AvgOut")) currenttip.add(
+                GTUtility.getAmperageForTier(tag.getLong("AvgIn"), tag.getByte("CoreVoltageTier")),
+                GTUtility.getColoredTierNameFromTier(tag.getByte("CoreVoltageTier"))));
+        if (tag.hasKey("AvgOut") && tag.hasKey("CoreVoltageTier")) currenttip.add(
             StatCollector.translateToLocalFormatted(
                 "GT5U.waila.energy.avg_out_with_amperage",
                 formatNumber(tag.getLong("AvgOut")),
-                GTUtility.getAmperageForTier(tag.getLong("AvgOut"), (byte) DECoreTierSpecs.fromTier(mCoreTier).voltageTier),
-                GTUtility.getColoredTierNameFromTier((byte) DECoreTierSpecs.fromTier(mCoreTier).voltageTier)));
+                GTUtility.getAmperageForTier(tag.getLong("AvgOut"), tag.getByte("CoreVoltageTier")),
+                GTUtility.getColoredTierNameFromTier(tag.getByte("CoreVoltageTier"))));
         super.getWailaBody(itemStack, currenttip, accessor, config);
     }
 
@@ -440,8 +511,8 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     public long maxEUStore() {
         TileEnergyStorageCore core = getMaster();
         if (core == null || !core.isOnline()) return 0;
-        long voltage = DECoreTierSpecs.fromTier(core.getTier()).voltage;
-        long amperage = DECoreTierSpecs.fromTier(core.getTier()).amperage;
+        long voltage = mCoreVoltageTier > 0 ? V[mCoreVoltageTier] : 0;
+        long amperage = mCoreMaxAmperage;
         long maxPower = voltage * amperage;
         return maxPower * 200;
     }
@@ -458,37 +529,36 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
 
     @Override
     public long maxEUOutput() {
-        TileEnergyStorageCore core = getMaster();
-        if (core == null || !core.isOnline()) return 0;
-        long voltage = DECoreTierSpecs.fromTier(core.getTier()).voltage;
-        return getBaseMetaTileEntity().isAllowedToWork() ? voltage : 0;
+        if (mCoreVoltageTier > 0 && getBaseMetaTileEntity().isAllowedToWork()) {
+            return V[mCoreVoltageTier];
+        } else return 0;
     }
 
     @Override
     public long maxEUInput() {
-        TileEnergyStorageCore core = getMaster();
-        if (core == null || !core.isOnline()) return 0;
-        long voltage = DECoreTierSpecs.fromTier(core.getTier()).voltage;
-
-        return getBaseMetaTileEntity().isAllowedToWork() ? 0 : voltage;
+        if (mCoreVoltageTier > 0 && !getBaseMetaTileEntity().isAllowedToWork()) {
+            return V[mCoreVoltageTier];
+        } else return 0;
     }
 
     @Override
     public long maxAmperesOut() {
-        TileEnergyStorageCore core = getMaster();
-        if (core == null || !core.isOnline()) return 0;
-        long amperage = DECoreTierSpecs.fromTier(core.getTier()).amperage;
-
-        return getBaseMetaTileEntity().isAllowedToWork() ? amperage : 0;
+        return getBaseMetaTileEntity().isAllowedToWork() ? mCoreMaxAmperage : 0;
     }
 
     @Override
     public long maxAmperesIn() {
-        TileEnergyStorageCore core = getMaster();
-        if (core == null || !core.isOnline()) return 0;
-        long amperage = DECoreTierSpecs.fromTier(core.getTier()).amperage;
+        return getBaseMetaTileEntity().isAllowedToWork() ? 0 : mCoreMaxAmperage;
+    }
 
-        return getBaseMetaTileEntity().isAllowedToWork() ? 0 : amperage;
+    @Override
+    public long getInputTier() {
+        return mCoreVoltageTier;
+    }
+
+    @Override
+    public long getOutputTier() {
+        return mCoreVoltageTier;
     }
 
     @Override
@@ -544,31 +614,5 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     @Override
     public boolean shouldJoinIc2Enet() {
         return true;
-    }
-
-    public enum DECoreTierSpecs {
-
-        TIER_1(6, 512, 4),
-        TIER_2(7, 2048, 8),
-        TIER_3(8, 8192, 16),
-        TIER_4(9, 32768, 32),
-        TIER_5(10, 131072, 64),
-        TIER_6(11, 524288, 128),
-        TIER_7(12, 2097152, 256);
-
-        public final long voltageTier;
-        public final long voltage;
-        public final long amperage;
-
-        DECoreTierSpecs(long voltageTier, long voltage, long amperage) {
-            this.voltageTier = voltageTier;
-            this.voltage = voltage;
-            this.amperage = amperage;
-        }
-
-        public static DECoreTierSpecs fromTier(int tier) {
-            if (tier < 0 || tier >= values().length) return TIER_1;
-            return values()[tier];
-        }
     }
 }
