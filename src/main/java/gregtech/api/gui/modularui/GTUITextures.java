@@ -147,6 +147,8 @@ public class GTUITextures {
         .mapToObj(i -> UITexture.fullImage(GregTech.ID, "gui/overlay_slot/number_" + i))
         .collect(Collectors.toList())
         .toArray(new UITexture[0]);
+    public static final UITexture OVERLAY_SLOT_DRACONIC_CORE = UITexture.fullImage(GregTech.ID, "gui/overlay_slot/draconic_core");
+    public static final UITexture OVERLAY_SLOT_FIELD_GENERATOR = UITexture.fullImage(GregTech.ID, "gui/overlay_slot/field_generator");
 
     public static final UITexture PROGRESSBAR_ARROW = UITexture.fullImage(GregTech.ID, "gui/progressbar/arrow");
     public static final SteamTexture PROGRESSBAR_ARROW_STEAM = SteamTexture

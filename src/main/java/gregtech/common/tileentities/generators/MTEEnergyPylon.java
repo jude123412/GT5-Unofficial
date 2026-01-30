@@ -28,6 +28,7 @@ import com.gtnewhorizons.modularui.common.internal.wrapper.BaseSlot;
 import com.gtnewhorizons.modularui.common.widget.SlotGroup;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.VoltageIndex;
+import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.tooltip.TooltipHelper;
 import gregtech.common.items.MetaGeneratedItem01;
@@ -156,16 +157,29 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         builder.widget(
             SlotGroup.ofItemHandler(inventoryHandler, 1)
                 .startFromSlot(0)
-                .endAtSlot(1)
-                .slotCreator(index -> new BaseSlot(inventoryHandler, index) {
+                .endAtSlot(0)
+                .slotCreator(index -> new BaseSlot(inventoryHandler, 0) {
                     @Override
                     public int getSlotStackLimit() {
-                        return index == 1 ? 1 : 64;
+                        return 64;
                     }
                 })
-                .background(getGUITextureSet().getItemSlot())
+                .background(getGUITextureSet().getItemSlot(), GTUITextures.OVERLAY_SLOT_DRACONIC_CORE)
                 .build()
                 .setPos(79, 25));
+        builder.widget(
+            SlotGroup.ofItemHandler(inventoryHandler, 1)
+                .startFromSlot(0)
+                .endAtSlot(0)
+                .slotCreator(index -> new BaseSlot(inventoryHandler, 1) {
+                    @Override
+                    public int getSlotStackLimit() {
+                        return 1;
+                    }
+                })
+                .background(getGUITextureSet().getItemSlot(), GTUITextures.OVERLAY_SLOT_FIELD_GENERATOR)
+                .build()
+                .setPos(79, 43));
     }
 
     @Override
