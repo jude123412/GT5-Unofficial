@@ -19,6 +19,7 @@ import static gregtech.api.util.GTRecipeBuilder.WILDCARD;
 
 import java.util.Locale;
 
+import gregtech.common.blocks.BlockEnergyPylon;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -752,6 +753,7 @@ public class LoaderGTBlockFluid implements Runnable {
         GregTechAPI.sWormholeRender = new BlockWormholeRender();
         GregTechAPI.sBlackholeRender = new BlockBlackholeRenderer();
         GregTechAPI.nanoForgeRender = new BlockNanoForgeRenderer();
+        GregTechAPI.sEnergyPylonRender = new BlockEnergyPylon();
 
         GTOreAdapter.INSTANCE.init();
 

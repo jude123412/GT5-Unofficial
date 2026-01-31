@@ -194,6 +194,7 @@ public class GregTechAPI {
     public static Block sBlackholeRender;
     public static Block sSpaceElevatorCable;
     public static Block nanoForgeRender;
+    public static Block sEnergyPylonRender;
     /**
      * Getting assigned by the Config
      */

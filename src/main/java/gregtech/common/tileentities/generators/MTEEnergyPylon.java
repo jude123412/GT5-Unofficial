@@ -26,12 +26,15 @@ import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
 import com.gtnewhorizons.modularui.common.internal.wrapper.BaseSlot;
 import com.gtnewhorizons.modularui.common.widget.SlotGroup;
+import gregtech.api.GregTechAPI;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.VoltageIndex;
 import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.tooltip.TooltipHelper;
 import gregtech.common.items.MetaGeneratedItem01;
+import gregtech.common.tileentities.render.TileEntityEnergyPylon;
+import gregtech.loaders.preload.LoaderGTBlockFluid;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -186,20 +189,24 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
     public void onPostTick(IGregTechTileEntity aBaseMetaTileEntity, long aTick) {
         if (aBaseMetaTileEntity.isClientSide()) {
             modelRotation += 1.5F;
-            modelScale += aBaseMetaTileEntity.isAllowedToWork() ? 0.01F : -0.01F;
+            modelScale += !aBaseMetaTileEntity.isAllowedToWork() ? 0.01F : -0.01F;
             if (modelScale < 0) {
-                modelScale = aBaseMetaTileEntity.isAllowedToWork() ? 0F : 10000F;
+                modelScale = !aBaseMetaTileEntity.isAllowedToWork() ? 0F : 10000F;
             }
         }
 
         if (aBaseMetaTileEntity.isServerSide()) {
-            if (foundCore) spawnParticles();
+            if (foundCore) {
+                spawnParticles();
+                placeRenderTile();
+            }
             if (foundCore && particleRate > 0) particleRate--;
             if (aTick % 100 == 0) nextCore();
             syncEnergy(aBaseMetaTileEntity);
             setFoundCore();
             setCoreMaxAmperage();
             setCoreMaxVoltage();
+
         }
 
         super.onPostTick(aBaseMetaTileEntity, aTick);
@@ -210,6 +217,18 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         nextCore();
         super.onFirstTick(aBaseMetaTileEntity);
     }
+
+    public void placeRenderTile() {
+        World world = getBaseMetaTileEntity().getWorld();
+        int x = getBaseMetaTileEntity().getXCoord();
+        int y = getBaseMetaTileEntity().getYCoord() + 1;
+        int z = getBaseMetaTileEntity().getZCoord();
+
+        if (world.isAirBlock(x, y, z) || world.getBlock(x, y, z).isReplaceable(world, x, y, z)) {
+            world.setBlock(x, y, z, GregTechAPI.sEnergyPylonRender);
+        }
+    }
+
 
     public float getModelScale() {
         return modelScale;

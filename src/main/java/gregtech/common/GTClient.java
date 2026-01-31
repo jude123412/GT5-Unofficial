@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import gregtech.common.render.RenderEnergyPylon;
+import gregtech.common.render.EnergyPylonRenderer;
+import gregtech.common.tileentities.render.TileEntityEnergyPylon;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityClientPlayerMP;
@@ -324,10 +325,9 @@ public class GTClient extends GTProxy {
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityWormhole.class, new WormholeRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityBlackhole.class, new BlackholeRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(TileEntityNanoForgeRenderer.class, new NanoForgeRenderer());
+        if (DraconicEvolution.isModLoaded()) ClientRegistry.bindTileEntitySpecialRenderer(TileEntityEnergyPylon.class, new EnergyPylonRenderer());
         ClientRegistry.bindTileEntitySpecialRenderer(BaseMetaTileEntity.class, new BaseMetaTileEntityRenderer());
-        if (DraconicEvolution.isModLoaded()) {
-            ClientRegistry.bindTileEntitySpecialRenderer(BaseMetaTileEntity.class, new RenderEnergyPylon());
-        }
+
 
         MetaGeneratedItemRenderer metaItemRenderer = new MetaGeneratedItemRenderer();
         for (MetaGeneratedItem item : MetaGeneratedItem.sInstances.values()) {

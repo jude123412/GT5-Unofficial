@@ -144,6 +144,7 @@ item.gt.drop.name=Drop
 item.gt.pollen.name=Pollen
 item.gt.propolis.name=Propolis
 tile.gt.dronerender.name=Drone Renderer
+tile.gt.energypylonrender.name=Energy Pylon Renderer
 
 # GT Item Descriptions
 gt.item.desc.stored_heat=Stored Heat: %s

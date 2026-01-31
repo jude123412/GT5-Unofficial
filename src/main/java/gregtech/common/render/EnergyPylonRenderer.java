@@ -1,9 +1,9 @@
 package gregtech.common.render;
 
 import com.brandon3055.draconicevolution.common.lib.References;
-import gregtech.api.metatileentity.BaseMetaTileEntity;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.common.tileentities.generators.MTEEnergyPylon;
+import gregtech.common.tileentities.render.TileEntityEnergyPylon;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
@@ -12,32 +12,32 @@ import net.minecraftforge.client.model.AdvancedModelLoader;
 import net.minecraftforge.client.model.IModelCustom;
 import org.lwjgl.opengl.GL11;
 
-public class RenderEnergyPylon extends TileEntitySpecialRenderer {
+public class EnergyPylonRenderer extends TileEntitySpecialRenderer {
 
     private static final ResourceLocation modelTexture = new ResourceLocation(
         References.MODID.toLowerCase(),
         "textures/models/pylon_sphere_texture.png");
     private final IModelCustom model;
 
-    public RenderEnergyPylon() {
+    public EnergyPylonRenderer() {
         model = AdvancedModelLoader
             .loadModel(new ResourceLocation(References.MODID.toLowerCase(), "models/pylon_sphere.obj"));
     }
 
     @Override
     public void renderTileEntityAt(TileEntity tile, double x, double y, double z, float timeSinceLastTick) {
-            if (!(tile instanceof BaseMetaTileEntity base)) return;
+            if (!(tile instanceof TileEntityEnergyPylon base)) return;
 
-            MetaTileEntity mte = (MetaTileEntity) base.getMetaTileEntity();
+            MetaTileEntity mte = base.getPylonMTE();
             if (!(mte instanceof MTEEnergyPylon pylon)) return;
 
-            float scale = pylon.getModelScale() + (timeSinceLastTick *= !pylon.getBaseMetaTileEntity().isAllowedToWork() ? -0.01F : 0.01F);
+            float scale = pylon.getModelScale() + (timeSinceLastTick *= pylon.getBaseMetaTileEntity().isAllowedToWork() ? -0.01F : 0.01F);
             float rotation = pylon.getModelRotation() + (timeSinceLastTick / 2F);
 
             GL11.glPushMatrix();
             GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
 
-            GL11.glTranslated(x + 0.5, y + 0.5, z + 0.5);
+            GL11.glTranslated(x + 0.5, y - 0.5, z + 0.5);
             if (pylon.getBaseMetaTileEntity().getWorld().getBlockMetadata(pylon.getBaseMetaTileEntity().getXCoord(), pylon.getBaseMetaTileEntity().getYCoord(), pylon.getBaseMetaTileEntity().getZCoord()) == 1) {
                 GL11.glTranslated(0, -1, 0);
             } else {
