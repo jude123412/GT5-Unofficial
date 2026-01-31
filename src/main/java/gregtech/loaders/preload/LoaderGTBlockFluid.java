@@ -6,6 +6,7 @@ import static gregtech.api.enums.FluidState.MOLTEN;
 import static gregtech.api.enums.FluidState.PLASMA;
 import static gregtech.api.enums.FluidState.SLURRY;
 import static gregtech.api.enums.Mods.AppliedEnergistics2;
+import static gregtech.api.enums.Mods.DraconicEvolution;
 import static gregtech.api.enums.Mods.PamsHarvestCraft;
 import static gregtech.api.enums.Mods.Railcraft;
 import static gregtech.api.enums.Mods.Thaumcraft;
@@ -20,6 +21,7 @@ import static gregtech.api.util.GTRecipeBuilder.WILDCARD;
 import java.util.Locale;
 
 import gregtech.common.blocks.BlockEnergyPylon;
+import gregtech.common.tileentities.render.TileEntityEnergyPylon;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -904,6 +906,11 @@ public class LoaderGTBlockFluid implements Runnable {
 
         GTLog.out.println("GTMod: Registering the NanoForgeRender.");
         GameRegistry.registerTileEntity(TileEntityNanoForgeRenderer.class, "NanoForgeRender");
+
+        if (DraconicEvolution.isModLoaded()) {
+            GTLog.out.println("GTMod: Registering the EnergyPylonRender.");
+            GameRegistry.registerTileEntity(TileEntityEnergyPylon.class, "EnergyPylonRender");
+        }
 
         GTLog.out.println("GTMod: Registering the BaseMetaPipeEntity.");
         GameRegistry.registerTileEntity(BaseMetaPipeEntity.class, "BaseMetaPipeEntity");

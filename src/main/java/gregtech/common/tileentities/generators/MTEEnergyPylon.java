@@ -206,7 +206,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
             setFoundCore();
             setCoreMaxAmperage();
             setCoreMaxVoltage();
-
         }
 
         super.onPostTick(aBaseMetaTileEntity, aTick);
@@ -416,13 +415,29 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         if (space <= 0 || requested <= 0) return;
 
         long coreAvailable = mCoreEU;
+        long remaining = Math.min(requested, Math.min(coreAvailable, space));
 
-        long amount = Math.min(requested, Math.min(coreAvailable, space));
+        if (remaining <= 0) return;
 
-        if (amount > 0) {
-            particleRate = (byte) Math.min(20, amount < 500 ? 1 : amount / 500);
-            core.extractEnergy((int) amount, false);
-            this.setEUVar(stored + amount);
+        // Particle rate based on total transfer, not per-chunk
+        particleRate = (byte) Math.min(20, remaining < 500 ? 1 : remaining / 500);
+
+        long transferred = 0;
+
+        while (remaining > 0) {
+            int packet = (int) Math.min(Integer.MAX_VALUE, remaining);
+
+            int extracted = core.extractEnergy(packet, false);
+            if (extracted <= 0) break;
+
+            transferred += extracted;
+            remaining -= extracted;
+
+            if (extracted < packet) break; // core hit its limit
+        }
+
+        if (transferred > 0) {
+            this.setEUVar(stored + transferred);
         }
     }
 
@@ -431,14 +446,31 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         if (stored <= 0 || requested <= 0) return;
 
         long coreSpace = mMaxCoreEu - mCoreEU;
-        if (coreSpace == 0) return;
+        if (coreSpace <= 0) return;
 
-        long amount = Math.min(requested, Math.min(stored, coreSpace));
+        long remaining = Math.min(requested, Math.min(stored, coreSpace));
 
-        if (amount > 0) {
-            particleRate = (byte) Math.min(20, amount < 500 ? 1 : amount / 500);
-            core.receiveEnergy((int) amount, false);
-            this.setEUVar(stored - amount);
+        if (remaining <= 0) return;
+
+        // Particle rate based on total transfer
+        particleRate = (byte) Math.min(20, remaining < 500 ? 1 : remaining / 500);
+
+        long transferred = 0;
+
+        while (remaining > 0) {
+            int packet = (int) Math.min(Integer.MAX_VALUE, remaining);
+
+            int received = core.receiveEnergy(packet, false);
+            if (received <= 0) break;
+
+            transferred += received;
+            remaining -= received;
+
+            if (received < packet) break; // core hit its limit
+        }
+
+        if (transferred > 0) {
+            this.setEUVar(stored - transferred);
         }
     }
 
