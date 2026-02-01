@@ -4,16 +4,11 @@ import static com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil.fo
 import static gregtech.api.enums.GTValues.V;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_IN;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_OUT;
-import static gregtech.api.enums.TierEU.LV;
 import static gregtech.api.enums.VoltageIndex.HV;
-import static net.minecraft.util.EnumChatFormatting.AQUA;
-import static net.minecraft.util.EnumChatFormatting.BLUE;
-import static net.minecraft.util.EnumChatFormatting.DARK_GRAY;
-import static net.minecraft.util.EnumChatFormatting.DARK_GREEN;
-import static net.minecraft.util.EnumChatFormatting.DARK_RED;
-import static net.minecraft.util.EnumChatFormatting.GREEN;
-import static net.minecraft.util.EnumChatFormatting.LIGHT_PURPLE;
-import static net.minecraft.util.EnumChatFormatting.YELLOW;
+
+import com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil;
+import net.minecraft.util.EnumChatFormatting;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,20 +22,16 @@ import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
 import com.gtnewhorizons.modularui.common.internal.wrapper.BaseSlot;
 import com.gtnewhorizons.modularui.common.widget.SlotGroup;
 import gregtech.api.GregTechAPI;
-import gregtech.api.enums.ItemList;
+import gregtech.api.enums.GTValues;
 import gregtech.api.enums.VoltageIndex;
 import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.tooltip.TooltipHelper;
-import gregtech.common.items.MetaGeneratedItem01;
-import gregtech.common.tileentities.render.TileEntityEnergyPylon;
-import gregtech.loaders.preload.LoaderGTBlockFluid;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -83,17 +74,19 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
             2,
             new String[] {
                 "Inserts or Extracts energy from Draconic Evolution's Energy Core",
-                "Send -> <- Receive (Use a soft mallet to change mode)",
-                "Has and internal buffer based on this formular",
-                "(Tier Voltage * Tier Amperage) * 200",
-                "Capacity, Voltage & Amperage is based on the Energy Core's tier",
-                "Tier " + GTUtility.getColoredTierNameFromTier((byte) HV) + " : "  + TooltipHelper.coloredText("512", YELLOW) + " EU/t : " + TooltipHelper.coloredText("4", YELLOW) + " Amps",
-                "Tier " + TooltipHelper.coloredText("2", DARK_GRAY) + " : "  + TooltipHelper.coloredText("2,048", DARK_GRAY) + " EU/t : " + TooltipHelper.coloredText("8", DARK_GRAY) + " Amps",
-                "Tier " + TooltipHelper.coloredText("3", BLUE) + " : "  + TooltipHelper.coloredText("8,192", BLUE) + " EU/t : " + TooltipHelper.coloredText("16", BLUE) + " Amps",
-                "Tier " + TooltipHelper.coloredText("4", LIGHT_PURPLE) + " : "  + TooltipHelper.coloredText("32,768", LIGHT_PURPLE) + " EU/t : " + TooltipHelper.coloredText("32", LIGHT_PURPLE) + " Amps",
-                "Tier " + TooltipHelper.coloredText("5", AQUA) + " : "  + TooltipHelper.coloredText("131,072", AQUA) + " EU/t : " + TooltipHelper.coloredText("64", AQUA) + " Amps",
-                "Tier " + TooltipHelper.coloredText("6", DARK_GREEN) + " : "  + TooltipHelper.coloredText("524,288", DARK_GREEN) + " EU/t : " + TooltipHelper.coloredText("128", DARK_GREEN) + " Amps",
-                "Tier " + TooltipHelper.coloredText("7", DARK_RED) + " : "  + TooltipHelper.coloredText("2,097,152", DARK_RED) + " EU/t : " + TooltipHelper.coloredText("256", DARK_RED) + " Amps"
+                "Send -> Receive (Use a soft mallet to change mode)",
+                " ",
+                "Has and internal buffer based on this formula",
+                "(Voltage * Amperage) * 200",
+                " ",
+                "Voltage is based on what field generator is placed within the device",
+                " ",
+                "Amperage is based on how many cores are placed in the device",
+                TooltipHelper.coloredText("Draconic Core, ", EnumChatFormatting.AQUA) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(1), EnumChatFormatting.AQUA) + " Amp per core",
+                TooltipHelper.coloredText("Wyvern Core, ", EnumChatFormatting.DARK_PURPLE) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(4), EnumChatFormatting.DARK_PURPLE) + " Amps per core",
+                TooltipHelper.coloredText("Awakened Core, ", EnumChatFormatting.GOLD) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(256), EnumChatFormatting.GOLD) + " Amps per core",
+                TooltipHelper.coloredText("Chaotic Core, ", EnumChatFormatting.DARK_GRAY) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(16384), EnumChatFormatting.DARK_GRAY) + " Amps per core",
+                " ",
             });
     }
 
@@ -535,14 +528,14 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
         final NBTTagCompound tag = accessor.getNBTData();
         if (tag.hasKey("foundCore")) currenttip.add(
             tag.getBoolean("foundCore")
-                ? GREEN + StatCollector.translateToLocal("GT5U.waila.generating.foundCore")
+                ? EnumChatFormatting.GREEN + StatCollector.translateToLocal("GT5U.waila.generating.foundCore")
                 : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.missingCore"));
         if (tag.hasKey("mode")) currenttip.add(
             tag.getBoolean("mode")
-                ? GREEN + StatCollector.translateToLocal("GT5U.waila.generating.exportMode")
+                ? EnumChatFormatting.GREEN + StatCollector.translateToLocal("GT5U.waila.generating.exportMode")
                 : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.importMode"));
         if (tag.hasKey("coreEu") && tag.hasKey("maxCoreEu")) currenttip.add(
-            GREEN + formatNumber(tag.getLong("coreEu"))
+            EnumChatFormatting.GREEN + formatNumber(tag.getLong("coreEu"))
                 + EnumChatFormatting.GRAY
                 + " / "
                 + EnumChatFormatting.YELLOW
@@ -550,7 +543,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
                 + EnumChatFormatting.GRAY
                 + " EU");
         if (tag.hasKey("storedEu") && tag.hasKey("maxStoredEu")) currenttip.add(
-            GREEN + formatNumber(tag.getLong("storedEu"))
+            EnumChatFormatting.GREEN + formatNumber(tag.getLong("storedEu"))
                 + EnumChatFormatting.GRAY
                 + " / "
                 + EnumChatFormatting.YELLOW
