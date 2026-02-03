@@ -1,4 +1,4 @@
-package gregtech.common.tileentities.generators;
+package gregtech.common.tileentities.machines.draconic;
 
 import static com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil.formatNumber;
 import static gregtech.api.enums.GTValues.V;
@@ -43,7 +43,6 @@ import com.brandon3055.draconicevolution.common.tileentities.multiblocktiles.Til
 import gregtech.api.enums.Textures;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
-import gregtech.api.interfaces.modularui.IAddGregtechLogo;
 import gregtech.api.interfaces.modularui.IAddUIWidgets;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.implementations.MTETieredMachineBlock;
@@ -51,7 +50,7 @@ import gregtech.api.render.TextureFactory;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 
-public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtechLogo, IAddUIWidgets {
+public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidgets {
 
     private final List<MultiblockHelper.TileLocation> coreLocations = new ArrayList<>();
     private int selectedCore = 0;
@@ -72,18 +71,18 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddGregtec
             aTier,
             2,
             new String[] {
-                "Inserts or Extracts energy from Draconic Evolution's Energy Core",
-                "Send -> Receive (Use a soft mallet to change mode)",
+                "Inserts or Extracts energy from Draconic Evolution's Energy Core.",
+                "Send -> Receive (Use a soft mallet to change mode).",
                 " ",
-                "Has and internal buffer based on this formula",
-                "(Voltage * Amperage) * 200",
+                "Has and internal buffer based on this formula,",
+                "(Voltage * Amperage) * 200.",
                 " ",
-                "Voltage is based on what tier of field generator is placed within the device",
-                "Amperage is based on how many cores are placed in the device",
-                TooltipHelper.coloredText("Draconic Core, ", EnumChatFormatting.AQUA) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(1), EnumChatFormatting.AQUA) + " Amp per core",
-                TooltipHelper.coloredText("Wyvern Core, ", EnumChatFormatting.DARK_PURPLE) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(4), EnumChatFormatting.DARK_PURPLE) + " Amps per core",
-                TooltipHelper.coloredText("Awakened Core, ", EnumChatFormatting.GOLD) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(256), EnumChatFormatting.GOLD) + " Amps per core",
-                TooltipHelper.coloredText("Chaotic Core, ", EnumChatFormatting.DARK_GRAY) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(16384), EnumChatFormatting.DARK_GRAY) + " Amps per core",
+                "Voltage is based on what tier of field generator is placed within the device.",
+                "Amperage is based on how many cores are placed in the device.",
+                TooltipHelper.coloredText("Draconic Core, ", EnumChatFormatting.AQUA) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(1), EnumChatFormatting.AQUA) + " Amp per core.",
+                TooltipHelper.coloredText("Wyvern Core, ", EnumChatFormatting.DARK_PURPLE) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(4), EnumChatFormatting.DARK_PURPLE) + " Amps per core.",
+                TooltipHelper.coloredText("Awakened Core, ", EnumChatFormatting.GOLD) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(256), EnumChatFormatting.GOLD) + " Amps per core.",
+                TooltipHelper.coloredText("Chaotic Core, ", EnumChatFormatting.DARK_GRAY) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(16384), EnumChatFormatting.DARK_GRAY) + " Amps per core.",
                 " ",
             });
     }

@@ -4,7 +4,7 @@ import static net.minecraft.util.StatCollector.translateToLocal;
 
 import java.util.function.Function;
 
-import gregtech.common.tileentities.generators.MTEEnergyPylon;
+import gregtech.common.tileentities.machines.draconic.MTEEnergyPylon;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;

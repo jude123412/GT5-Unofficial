@@ -1,7 +1,7 @@
 package gregtech.common.tileentities.render;
 
 import gregtech.api.metatileentity.BaseMetaTileEntity;
-import gregtech.common.tileentities.generators.MTEEnergyPylon;
+import gregtech.common.tileentities.machines.draconic.MTEEnergyPylon;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 

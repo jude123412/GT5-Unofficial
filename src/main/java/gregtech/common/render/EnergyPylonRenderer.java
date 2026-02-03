@@ -2,7 +2,7 @@ package gregtech.common.render;
 
 import com.brandon3055.draconicevolution.common.lib.References;
 import gregtech.api.metatileentity.MetaTileEntity;
-import gregtech.common.tileentities.generators.MTEEnergyPylon;
+import gregtech.common.tileentities.machines.draconic.MTEEnergyPylon;
 import gregtech.common.tileentities.render.TileEntityEnergyPylon;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
