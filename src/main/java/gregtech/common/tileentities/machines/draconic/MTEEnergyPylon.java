@@ -4,11 +4,13 @@ import static com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil.fo
 import static gregtech.api.enums.GTValues.V;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_IN;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_OUT;
-import static gregtech.api.enums.VoltageIndex.HV;
+import static gregtech.api.util.GTModHandler.getModItem;
 
 import com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import gregtech.api.enums.ItemList;
+import gregtech.api.enums.Mods;
 import net.minecraft.util.EnumChatFormatting;
 
 
@@ -18,7 +20,6 @@ import java.util.Random;
 
 import com.brandon3055.draconicevolution.client.handler.ParticleHandler;
 import com.brandon3055.draconicevolution.client.render.particle.Particles;
-import com.brandon3055.draconicevolution.common.ModItems;
 import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
 import com.gtnewhorizons.modularui.common.internal.wrapper.BaseSlot;
@@ -80,7 +81,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
                 "(Voltage * Amperage) * 200.",
                 " ",
                 "Voltage is based on what tier of field generator is placed within the device.",
-                "Amperage is based on how many cores are placed in the device.",
+                "Amperage is based on how many cores are placed within in the device.",
                 TooltipHelper.coloredText("Draconic Core, ", EnumChatFormatting.AQUA) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(1), EnumChatFormatting.AQUA) + " Amp per core.",
                 TooltipHelper.coloredText("Wyvern Core, ", EnumChatFormatting.DARK_PURPLE) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(4), EnumChatFormatting.DARK_PURPLE) + " Amps per core.",
                 TooltipHelper.coloredText("Awakened Core, ", EnumChatFormatting.GOLD) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(256), EnumChatFormatting.GOLD) + " Amps per core.",
@@ -477,10 +478,14 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
 
     private void updateCoreMaxVoltage() {
         if (mInventory[0] != null) {
-            if (mInventory[0].getItem() == ModItems.draconicCore) mCoreMaxAmperage = mInventory[0].stackSize;
-            else if (mInventory[0].getItem() == ModItems.wyvernCore) mCoreMaxAmperage = mInventory[0].stackSize * 4L;
-            else if (mInventory[0].getItem() == ModItems.awakenedCore) mCoreMaxAmperage = mInventory[0].stackSize * 256L;
-            else if (mInventory[0].getItem() == ModItems.chaoticCore) mCoreMaxAmperage = mInventory[0].stackSize * 16384L;
+            if (mInventory[0].isItemEqual(getModItem(Mods.DraconicEvolution.ID, "draconicCore", 1L, 0)))
+                mCoreMaxAmperage = mInventory[0].stackSize;
+            else if (mInventory[0].isItemEqual(getModItem(Mods.DraconicEvolution.ID, "wyvernCore", 1L, 0)))
+                mCoreMaxAmperage = mInventory[0].stackSize * 4L;
+            else if (mInventory[0].isItemEqual(getModItem(Mods.DraconicEvolution.ID, "awakenedCore", 1L, 0)))
+                mCoreMaxAmperage = mInventory[0].stackSize * 256L;
+            else if (mInventory[0].isItemEqual(getModItem(Mods.DraconicEvolution.ID, "chaoticCore", 1L, 0)))
+                mCoreMaxAmperage = mInventory[0].stackSize * 16384L;
         } else {
             mCoreMaxAmperage = 0;
         }
@@ -488,20 +493,20 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
 
     private void updateCoreMaxAmperage() {
         if (mInventory[1] != null) {
-            if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32670")) mCoreVoltageTier = VoltageIndex.LV;
-            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32671")) mCoreVoltageTier = VoltageIndex.MV;
-            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32672")) mCoreVoltageTier = HV;
-            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32673")) mCoreVoltageTier = VoltageIndex.EV;
-            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32674")) mCoreVoltageTier = VoltageIndex.IV;
-            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32675")) mCoreVoltageTier = VoltageIndex.LuV;
-            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32676")) mCoreVoltageTier = VoltageIndex.ZPM;
-            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32677")) mCoreVoltageTier = VoltageIndex.UV;
-            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32678")) mCoreVoltageTier = VoltageIndex.UHV;
-            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32679")) mCoreVoltageTier = VoltageIndex.UEV;
-            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32045")) mCoreVoltageTier = VoltageIndex.UIV;
-            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32046")) mCoreVoltageTier = VoltageIndex.UMV;
-            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32047")) mCoreVoltageTier = VoltageIndex.UXV;
-            else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32048")) mCoreVoltageTier = VoltageIndex.MAX;
+            if (mInventory[1].isItemEqual(ItemList.Field_Generator_LV.get(1))) mCoreVoltageTier = VoltageIndex.LV;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_MV.get(1))) mCoreVoltageTier = VoltageIndex.MV;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_HV.get(1))) mCoreVoltageTier = VoltageIndex.HV;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_EV.get(1))) mCoreVoltageTier = VoltageIndex.EV;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_IV.get(1))) mCoreVoltageTier = VoltageIndex.IV;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_LuV.get(1))) mCoreVoltageTier = VoltageIndex.LuV;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_ZPM.get(1))) mCoreVoltageTier = VoltageIndex.ZPM;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UV.get(1))) mCoreVoltageTier = VoltageIndex.UV;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UHV.get(1))) mCoreVoltageTier = VoltageIndex.UHV;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UEV.get(1))) mCoreVoltageTier = VoltageIndex.UEV;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UIV.get(1))) mCoreVoltageTier = VoltageIndex.UIV;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UMV.get(1))) mCoreVoltageTier = VoltageIndex.UMV;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UXV.get(1))) mCoreVoltageTier = VoltageIndex.UXV;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_MAX.get(1))) mCoreVoltageTier = VoltageIndex.MAX;
         } else {
             mCoreVoltageTier = 0;
         }
