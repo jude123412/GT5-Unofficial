@@ -425,8 +425,8 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
 
         if (remaining <= 0) return;
 
-        // Particle rate based on total transfer, not per-chunk
-        particleRate = (byte) Math.min(20, remaining < 500 ? 1 : remaining / 500);
+        // Particle rate based on total transfer
+        particleRate = calculateParticleRate(remaining);
 
         long transferred = 0;
 
@@ -459,7 +459,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         if (remaining <= 0) return;
 
         // Particle rate based on total transfer
-        particleRate = (byte) Math.min(20, remaining < 500 ? 1 : remaining / 500);
+        particleRate = calculateParticleRate(remaining);
 
         long transferred = 0;
 
@@ -478,6 +478,12 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         if (transferred > 0) {
             this.setEUVar(stored - transferred);
         }
+    }
+
+    private byte calculateParticleRate(long remaining) {
+        int rate = remaining < 500 ? 1 : (int) (remaining / 500);
+        if (rate > 20) rate = 20;
+        return (byte) rate;
     }
 
     public long getmCoreEU() {
