@@ -11,6 +11,8 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Mods;
+import gregtech.common.blocks.BlockEnergyPylon;
+import gregtech.common.tileentities.render.TileEntityEnergyPylon;
 import net.minecraft.util.EnumChatFormatting;
 
 
@@ -207,8 +209,8 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
             if (aTick % 100 == 0) nextCore();
             syncEnergy(aBaseMetaTileEntity);
             setFoundCore();
-            updateCoreMaxAmperage();
-            updateCoreMaxVoltage();
+            updateAmperageFromCoreItem();
+            updateVoltageTierFromFieldGenerator();
         }
 
         super.onPostTick(aBaseMetaTileEntity, aTick);
@@ -226,7 +228,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         int y = getBaseMetaTileEntity().getYCoord() + 1;
         int z = getBaseMetaTileEntity().getZCoord();
 
-        if (world.isAirBlock(x, y, z) || world.getBlock(x, y, z).isReplaceable(world, x, y, z)) {
+        if (world.isAirBlock(x, y, z) || world.getBlock(x, y, z).isReplaceable(world, x, y, z) && !(world.getBlock(x, y, z) instanceof BlockEnergyPylon)) {
             world.setBlock(x, y, z, GregTechAPI.sEnergyPylonRender);
         }
     }
@@ -486,7 +488,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         return mMaxCoreEu;
     }
 
-    private void updateCoreMaxVoltage() {
+    private void updateAmperageFromCoreItem() {
         if (mInventory[0] != null) {
             if (mInventory[0].isItemEqual(getModItem(Mods.DraconicEvolution.ID, "draconicCore", 1L, 0)))
                 mCoreMaxAmperage = mInventory[0].stackSize;
@@ -501,7 +503,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         }
     }
 
-    private void updateCoreMaxAmperage() {
+    private void updateVoltageTierFromFieldGenerator() {
         if (mInventory[1] != null) {
             if (mInventory[1].isItemEqual(ItemList.Field_Generator_LV.get(1))) mCoreVoltageTier = VoltageIndex.LV;
             else if (mInventory[1].isItemEqual(ItemList.Field_Generator_MV.get(1))) mCoreVoltageTier = VoltageIndex.MV;
