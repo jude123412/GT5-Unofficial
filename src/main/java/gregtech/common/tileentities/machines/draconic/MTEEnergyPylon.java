@@ -340,10 +340,12 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         int range = 15;
         List<MultiblockHelper.TileLocation> locations = new ArrayList<>();
 
+        outer:
         for (int x = getXCoord() - range; x <= getXCoord() + range; x++) {
             for (int y = getYCoord() - range; y <= getYCoord() + range; y++) {
                 for (int z = getZCoord() - range; z <= getZCoord() + range; z++) {
                     if (getWorld().getBlock(x, y, z) == ModBlocks.energyStorageCore) {
+                        if (!locations.isEmpty() && locations.size() >= 4) break outer;
                         TileLocation helper = new TileLocation(x, y, z);
                         locations.add(helper);
                     }
