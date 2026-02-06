@@ -134,12 +134,22 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
 
     @Override
     public void saveNBTData(NBTTagCompound aNBT) {
-
+        aNBT.setInteger("mSelectedCore", selectedCore);
+        aNBT.setInteger("mCoreMaxVoltageTier", mCoreVoltageTier);
+        aNBT.setBoolean("mFoundCore", foundCore);
+        aNBT.setFloat("mModelScale", modelScale);
+        aNBT.setFloat("mModelRotation", modelRotation);
+        aNBT.setLong("mCoreMaxAmperage", mCoreMaxAmperage);
     }
 
     @Override
     public void loadNBTData(NBTTagCompound aNBT) {
-
+        if (aNBT.hasKey("mSelectedCore")) selectedCore = aNBT.getInteger("mSelectedCore");
+        if (aNBT.hasKey("mCoreMaxVoltageTier")) mCoreVoltageTier = aNBT.getInteger("mCoreMaxVoltageTier");
+        if (aNBT.hasKey("mFoundCore")) foundCore = aNBT.getBoolean("mFoundCore");
+        if (aNBT.hasKey("mModelScale")) modelScale = aNBT.getFloat("mModelScale");
+        if (aNBT.hasKey("mModelRotation")) modelRotation = aNBT.getFloat("mModelRotation");
+        if (aNBT.hasKey("mCoreMaxAmperage")) mCoreMaxAmperage = aNBT.getLong("mCoreMaxAmperage");
     }
 
     @Override
