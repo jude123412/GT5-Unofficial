@@ -206,7 +206,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
                 placeRenderTile();
             }
             if (foundCore && particleRate > 0) particleRate--;
-            if (aTick % 100 == 0) nextCore();
+            if (aTick % 400 == 0) nextCore();
             syncEnergy(aBaseMetaTileEntity);
             setFoundCore();
             updateAmperageFromCoreItem();
