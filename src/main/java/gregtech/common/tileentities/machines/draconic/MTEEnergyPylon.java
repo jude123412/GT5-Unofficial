@@ -194,8 +194,8 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
             if (aTick % 100 == 0) nextCore();
             syncEnergy(aBaseMetaTileEntity);
             setFoundCore();
-            setCoreMaxAmperage();
-            setCoreMaxVoltage();
+            updateCoreMaxAmperage();
+            updateCoreMaxVoltage();
         }
 
         super.onPostTick(aBaseMetaTileEntity, aTick);
@@ -472,7 +472,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         return mMaxCoreEu;
     }
 
-    private void setCoreMaxVoltage() {
+    private void updateCoreMaxVoltage() {
         if (mInventory[0] != null) {
             if (mInventory[0].getItem() == ModItems.draconicCore) mCoreMaxAmperage = mInventory[0].stackSize;
             else if (mInventory[0].getItem() == ModItems.wyvernCore) mCoreMaxAmperage = mInventory[0].stackSize * 4L;
@@ -483,7 +483,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         }
     }
 
-    private void setCoreMaxAmperage() {
+    private void updateCoreMaxAmperage() {
         if (mInventory[1] != null) {
             if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32670")) mCoreVoltageTier = VoltageIndex.LV;
             else if (mInventory[1].getUnlocalizedName().equals("gt.metaitem.01.32671")) mCoreVoltageTier = VoltageIndex.MV;
