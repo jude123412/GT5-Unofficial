@@ -12,7 +12,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Mods;
 import gregtech.common.blocks.BlockEnergyPylon;
-import gregtech.common.tileentities.render.TileEntityEnergyPylon;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.EnumChatFormatting;
 
 
@@ -89,6 +89,8 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
                 TooltipHelper.coloredText("Awakened Core, ", EnumChatFormatting.GOLD) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(256), EnumChatFormatting.GOLD) + " Amps per core.",
                 TooltipHelper.coloredText("Chaotic Core, ", EnumChatFormatting.DARK_GRAY) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(16384), EnumChatFormatting.DARK_GRAY) + " Amps per core.",
                 " ",
+                TooltipHelper.coloredText("Has been optimized to detect Energy Cores placed above the interface,", EnumChatFormatting.GREEN),
+                TooltipHelper.coloredText("(up to 15 blocks up, 11 blocks horizontal range)", EnumChatFormatting.GREEN)
             });
     }
 
@@ -244,6 +246,11 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
 
     @SideOnly(Side.CLIENT)
     private void spawnParticles() {
+        EntityPlayer player = Minecraft.getMinecraft().thePlayer;
+        if (player == null || player.getDistanceSq(getXCoord() + 0.5, getYCoord() + 0.5, getZCoord() + 0.5) > 512) {
+            return; // Skip particles beyond 32 blocks
+        }
+
         Random rand = getWorld().rand;
 
         TileEnergyStorageCore core = getMaster();
@@ -337,13 +344,14 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
     }
 
     private void findCores() {
-        int range = 15;
+        int horizontal = 11; // X/Z radius
+        int vertical = 15; // Y radius
         List<MultiblockHelper.TileLocation> locations = new ArrayList<>();
 
         outer:
-        for (int x = getXCoord() - range; x <= getXCoord() + range; x++) {
-            for (int y = getYCoord() - range; y <= getYCoord() + range; y++) {
-                for (int z = getZCoord() - range; z <= getZCoord() + range; z++) {
+        for (int x = getXCoord() - horizontal; x <= getXCoord() + horizontal; x++) {
+            for (int y = getYCoord(); y <= getYCoord() + vertical; y++) { // Only scan above
+                for (int z = getZCoord() - horizontal; z <= getZCoord() + horizontal; z++) {
                     if (getWorld().getBlock(x, y, z) == ModBlocks.energyStorageCore) {
                         if (!locations.isEmpty() && locations.size() >= 4) break outer;
                         TileLocation helper = new TileLocation(x, y, z);
