@@ -7,6 +7,8 @@ import static gregtech.api.enums.Textures.BlockIcons.OVERLAYS_ENERGY_OUT;
 import static gregtech.api.enums.VoltageIndex.HV;
 
 import com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.util.EnumChatFormatting;
 
 
@@ -227,6 +229,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         return modelRotation;
     }
 
+    @SideOnly(Side.CLIENT)
     private void spawnParticles() {
         Random rand = getWorld().rand;
 
