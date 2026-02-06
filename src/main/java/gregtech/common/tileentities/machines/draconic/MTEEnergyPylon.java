@@ -9,6 +9,7 @@ import static gregtech.api.util.GTModHandler.getModItem;
 import com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Mods;
 import gregtech.common.blocks.BlockEnergyPylon;
@@ -67,6 +68,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
     public float modelScale = 0;
     private byte particleRate = 0;
     private boolean foundCore = false;
+    private boolean wirelessMode = false;
 
     public MTEEnergyPylon(int aID, String aName, String aNameRegional, int aTier) {
         super(
@@ -234,7 +236,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
             world.setBlock(x, y, z, GregTechAPI.sEnergyPylonRender);
         }
     }
-
 
     public float getModelScale() {
         return modelScale;
@@ -705,5 +706,33 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
     @Override
     public boolean shouldJoinIc2Enet() {
         return true;
+    }
+
+    private boolean canUseWireless() {
+        if (mInventory[1] != null) {
+            if (mInventory[1].isItemEqual(ItemList.Field_Generator_UHV.get(1))) return true;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UEV.get(1))) return true;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UIV.get(1))) return true;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UMV.get(1))) return true;
+            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UXV.get(1))) return true;
+            else return mInventory[1].isItemEqual(ItemList.Field_Generator_MAX.get(1));
+        } else return false;
+    }
+
+    @Override
+    public void onScrewdriverRightClick(ForgeDirection side, EntityPlayer aPlayer, float aX, float aY, float aZ,
+                                        ItemStack aTool) {
+        if (canUseWireless()) {
+            wirelessMode = !wirelessMode;
+            GTUtility.sendChatToPlayer(aPlayer, "Wireless network mode " + (wirelessMode ? "enabled." : "disabled."));
+        } else {
+            GTUtility.sendChatToPlayer(
+                aPlayer,
+                "Wireless mode cannot be enabled without at least a " + GTValues.TIER_COLORS[9]
+                    + GTValues.VN[9]
+                    + EnumChatFormatting.RESET
+                    + "+ Field Generator placed inside the interface.");
+            wirelessMode = false;
+        }
     }
 }
