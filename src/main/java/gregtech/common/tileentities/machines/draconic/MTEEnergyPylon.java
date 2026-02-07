@@ -102,8 +102,8 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
                 TooltipHelper.coloredText("Chaotic Core, ", EnumChatFormatting.DARK_GRAY) + TooltipHelper.coloredText(NumberFormatUtil.formatNumber(16384), EnumChatFormatting.DARK_GRAY) + " Amps per core.",
                 " ",
                 "Use a screwdriver to toggle Wireless Mode.",
-                "While in wireless mode, the pylon’s normal functionality is disabled.",
-                "Automatically sends or receives energy through the wireless network every 10 seconds.",
+                "While in wireless mode, the pylon can't send or receive energy from cables/lasers.",
+                "instead sends or receives energy from the wireless network every 10 seconds.",
                 "Transfer rate scales with field generator tier and core type × stack size.",
                 " ",
                 TooltipHelper.coloredText("Has been optimized to detect Energy Cores placed above the interface,", EnumChatFormatting.GREEN),
@@ -529,7 +529,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
 
             if (wirelessMode) {
                 long amount = (V[mCoreVoltageTier] * mCoreWirelessAmperage) * wirelessResyncRate;
-                if (amount > mMaxCoreEu) amount = mMaxCoreEu / 16;
+                if (amount > mMaxCoreEu && amount > mMaxCoreEu - mCoreEU) amount = mMaxCoreEu / 16;
 
                 if (getBaseMetaTileEntity().isAllowedToWork()) {
                     // SEND to wireless network
