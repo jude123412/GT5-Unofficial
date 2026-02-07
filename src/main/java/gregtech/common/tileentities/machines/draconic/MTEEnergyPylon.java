@@ -514,12 +514,6 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         }
     }
 
-    private byte calculateParticleRate(long remaining) {
-        int rate = remaining < 500 ? 1 : (int) (remaining / 500);
-        if (rate > 20) rate = 20;
-        return (byte) rate;
-    }
-
     private void syncWirelessEnergy(IGregTechTileEntity aBaseMetaTileEntity) {
         TileEnergyStorageCore core = getMaster();
         if (foundCore && core != null) {
@@ -612,6 +606,12 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         if (transferred > 0) {
             WirelessNetworkManager.setUserEU(global_energy_user_uuid,  storedWireless.subtract(BigInteger.valueOf(transferred)));
         }
+    }
+
+    private byte calculateParticleRate(long remaining) {
+        int rate = remaining < 500 ? 1 : (int) (remaining / 500);
+        if (rate > 20) rate = 20;
+        return (byte) rate;
     }
 
     public long getmCoreEU() {
