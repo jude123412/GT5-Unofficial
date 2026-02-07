@@ -418,12 +418,12 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
             if (getBaseMetaTileEntity().isAllowedToWork()) {
                 // Pull from core if we have space
                 if (spaceLeft > 0 && mCoreEU > 0) {
-                    extractEnergy(spaceLeft, core);
+                     if (!wirelessMode) extractEnergy(spaceLeft, core);
                 }
             } else {
                 // Push to core if we are over some threshold
                 if (stored > 0 && mCoreEU < mMaxCoreEu) {
-                    receiveEnergy(stored, core);
+                    if (!wirelessMode) receiveEnergy(stored, core);
                 }
             }
         } else {
@@ -552,6 +552,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         int z) {
         tag.setBoolean("foundCore", foundCore);
         tag.setBoolean("mode", getBaseMetaTileEntity().isAllowedToWork());
+        tag.setBoolean("wirelessMode", wirelessMode);
         tag.setByte("CoreVoltageTier", (byte) mCoreVoltageTier);
         tag.setLong("coreEu", mCoreEU);
         tag.setLong("maxCoreEu", mMaxCoreEu);
@@ -570,10 +571,14 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
             tag.getBoolean("foundCore")
                 ? EnumChatFormatting.GREEN + StatCollector.translateToLocal("GT5U.waila.generating.foundCore")
                 : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.missingCore"));
-        if (tag.hasKey("mode")) currenttip.add(
-            tag.getBoolean("mode")
-                ? EnumChatFormatting.GREEN + StatCollector.translateToLocal("GT5U.waila.generating.exportMode")
-                : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.importMode"));
+        if (!tag.getBoolean("wirelessMode")) {
+            if (tag.hasKey("mode")) currenttip.add(
+                tag.getBoolean("mode")
+                    ? EnumChatFormatting.GREEN + StatCollector.translateToLocal("GT5U.waila.generating.exportMode")
+                    : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.importMode"));
+        } else {
+            if (tag.hasKey("wirelessMode")) currenttip.add(EnumChatFormatting.BLUE + StatCollector.translateToLocal("GT5U.waila.generating.wirelessMode"));
+        }
         if (tag.hasKey("coreEu") && tag.hasKey("maxCoreEu")) currenttip.add(
             EnumChatFormatting.GREEN + formatNumber(tag.getLong("coreEu"))
                 + EnumChatFormatting.GRAY
@@ -582,26 +587,28 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
                 + formatNumber(tag.getLong("maxCoreEu"))
                 + EnumChatFormatting.GRAY
                 + " EU");
-        if (tag.hasKey("storedEu") && tag.hasKey("maxStoredEu")) currenttip.add(
-            EnumChatFormatting.GREEN + formatNumber(tag.getLong("storedEu"))
-                + EnumChatFormatting.GRAY
-                + " / "
-                + EnumChatFormatting.YELLOW
-                + formatNumber(tag.getLong("maxStoredEu"))
-                + EnumChatFormatting.GRAY
-                + " EU");
-        if (tag.hasKey("AvgIn") && tag.hasKey("CoreVoltageTier")) currenttip.add(
-            StatCollector.translateToLocalFormatted(
-                "GT5U.waila.energy.avg_in_with_amperage",
-                formatNumber(tag.getLong("AvgIn")),
-                GTUtility.getAmperageForTier(tag.getLong("AvgIn"), tag.getByte("CoreVoltageTier")),
-                GTUtility.getColoredTierNameFromTier(tag.getByte("CoreVoltageTier"))));
-        if (tag.hasKey("AvgOut") && tag.hasKey("CoreVoltageTier")) currenttip.add(
-            StatCollector.translateToLocalFormatted(
-                "GT5U.waila.energy.avg_out_with_amperage",
-                formatNumber(tag.getLong("AvgOut")),
-                GTUtility.getAmperageForTier(tag.getLong("AvgOut"), tag.getByte("CoreVoltageTier")),
-                GTUtility.getColoredTierNameFromTier(tag.getByte("CoreVoltageTier"))));
+        if (!tag.getBoolean("wirelessMode")) {
+            if (tag.hasKey("storedEu") && tag.hasKey("maxStoredEu")) currenttip.add(
+                EnumChatFormatting.GREEN + formatNumber(tag.getLong("storedEu"))
+                    + EnumChatFormatting.GRAY
+                    + " / "
+                    + EnumChatFormatting.YELLOW
+                    + formatNumber(tag.getLong("maxStoredEu"))
+                    + EnumChatFormatting.GRAY
+                    + " EU");
+            if (tag.hasKey("AvgIn") && tag.hasKey("CoreVoltageTier")) currenttip.add(
+                StatCollector.translateToLocalFormatted(
+                    "GT5U.waila.energy.avg_in_with_amperage",
+                    formatNumber(tag.getLong("AvgIn")),
+                    GTUtility.getAmperageForTier(tag.getLong("AvgIn"), tag.getByte("CoreVoltageTier")),
+                    GTUtility.getColoredTierNameFromTier(tag.getByte("CoreVoltageTier"))));
+            if (tag.hasKey("AvgOut") && tag.hasKey("CoreVoltageTier")) currenttip.add(
+                StatCollector.translateToLocalFormatted(
+                    "GT5U.waila.energy.avg_out_with_amperage",
+                    formatNumber(tag.getLong("AvgOut")),
+                    GTUtility.getAmperageForTier(tag.getLong("AvgOut"), tag.getByte("CoreVoltageTier")),
+                    GTUtility.getColoredTierNameFromTier(tag.getByte("CoreVoltageTier"))));
+        }
         super.getWailaBody(itemStack, currenttip, accessor, config);
     }
 
@@ -612,7 +619,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         long voltage = mCoreVoltageTier > 0 ? V[mCoreVoltageTier] : 0;
         long amperage = mCoreMaxAmperage;
         long maxPower = voltage * amperage;
-        return maxPower * 200;
+        return wirelessMode ? 0 : maxPower * 200;
     }
 
     @Override
@@ -627,26 +634,26 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
 
     @Override
     public long maxEUOutput() {
-        if (mCoreVoltageTier > 0 && getBaseMetaTileEntity().isAllowedToWork()) {
+        if (mCoreVoltageTier > 0 && getBaseMetaTileEntity().isAllowedToWork() && !wirelessMode) {
             return V[mCoreVoltageTier];
         } else return 0;
     }
 
     @Override
     public long maxEUInput() {
-        if (mCoreVoltageTier > 0 && !getBaseMetaTileEntity().isAllowedToWork()) {
+        if (mCoreVoltageTier > 0 && !getBaseMetaTileEntity().isAllowedToWork() && !wirelessMode) {
             return V[mCoreVoltageTier];
         } else return 0;
     }
 
     @Override
     public long maxAmperesOut() {
-        return getBaseMetaTileEntity().isAllowedToWork() ? mCoreMaxAmperage : 0;
+        return getBaseMetaTileEntity().isAllowedToWork() && !wirelessMode ? mCoreMaxAmperage : 0;
     }
 
     @Override
     public long maxAmperesIn() {
-        return getBaseMetaTileEntity().isAllowedToWork() ? 0 : mCoreMaxAmperage;
+        return !getBaseMetaTileEntity().isAllowedToWork() && !wirelessMode ? mCoreMaxAmperage : 0;
     }
 
     @Override
@@ -668,7 +675,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
     public boolean isInputFacing(ForgeDirection side) {
         ForgeDirection blockFrontFacing = getBaseMetaTileEntity().getFrontFacing();
 
-        if (getBaseMetaTileEntity().isAllowedToWork()) {
+        if (getBaseMetaTileEntity().isAllowedToWork() && !wirelessMode) {
             return false;
         } else {
             return side == blockFrontFacing;
@@ -679,7 +686,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
     public boolean isOutputFacing(ForgeDirection side) {
         ForgeDirection blockFrontFacing = getBaseMetaTileEntity().getFrontFacing();
 
-        if (getBaseMetaTileEntity().isAllowedToWork()) {
+        if (getBaseMetaTileEntity().isAllowedToWork() && !wirelessMode) {
             return side == blockFrontFacing;
         } else {
             return false;
