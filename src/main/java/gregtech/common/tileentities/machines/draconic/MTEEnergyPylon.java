@@ -13,13 +13,17 @@ import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Mods;
 import gregtech.common.blocks.BlockEnergyPylon;
+import gregtech.common.misc.WirelessNetworkManager;
+import gregtech.common.misc.spaceprojects.SpaceProjectManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.EnumChatFormatting;
 
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import com.brandon3055.draconicevolution.client.handler.ParticleHandler;
 import com.brandon3055.draconicevolution.client.render.particle.Particles;
@@ -60,8 +64,10 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
 
     private final List<MultiblockHelper.TileLocation> coreLocations = new ArrayList<>();
     private int selectedCore = 0;
-    private long mCoreMaxAmperage = 0;
     private int mCoreVoltageTier = 0;
+    private int wirelessResyncRate = 200;
+    private long mCoreMaxAmperage = 0;
+    private long mCoreWirelessAmperage = 0;
     private long mCoreEU = 0;
     private long mMaxCoreEu = 0;
     public float modelRotation = 0;
@@ -69,6 +75,9 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
     private byte particleRate = 0;
     private boolean foundCore = false;
     private boolean wirelessMode = false;
+    private boolean canUseWirelessMode = false;
+
+    private UUID global_energy_user_uuid;
 
     public MTEEnergyPylon(int aID, String aName, String aNameRegional, int aTier) {
         super(
@@ -149,6 +158,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         aNBT.setInteger("mSelectedCore", selectedCore);
         aNBT.setInteger("mCoreMaxVoltageTier", mCoreVoltageTier);
         aNBT.setBoolean("mFoundCore", foundCore);
+        aNBT.setBoolean("mWirelessMode", wirelessMode);
         aNBT.setFloat("mModelScale", modelScale);
         aNBT.setFloat("mModelRotation", modelRotation);
         aNBT.setLong("mCoreMaxAmperage", mCoreMaxAmperage);
@@ -159,6 +169,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         if (aNBT.hasKey("mSelectedCore")) selectedCore = aNBT.getInteger("mSelectedCore");
         if (aNBT.hasKey("mCoreMaxVoltageTier")) mCoreVoltageTier = aNBT.getInteger("mCoreMaxVoltageTier");
         if (aNBT.hasKey("mFoundCore")) foundCore = aNBT.getBoolean("mFoundCore");
+        if (aNBT.hasKey("mWirelessMode")) wirelessMode = aNBT.getBoolean("mWirelessMode");
         if (aNBT.hasKey("mModelScale")) modelScale = aNBT.getFloat("mModelScale");
         if (aNBT.hasKey("mModelRotation")) modelRotation = aNBT.getFloat("mModelRotation");
         if (aNBT.hasKey("mCoreMaxAmperage")) mCoreMaxAmperage = aNBT.getLong("mCoreMaxAmperage");
@@ -218,6 +229,7 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
             if (foundCore && particleRate > 0) particleRate--;
             if (aTick % 400 == 0) nextCore();
             syncEnergy(aBaseMetaTileEntity);
+            if (aTick % wirelessResyncRate == 0) syncWirelessEnergy(aBaseMetaTileEntity);
             setFoundCore();
             updateAmperageFromCoreItem();
             updateVoltageTierFromFieldGenerator();
@@ -228,8 +240,13 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
 
     @Override
     public void onFirstTick(IGregTechTileEntity aBaseMetaTileEntity) {
-        nextCore();
         super.onFirstTick(aBaseMetaTileEntity);
+        nextCore();
+
+        if (!aBaseMetaTileEntity.isServerSide()) return;
+
+        global_energy_user_uuid = aBaseMetaTileEntity.getOwnerUuid();
+        SpaceProjectManager.checkOrCreateTeam(global_energy_user_uuid);
     }
 
     public void placeRenderTile() {
@@ -415,15 +432,15 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
             long stored = getBaseMetaTileEntity().getStoredEU();
             long spaceLeft = getBaseMetaTileEntity().getEUCapacity() - stored;
 
-            if (getBaseMetaTileEntity().isAllowedToWork()) {
+            if (getBaseMetaTileEntity().isAllowedToWork() && !wirelessMode) {
                 // Pull from core if we have space
                 if (spaceLeft > 0 && mCoreEU > 0) {
-                     if (!wirelessMode) extractEnergy(spaceLeft, core);
+                     extractEnergy(spaceLeft, core);
                 }
-            } else {
+            } else if (!getBaseMetaTileEntity().isAllowedToWork() && !wirelessMode) {
                 // Push to core if we are over some threshold
                 if (stored > 0 && mCoreEU < mMaxCoreEu) {
-                    if (!wirelessMode) receiveEnergy(stored, core);
+                    receiveEnergy(stored, core);
                 }
             }
         } else {
@@ -503,6 +520,100 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         return (byte) rate;
     }
 
+    private void syncWirelessEnergy(IGregTechTileEntity aBaseMetaTileEntity) {
+        TileEnergyStorageCore core = getMaster();
+        if (foundCore && core != null) {
+            mCoreEU = core.getEnergyStored();
+            mMaxCoreEu = core.getMaxEnergyStored();
+            aBaseMetaTileEntity.setActive(aBaseMetaTileEntity.isAllowedToWork());
+
+            if (wirelessMode) {
+                long amount = (V[mCoreVoltageTier] * mCoreWirelessAmperage) * wirelessResyncRate;
+                if (amount > mMaxCoreEu) amount = mMaxCoreEu / 16;
+
+                if (getBaseMetaTileEntity().isAllowedToWork()) {
+                    // SEND to wireless network
+                    if (mCoreEU > mMaxCoreEu / 2 + amount) {
+                        extractWirelessEnergy(amount, core);
+                    }
+
+                } else if (!getBaseMetaTileEntity().isAllowedToWork()) {
+                    // RECEIVE from wireless network
+                    if (mCoreEU < mMaxCoreEu / 2 - amount) {
+                        receiveWirelessEnergy(amount, core);
+                    }
+                }
+            }
+        }
+    }
+
+    private void extractWirelessEnergy(long requested, TileEnergyStorageCore core) {
+        BigInteger storedWireless = WirelessNetworkManager.getUserEU(global_energy_user_uuid);
+
+        long stored = mCoreEU;
+        long space = mMaxCoreEu - mCoreEU;
+        if (space <= 0 || requested <= 0) return;
+
+        long remaining = Math.min(requested, Math.min(stored, space));
+
+        if (remaining <= 0) return;
+
+        // Particle rate based on total transfer
+        particleRate = calculateParticleRate(remaining);
+
+        long transferred = 0;
+
+        while (remaining > 0) {
+            int packet = (int) Math.min(Integer.MAX_VALUE, remaining);
+
+            int extracted = core.extractEnergy(packet, false);
+            if (extracted <= 0) break;
+
+            transferred += extracted;
+            remaining -= extracted;
+
+            if (extracted < packet) break; // core hit its limit
+        }
+
+        if (transferred > 0) {
+            WirelessNetworkManager.setUserEU(global_energy_user_uuid, storedWireless.add(BigInteger.valueOf(transferred)));
+        }
+    }
+
+    private void receiveWirelessEnergy(long requested, TileEnergyStorageCore core) {
+        BigInteger storedWireless = WirelessNetworkManager.getUserEU(global_energy_user_uuid);
+
+        if (requested <= 0) return;
+
+        long coreSpace = mMaxCoreEu - mCoreEU;
+        if (coreSpace <= 0) return;
+
+        long remaining = requested < mMaxCoreEu ? requested : 0;
+
+        if (remaining <= 0) return;
+
+        // Particle rate based on total transfer
+        particleRate = calculateParticleRate(remaining);
+
+        long transferred = 0;
+
+        while (remaining > 0) {
+            int packet = (int) Math.min(Integer.MAX_VALUE, remaining);
+
+            int received = core.receiveEnergy(packet, false);
+            if (received <= 0) break;
+
+            transferred += received;
+            remaining -= received;
+
+            if (received < packet) break; // core hit its limit
+        }
+
+        if (transferred > 0) {
+            WirelessNetworkManager.setUserEU(global_energy_user_uuid,  storedWireless.subtract(BigInteger.valueOf(transferred)));
+        }
+    }
+
     public long getmCoreEU() {
         return mCoreEU;
     }
@@ -513,14 +624,19 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
 
     private void updateAmperageFromCoreItem() {
         if (mInventory[0] != null) {
-            if (mInventory[0].isItemEqual(getModItem(Mods.DraconicEvolution.ID, "draconicCore", 1L, 0)))
+            if (mInventory[0].isItemEqual(getModItem(Mods.DraconicEvolution.ID, "draconicCore", 1L, 0))) {
                 mCoreMaxAmperage = mInventory[0].stackSize;
-            else if (mInventory[0].isItemEqual(getModItem(Mods.DraconicEvolution.ID, "wyvernCore", 1L, 0)))
+                mCoreWirelessAmperage = mInventory[0].stackSize;
+            } else if (mInventory[0].isItemEqual(getModItem(Mods.DraconicEvolution.ID, "wyvernCore", 1L, 0))) {
                 mCoreMaxAmperage = mInventory[0].stackSize * 4L;
-            else if (mInventory[0].isItemEqual(getModItem(Mods.DraconicEvolution.ID, "awakenedCore", 1L, 0)))
+                mCoreWirelessAmperage = mInventory[0].stackSize * 4L;
+            } else if (mInventory[0].isItemEqual(getModItem(Mods.DraconicEvolution.ID, "awakenedCore", 1L, 0))) {
                 mCoreMaxAmperage = mInventory[0].stackSize * 256L;
-            else if (mInventory[0].isItemEqual(getModItem(Mods.DraconicEvolution.ID, "chaoticCore", 1L, 0)))
+                mCoreWirelessAmperage = mInventory[0].stackSize * 256L;
+            } else if (mInventory[0].isItemEqual(getModItem(Mods.DraconicEvolution.ID, "chaoticCore", 1L, 0))) {
                 mCoreMaxAmperage = mInventory[0].stackSize * 16384L;
+                mCoreWirelessAmperage = mInventory[0].stackSize * 16384L;
+            }
         } else {
             mCoreMaxAmperage = 0;
         }
@@ -528,20 +644,41 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
 
     private void updateVoltageTierFromFieldGenerator() {
         if (mInventory[1] != null) {
-            if (mInventory[1].isItemEqual(ItemList.Field_Generator_LV.get(1))) mCoreVoltageTier = VoltageIndex.LV;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_MV.get(1))) mCoreVoltageTier = VoltageIndex.MV;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_HV.get(1))) mCoreVoltageTier = VoltageIndex.HV;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_EV.get(1))) mCoreVoltageTier = VoltageIndex.EV;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_IV.get(1))) mCoreVoltageTier = VoltageIndex.IV;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_LuV.get(1))) mCoreVoltageTier = VoltageIndex.LuV;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_ZPM.get(1))) mCoreVoltageTier = VoltageIndex.ZPM;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UV.get(1))) mCoreVoltageTier = VoltageIndex.UV;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UHV.get(1))) mCoreVoltageTier = VoltageIndex.UHV;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UEV.get(1))) mCoreVoltageTier = VoltageIndex.UEV;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UIV.get(1))) mCoreVoltageTier = VoltageIndex.UIV;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UMV.get(1))) mCoreVoltageTier = VoltageIndex.UMV;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UXV.get(1))) mCoreVoltageTier = VoltageIndex.UXV;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_MAX.get(1))) mCoreVoltageTier = VoltageIndex.MAX;
+            if (mInventory[1].isItemEqual(ItemList.Field_Generator_LV.get(1))) {
+                mCoreVoltageTier = VoltageIndex.LV;
+            } else if (mInventory[1].isItemEqual(ItemList.Field_Generator_MV.get(1))) {
+                mCoreVoltageTier = VoltageIndex.MV;
+            } else if (mInventory[1].isItemEqual(ItemList.Field_Generator_HV.get(1))) {
+                mCoreVoltageTier = VoltageIndex.HV;
+            } else if (mInventory[1].isItemEqual(ItemList.Field_Generator_EV.get(1))) {
+                mCoreVoltageTier = VoltageIndex.EV;
+            } else if (mInventory[1].isItemEqual(ItemList.Field_Generator_IV.get(1))) {
+                mCoreVoltageTier = VoltageIndex.IV;
+            } else if (mInventory[1].isItemEqual(ItemList.Field_Generator_LuV.get(1))) {
+                mCoreVoltageTier = VoltageIndex.LuV;
+            } else if (mInventory[1].isItemEqual(ItemList.Field_Generator_ZPM.get(1))) {
+                mCoreVoltageTier = VoltageIndex.ZPM;
+            } else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UV.get(1))) {
+                mCoreVoltageTier = VoltageIndex.UV;
+            } else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UHV.get(1))) {
+                mCoreVoltageTier = VoltageIndex.UHV;
+                canUseWirelessMode = true;
+            } else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UEV.get(1))) {
+                mCoreVoltageTier = VoltageIndex.UEV;
+                canUseWirelessMode = true;
+            } else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UIV.get(1))) {
+                mCoreVoltageTier = VoltageIndex.UIV;
+                canUseWirelessMode = true;
+            } else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UMV.get(1))) {
+                mCoreVoltageTier = VoltageIndex.UMV;
+                canUseWirelessMode = true;
+            } else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UXV.get(1))) {
+                mCoreVoltageTier = VoltageIndex.UXV;
+                canUseWirelessMode = true;
+            } else if (mInventory[1].isItemEqual(ItemList.Field_Generator_MAX.get(1))) {
+                mCoreVoltageTier = VoltageIndex.MAX;
+                canUseWirelessMode = true;
+            }
         } else {
             mCoreVoltageTier = 0;
         }
@@ -571,13 +708,13 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
             tag.getBoolean("foundCore")
                 ? EnumChatFormatting.GREEN + StatCollector.translateToLocal("GT5U.waila.generating.foundCore")
                 : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.missingCore"));
-        if (!tag.getBoolean("wirelessMode")) {
-            if (tag.hasKey("mode")) currenttip.add(
-                tag.getBoolean("mode")
-                    ? EnumChatFormatting.GREEN + StatCollector.translateToLocal("GT5U.waila.generating.exportMode")
-                    : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.importMode"));
-        } else {
-            if (tag.hasKey("wirelessMode")) currenttip.add(EnumChatFormatting.BLUE + StatCollector.translateToLocal("GT5U.waila.generating.wirelessMode"));
+        if (tag.hasKey("mode")) currenttip.add(
+            tag.getBoolean("mode")
+                ? EnumChatFormatting.GREEN + StatCollector.translateToLocal("GT5U.waila.generating.exportMode")
+                : EnumChatFormatting.RED + StatCollector.translateToLocal("GT5U.waila.generating.importMode"));
+        if (tag.hasKey("wirelessMode")) {
+            if (tag.getBoolean("wirelessMode"))
+                currenttip.add(EnumChatFormatting.BLUE + StatCollector.translateToLocal("GT5U.waila.generating.wirelessMode"));
         }
         if (tag.hasKey("coreEu") && tag.hasKey("maxCoreEu")) currenttip.add(
             EnumChatFormatting.GREEN + formatNumber(tag.getLong("coreEu"))
@@ -587,27 +724,29 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
                 + formatNumber(tag.getLong("maxCoreEu"))
                 + EnumChatFormatting.GRAY
                 + " EU");
-        if (!tag.getBoolean("wirelessMode")) {
-            if (tag.hasKey("storedEu") && tag.hasKey("maxStoredEu")) currenttip.add(
-                EnumChatFormatting.GREEN + formatNumber(tag.getLong("storedEu"))
-                    + EnumChatFormatting.GRAY
-                    + " / "
-                    + EnumChatFormatting.YELLOW
-                    + formatNumber(tag.getLong("maxStoredEu"))
-                    + EnumChatFormatting.GRAY
-                    + " EU");
-            if (tag.hasKey("AvgIn") && tag.hasKey("CoreVoltageTier")) currenttip.add(
-                StatCollector.translateToLocalFormatted(
-                    "GT5U.waila.energy.avg_in_with_amperage",
-                    formatNumber(tag.getLong("AvgIn")),
-                    GTUtility.getAmperageForTier(tag.getLong("AvgIn"), tag.getByte("CoreVoltageTier")),
-                    GTUtility.getColoredTierNameFromTier(tag.getByte("CoreVoltageTier"))));
-            if (tag.hasKey("AvgOut") && tag.hasKey("CoreVoltageTier")) currenttip.add(
-                StatCollector.translateToLocalFormatted(
-                    "GT5U.waila.energy.avg_out_with_amperage",
-                    formatNumber(tag.getLong("AvgOut")),
-                    GTUtility.getAmperageForTier(tag.getLong("AvgOut"), tag.getByte("CoreVoltageTier")),
-                    GTUtility.getColoredTierNameFromTier(tag.getByte("CoreVoltageTier"))));
+        if (tag.hasKey("wirelessMode")) {
+            if (!tag.getBoolean("wirelessMode")) {
+                if (tag.hasKey("storedEu") && tag.hasKey("maxStoredEu")) currenttip.add(
+                    EnumChatFormatting.GREEN + formatNumber(tag.getLong("storedEu"))
+                        + EnumChatFormatting.GRAY
+                        + " / "
+                        + EnumChatFormatting.YELLOW
+                        + formatNumber(tag.getLong("maxStoredEu"))
+                        + EnumChatFormatting.GRAY
+                        + " EU");
+                if (tag.hasKey("AvgIn") && tag.hasKey("CoreVoltageTier")) currenttip.add(
+                    StatCollector.translateToLocalFormatted(
+                        "GT5U.waila.energy.avg_in_with_amperage",
+                        formatNumber(tag.getLong("AvgIn")),
+                        GTUtility.getAmperageForTier(tag.getLong("AvgIn"), tag.getByte("CoreVoltageTier")),
+                        GTUtility.getColoredTierNameFromTier(tag.getByte("CoreVoltageTier"))));
+                if (tag.hasKey("AvgOut") && tag.hasKey("CoreVoltageTier")) currenttip.add(
+                    StatCollector.translateToLocalFormatted(
+                        "GT5U.waila.energy.avg_out_with_amperage",
+                        formatNumber(tag.getLong("AvgOut")),
+                        GTUtility.getAmperageForTier(tag.getLong("AvgOut"), tag.getByte("CoreVoltageTier")),
+                        GTUtility.getColoredTierNameFromTier(tag.getByte("CoreVoltageTier"))));
+            }
         }
         super.getWailaBody(itemStack, currenttip, accessor, config);
     }
@@ -721,21 +860,10 @@ public class MTEEnergyPylon extends MTETieredMachineBlock implements IAddUIWidge
         return true;
     }
 
-    private boolean canUseWireless() {
-        if (mInventory[1] != null) {
-            if (mInventory[1].isItemEqual(ItemList.Field_Generator_UHV.get(1))) return true;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UEV.get(1))) return true;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UIV.get(1))) return true;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UMV.get(1))) return true;
-            else if (mInventory[1].isItemEqual(ItemList.Field_Generator_UXV.get(1))) return true;
-            else return mInventory[1].isItemEqual(ItemList.Field_Generator_MAX.get(1));
-        } else return false;
-    }
-
     @Override
     public void onScrewdriverRightClick(ForgeDirection side, EntityPlayer aPlayer, float aX, float aY, float aZ,
                                         ItemStack aTool) {
-        if (canUseWireless()) {
+        if (canUseWirelessMode) {
             wirelessMode = !wirelessMode;
             GTUtility.sendChatToPlayer(aPlayer, "Wireless network mode " + (wirelessMode ? "enabled." : "disabled."));
         } else {
