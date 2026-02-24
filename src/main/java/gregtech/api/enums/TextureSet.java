@@ -87,7 +87,7 @@ public class TextureSet {
         SET_METALLIC = new TextureSet("METALLIC"), SET_NETHERSTAR = new TextureSet("NETHERSTAR"),
         SET_GEM_VERTICAL = new TextureSet("GEM_VERTICAL"), SET_GEM_HORIZONTAL = new TextureSet("GEM_HORIZONTAL"),
         SET_REFINED = new TextureSet("REFINED"), SET_GEM_A = new TextureSet("GEM_A"),
-        SET_NUCLEAR = new TextureSet("NUCLEAR");
+        SET_NUCLEAR = new TextureSet("NUCLEAR"), SET_SHINY_METALLIC = new TextureSet("SHINY_METALLIC");
 
     /**
      * Custom Texture Sets for more clean code
