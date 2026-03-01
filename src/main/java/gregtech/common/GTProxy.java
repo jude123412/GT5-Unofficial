@@ -155,6 +155,7 @@ import gregtech.api.util.GTShapelessRecipe;
 import gregtech.api.util.GTSpawnEventHandler;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.WorldSpawnedEventBuilder;
+import gregtech.client.renderer.waila.TTRenderGTProgressBar;
 import gregtech.common.config.OPStuff;
 import gregtech.common.data.GTPowerfailTracker;
 import gregtech.common.data.maglev.TetherManager;
@@ -593,7 +594,6 @@ public class GTProxy implements IFuelHandler {
     public boolean mEnableAllMaterials = false;
     public boolean mEnableCleanroom = true;
     public boolean mLowGravProcessing = false;
-    public boolean mCropNeedBlock = true;
     public boolean mAMHInteraction = true;
     public boolean mForceFreeFace = true;
     public boolean mMixedOreOnlyYieldsTwoThirdsOfPureOre = false;
@@ -679,6 +679,16 @@ public class GTProxy implements IFuelHandler {
     public boolean mWailaTransformerVoltageTier = true;
     /** This enables showing the cpu load in nanoseconds via waila. */
     public boolean wailaAverageNS = false;
+    /** Color preset of the waila progress bar. */
+    public TTRenderGTProgressBar.ProgressBarColor wailaProgressBarColorPreset = TTRenderGTProgressBar.ProgressBarColor.Green;
+    /** First color of the waila progress bar. */
+    public int wailaProgressBarColor1 = 0xFFDD5555;
+    /** Second color of the waila progress bar. */
+    public int wailaProgressBarColor2 = 0xFFDD2222;
+    /** First color of the waila progress bar's border (top and left). */
+    public int wailaProgressBorderColor1 = 0xFF505050;
+    /** Second color of the waila progress bar's border (bottom and right). */
+    public int wailaProgressBorderColor2 = 0xFF505050;
 
     public static final int GUI_ID_COVER_SIDE_BASE = 10; // Takes GUI ID 10 - 15
 
@@ -865,17 +875,10 @@ public class GTProxy implements IFuelHandler {
         ItemList.IC2_Item_Casing_Tin.set(GTModHandler.getIC2Item("casingtin", 1L));
         ItemList.IC2_Item_Casing_Lead.set(GTModHandler.getIC2Item("casinglead", 1L));
         ItemList.IC2_Item_Casing_Steel.set(GTModHandler.getIC2Item("casingadviron", 1L));
-        ItemList.IC2_Spray_WeedEx.set(GTModHandler.getIC2Item("weedEx", 1L));
         ItemList.IC2_Mixed_Metal_Ingot.set(GTModHandler.getIC2Item("mixedMetalIngot", 1L));
-        ItemList.IC2_Fertilizer.set(GTModHandler.getIC2Item("fertilizer", 1L));
-        ItemList.IC2_CoffeeBeans.set(GTModHandler.getIC2Item("coffeeBeans", 1L));
-        ItemList.IC2_CoffeePowder.set(GTModHandler.getIC2Item("coffeePowder", 1L));
-        ItemList.IC2_Hops.set(GTModHandler.getIC2Item("hops", 1L));
         ItemList.IC2_Resin.set(GTModHandler.getIC2Item("resin", 1L));
         ItemList.IC2_Plantball.set(GTModHandler.getIC2Item("plantBall", 1L));
         ItemList.IC2_PlantballCompressed.set(GTModHandler.getIC2Item("compressedPlantBall", 1L, ItemList.IC2_Plantball.get(1L)));
-        ItemList.IC2_Crop_Seeds.set(GTModHandler.getIC2Item("cropSeed", 1L));
-        ItemList.IC2_Grin_Powder.set(GTModHandler.getIC2Item("grinPowder", 1L));
         ItemList.IC2_Energium_Dust.set(GTModHandler.getIC2Item("energiumDust", 1L));
         ItemList.IC2_Scrap.set(GTModHandler.getIC2Item("scrap", 1L));
         ItemList.IC2_Scrapbox.set(GTModHandler.getIC2Item("scrapBox", 1L));
@@ -959,7 +962,6 @@ public class GTProxy implements IFuelHandler {
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("cfPack", 1L, 32767));
         // GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("jetpack", 1L, 32767));
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("treetap", 1L, 32767));
-        GTModHandler.sNonReplaceableItems.add(ItemList.IC2_Spray_WeedEx.getWithDamage(1L, 32767));
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("staticBoots", 1L, 32767));
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("compositeArmor", 1L, 32767));
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("hazmatHelmet", 1L, 32767));
@@ -1093,7 +1095,7 @@ public class GTProxy implements IFuelHandler {
             if (GregTechAPI.METATILEENTITIES[i] != null) {
                 try {
                     GregTechAPI.METATILEENTITIES[i].onConfigLoad();
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     GT_FML_LOGGER.error("Could not load config for MTE " + GregTechAPI.METATILEENTITIES[i], e);
                 }
             }
@@ -1203,7 +1205,7 @@ public class GTProxy implements IFuelHandler {
             if (GregTechAPI.METATILEENTITIES[i] != null) {
                 try {
                     GregTechAPI.METATILEENTITIES[i].onServerStart();
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     throw new RuntimeException("Could not call onServerStart MTE " + GregTechAPI.METATILEENTITIES[i], e);
                 }
             }
@@ -1467,7 +1469,7 @@ public class GTProxy implements IFuelHandler {
                         GTUtility.setStack(tDrop, tSmeltingOutput);
                     }
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 e.printStackTrace(GTLog.err);
             }
         }
@@ -1926,7 +1928,7 @@ public class GTProxy implements IFuelHandler {
             if (this.mOreDictActivated) {
                 OreDictEventContainer.registerRecipes(tOre);
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             GT_FML_LOGGER
                 .error("Could not register ore (oredict name=" + aEvent.Name + ", item stack=" + aEvent.Ore + ")", e);
         }
@@ -1954,7 +1956,7 @@ public class GTProxy implements IFuelHandler {
         }
         GTOreDictUnificator.addToBlacklist(aFluidEvent.data.emptyContainer);
         GTOreDictUnificator.addToBlacklist(aFluidEvent.data.filledContainer);
-        GTUtility.addFluidContainerData(aFluidEvent.data);
+        GTUtility.insertInFluidToContainersMap(aFluidEvent.data);
     }
 
     @SubscribeEvent
@@ -2292,7 +2294,7 @@ public class GTProxy implements IFuelHandler {
                 .fluidInputs(new FluidStack(uncrackedFluid, 1000), Materials.Hydrogen.getGas(hydrogenAmount * 800))
                 .fluidOutputs(new FluidStack(crackedFluids[i], 1000))
                 .duration((1 + i) * SECONDS)
-                .eut(240)
+                .eut(TierEU.RECIPE_HV / 2)
                 .addTo(crackingRecipes);
 
             GTValues.RA.stdBuilder()
@@ -2354,7 +2356,7 @@ public class GTProxy implements IFuelHandler {
                 .fluidInputs(new FluidStack(uncrackedFluid, 1_000), Materials.Steam.getGas(1_000))
                 .fluidOutputs(new FluidStack(crackedFluids[i], 1_200))
                 .duration((1 + i) * SECONDS)
-                .eut(240)
+                .eut(TierEU.RECIPE_HV / 2)
                 .addTo(crackingRecipes);
 
             GTValues.RA.stdBuilder()

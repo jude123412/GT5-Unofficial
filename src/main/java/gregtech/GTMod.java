@@ -28,7 +28,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.SetMultimap;
 import com.gtnewhorizon.gtnhlib.config.ConfigException;
 import com.gtnewhorizon.gtnhlib.config.ConfigurationManager;
 
@@ -65,7 +64,6 @@ import gregtech.api.metatileentity.BaseMetaPipeEntity;
 import gregtech.api.modularui2.GTGuiTextures;
 import gregtech.api.modularui2.GTGuiTheme;
 import gregtech.api.modularui2.GTGuis;
-import gregtech.api.objects.GTItemStack;
 import gregtech.api.objects.ItemData;
 import gregtech.api.objects.XSTR;
 import gregtech.api.registries.LHECoolantRegistry;
@@ -98,6 +96,7 @@ import gregtech.common.misc.GTStructureChannels;
 import gregtech.common.misc.spaceprojects.commands.SPCommand;
 import gregtech.common.misc.spaceprojects.commands.SPMCommand;
 import gregtech.common.misc.spaceprojects.commands.SpaceProjectCommand;
+import gregtech.common.ores.UnificationOreAdapter;
 import gregtech.common.powergoggles.handlers.PowerGogglesConfigHandler;
 import gregtech.crossmod.ae2.AE2Compat;
 import gregtech.crossmod.holoinventory.HoloInventory;
@@ -112,7 +111,6 @@ import gregtech.loaders.misc.GTBees;
 import gregtech.loaders.postload.BlockResistanceLoader;
 import gregtech.loaders.postload.BookAndLootLoader;
 import gregtech.loaders.postload.CraftingRecipeLoader;
-import gregtech.loaders.postload.CropLoader;
 import gregtech.loaders.postload.GTPostLoad;
 import gregtech.loaders.postload.GTWorldgenloader;
 import gregtech.loaders.postload.ItemMaxStacksizeLoader;
@@ -121,6 +119,7 @@ import gregtech.loaders.postload.MachineTooltipsLoader;
 import gregtech.loaders.postload.MissingMappingsHandler;
 import gregtech.loaders.postload.PosteaTransformers;
 import gregtech.loaders.postload.RecyclerBlacklistLoader;
+import gregtech.loaders.postload.ScannerHandlerLoader;
 import gregtech.loaders.postload.ScrapboxDropLoader;
 import gregtech.loaders.preload.GTPreLoad;
 import gregtech.loaders.preload.LoaderCircuitBehaviors;
@@ -243,6 +242,8 @@ public class GTMod {
         Textures.BlockIcons.VOID.name();
         // noinspection ResultOfMethodCallIgnored// Suspicious likely pointless
         Textures.ItemIcons.VOID.name();
+
+        UnificationOreAdapter.load();
     }
 
     public static GTClient clientProxy() {
@@ -429,7 +430,6 @@ public class GTMod {
         new RecyclerBlacklistLoader().run();
         new MachineRecipeLoader().run();
         new ScrapboxDropLoader().run();
-        new CropLoader().run();
         new GTWorldgenloader().run();
         new CoverLoader().run();
         StoneType.init();
@@ -550,6 +550,7 @@ public class GTMod {
             tRunnable.run();
         }
         GTPostLoad.addFakeRecipes();
+        ScannerHandlerLoader.registerScannerHandlers();
 
         if (GregTechAPI.mOutputRF || GregTechAPI.mInputRF) {
             GTUtility.checkAvailabilities();
@@ -762,14 +763,9 @@ public class GTMod {
 
     @Mod.EventHandler
     public void onIDChangingEvent(FMLModIdMappingEvent event) {
-        GTUtility.reInit();
+        if (event.remappedIds.isEmpty()) return;
+
         GTRecipe.reInit();
-        for (Map<?, ?> gt_itemStackMap : GregTechAPI.sItemStackMappings) {
-            GTUtility.reMap(gt_itemStackMap);
-        }
-        for (SetMultimap<GTItemStack, ?> gt_itemStackMap : GregTechAPI.itemStackMultiMaps) {
-            GTUtility.reMap(gt_itemStackMap);
-        }
         RemovedMetaRegistry.init();
     }
 
