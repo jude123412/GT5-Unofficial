@@ -23,15 +23,15 @@ public class MTEMagicalMaintenanceHatch extends MTEHatchMaintenance {
 
     private static Textures.BlockIcons.CustomIcon face;
 
-    private int airBuffer = 0;
-    private int earthBuffer = 0;
-    private int fireBuffer = 0;
-    private int waterBuffer = 0;
-    private int orderBuffer = 0;
-    private int entropyBuffer = 0;
+    public int airBuffer = 0;
+    public int earthBuffer = 0;
+    public int fireBuffer = 0;
+    public int waterBuffer = 0;
+    public int orderBuffer = 0;
+    public int entropyBuffer = 0;
 
-    private static final int centiVisCap = 5000;
-    private static final int centiVisCost = 2500;
+    public static final int centiVisCap = 5000;
+    public static final int centiVisCost = 2500;
 
     private static final ResourceLocation focusMaintenanceSound = new ResourceLocation(
         "emt",
@@ -151,7 +151,7 @@ public class MTEMagicalMaintenanceHatch extends MTEHatchMaintenance {
         }
     }
 
-    private int fillIfBelowCap(int buffer, Aspect aspect) {
+    public int fillIfBelowCap(int buffer, Aspect aspect) {
         if (buffer >= centiVisCap) return buffer;
 
         int space = centiVisCap - buffer;

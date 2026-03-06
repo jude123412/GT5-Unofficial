@@ -2181,6 +2181,7 @@ public enum ItemList implements IItemContainer {
     DecayWarehouse,
     LATEX,
     MagicalMaintenanceHatch,
+    MagicalMaintenanceHatchME,
     AcceleratorLV,
     AcceleratorMV,
     AcceleratorHV,
