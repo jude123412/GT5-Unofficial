@@ -59,6 +59,8 @@ public class MTEMagicalMaintenanceHatchME extends MTEMagicalMaintenanceHatch imp
     public void onFirstTick(IGregTechTileEntity aBaseMetaTileEntity) {
         super.onFirstTick(aBaseMetaTileEntity);
         getProxy().onReady();
+        IGridNode node = getProxy().getNode();
+        if (node != null) node.updateState();
     }
 
     @Override
@@ -69,13 +71,15 @@ public class MTEMagicalMaintenanceHatchME extends MTEMagicalMaintenanceHatch imp
     @Override
     public void saveNBTData(NBTTagCompound nbt) {
         super.saveNBTData(nbt);
-        this.visSourceInfo.writeToNBT(nbt, "visInterface");
+        nbt.setBoolean("additionalConnection", additionalConnection);
+        this.visSourceInfo.writeToNBT(nbt, "visSourceInfo");
     }
 
     @Override
     public void loadNBTData(NBTTagCompound nbt) {
         super.loadNBTData(nbt);
-        if (nbt.hasKey("visInterface")) visSourceInfo.readFromNBT(nbt, "visInterface");
+        additionalConnection = nbt.getBoolean("additionalConnection");
+        this.visSourceInfo.readFromNBT(nbt, "visSourceInfo");
     }
 
     @Override
@@ -85,7 +89,7 @@ public class MTEMagicalMaintenanceHatchME extends MTEMagicalMaintenanceHatch imp
 
     @Override
     public AECableType getCableConnectionType(ForgeDirection forgeDirection) {
-        return getBaseMetaTileEntity().getFrontFacing() == forgeDirection ? AECableType.SMART : AECableType.NONE;
+        return (additionalConnection || getBaseMetaTileEntity().getFrontFacing() == forgeDirection) ? AECableType.SMART : AECableType.NONE;
     }
 
     private void updateValidGridProxySides() {
@@ -94,10 +98,13 @@ public class MTEMagicalMaintenanceHatchME extends MTEMagicalMaintenanceHatch imp
         } else {
             getProxy().setValidSides(EnumSet.of(getBaseMetaTileEntity().getFrontFacing()));
         }
+        IGridNode node = getProxy().getNode();
+        if (node != null) node.updateState();
     }
 
     @Override
     public void onFacingChange() {
+        super.onFacingChange();
         updateValidGridProxySides();
     }
 
@@ -170,7 +177,7 @@ public class MTEMagicalMaintenanceHatchME extends MTEMagicalMaintenanceHatch imp
 
         if (!this.getProxy()
             .isReady()) {
-            return 0;
+            return buffer;
         }
 
         try {
