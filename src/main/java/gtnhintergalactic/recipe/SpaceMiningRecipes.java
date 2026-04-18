@@ -412,8 +412,8 @@ public class SpaceMiningRecipes {
             "phosphateAsteroid",
             null,
             null,
-            new int[] { 4500, 2500, 3000 },
-            new Materials[] { Materials.Phosphate, Materials.TricalciumPhosphate, Materials.Sulfur },
+            new int[] { 4500, 2500, 3000, 3000 },
+            new Materials[] { Materials.Phosphate, Materials.TricalciumPhosphate, Materials.Sulfur, Materials.Apatite },
             OrePrefixes.oreEndstone,
             20,
             150,
@@ -425,6 +425,28 @@ public class SpaceMiningRecipes {
             (int) TierEU.RECIPE_LuV,
             ItemMiningDrones.DroneTiers.IV.ordinal(),
             ItemMiningDrones.DroneTiers.UIV.ordinal(),
+            150);
+
+        // Space Ore Asteroid
+        addRecipesToDrones(
+            "spaceOreAsteroid",
+            null,
+            null,
+            new int[] { 2000, 2000, 2000, 1000, 2000, 2000, 3000, 3000, 3000, 3000, 3000, 3000 },
+            new Materials[] { Materials.MeteoricIron, Materials.DeepIron, Materials.Mytryl, Materials.BlackPlutonium,
+                Materials.CallistoIce, Materials.Ledox, Materials.Alduorite, Materials.Rubracium, Materials.Vulcanite,
+                Materials.Vyroxeres, Materials.Ceruclase, Materials.Orichalcum },
+            OrePrefixes.oreEndstone,
+            20,
+            50,
+            30,
+            100,
+            60,
+            1,
+            25 * SECONDS,
+            (int) TierEU.RECIPE_LuV,
+            ItemMiningDrones.DroneTiers.LuV.ordinal(),
+            ItemMiningDrones.DroneTiers.UV.ordinal(),
             150);
 
         // Lead Asteroid
@@ -610,6 +632,27 @@ public class SpaceMiningRecipes {
             (int) TierEU.RECIPE_IV,
             ItemMiningDrones.DroneTiers.EV.ordinal(),
             ItemMiningDrones.DroneTiers.UHV.ordinal(),
+            150);
+
+        // Nether Ore Asteroid
+        addRecipesToDrones(
+            "NetherOreAsteroid",
+            null,
+            null,
+            new int[] { 3000, 3000, 2000, 1500, 500 },
+            new Materials[] { Materials.NetherQuartz, Materials.Sulfur, Materials.CertusQuartz, Materials.Quartzite,
+                Materials.Firestone },
+            OrePrefixes.oreNetherrack,
+            30,
+            110,
+            10,
+            100,
+            240,
+            1,
+            50 * SECONDS,
+            (int) TierEU.RECIPE_IV,
+            ItemMiningDrones.DroneTiers.EV.ordinal(),
+            ItemMiningDrones.DroneTiers.ZPM.ordinal(),
             150);
 
         // Europium Asteroid

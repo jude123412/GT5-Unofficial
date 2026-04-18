@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
@@ -23,11 +22,13 @@ import org.jetbrains.annotations.Nullable;
 
 import gregtech.GTMod;
 import gregtech.api.GregTechAPI;
+import gregtech.api.enums.GTValues;
 import gregtech.api.enums.HarvestTool;
 import gregtech.api.enums.Textures;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.render.TextureFactory;
+import gregtech.api.util.GTItemTransfer;
 import gregtech.api.util.GTUtility;
 import gregtech.common.tileentities.machines.multi.MTECokeOven;
 import mcp.mobius.waila.api.IWailaConfigHandler;
@@ -77,10 +78,22 @@ public class MTEHatchCokeOven extends MTEHatch {
 
         @Override
         public @NotNull String toString() {
+            return StatCollector.translateToLocal(this.getUnlocalizedString());
+        }
+
+        public @NotNull String getLocalizedName() {
             return switch (this) {
-                case Input -> StatCollector.translateToLocal("GT5U.machines.coke_oven_hatch.mode.input");
-                case OutputItem -> StatCollector.translateToLocal("GT5U.machines.coke_oven_hatch.mode.output");
-                case OutputFluid -> StatCollector.translateToLocal("GT5U.machines.coke_oven_hatch.mode.output_fluid");
+                case Input -> StatCollector.translateToLocal("GT5U.waila.coke_oven_hatch.mode.input");
+                case OutputItem -> StatCollector.translateToLocal("GT5U.waila.coke_oven_hatch.mode.output_item");
+                case OutputFluid -> StatCollector.translateToLocal("GT5U.waila.coke_oven_hatch.mode.output_fluid");
+            };
+        }
+
+        public @NotNull String getUnlocalizedString() {
+            return switch (this) {
+                case Input -> "GT5U.machines.coke_oven_hatch.mode.input";
+                case OutputItem -> "GT5U.machines.coke_oven_hatch.mode.output";
+                case OutputFluid -> "GT5U.machines.coke_oven_hatch.mode.output_fluid";
             };
         }
     }
@@ -155,7 +168,7 @@ public class MTEHatchCokeOven extends MTEHatch {
     public void getWailaBody(ItemStack itemStack, List<String> currenttip, IWailaDataAccessor accessor,
         IWailaConfigHandler config) {
         super.getWailaBody(itemStack, currenttip, accessor, config);
-        currenttip.add("Mode: " + mode.name);
+        currenttip.add(StatCollector.translateToLocalFormatted("GT5U.waila.mode", mode.getLocalizedName()));
     }
 
     /**
@@ -174,25 +187,16 @@ public class MTEHatchCokeOven extends MTEHatch {
         switch (mode) {
             case Input -> {}
             case OutputItem -> {
-                final IInventory target = baseMetaTileEntity.getIInventoryAtSide(sideFront);
-                if (target == null) return;
-                GTUtility.moveMultipleItemStacks(
-                    baseMetaTileEntity,
-                    target,
-                    sideFront,
-                    sideBack,
-                    null,
-                    false,
-                    (byte) 64,
-                    (byte) 1,
-                    (byte) 64,
-                    (byte) 1,
-                    getSizeInventory());
+                GTItemTransfer transfer = new GTItemTransfer();
+
+                transfer.outOfMachine(this, sideFront);
+
+                transfer.transfer();
             }
             case OutputFluid -> {
                 final IFluidHandler target = baseMetaTileEntity.getITankContainerAtSide(sideFront);
                 if (target == null) return;
-                GTUtility.moveFluid(activeController, target, sideFront, FLUID_TRANSFER_RATE, null);
+                GTUtility.moveFluid(activeController, target, ForgeDirection.UNKNOWN, FLUID_TRANSFER_RATE, null);
             }
         }
     }
@@ -248,7 +252,7 @@ public class MTEHatchCokeOven extends MTEHatch {
         return switch (mode) {
             case Input -> new int[] { MTECokeOven.INPUT_SLOT };
             case OutputItem -> new int[] { MTECokeOven.OUTPUT_SLOT };
-            default -> null;
+            default -> GTValues.emptyIntArray;
         };
     }
 
@@ -283,7 +287,7 @@ public class MTEHatchCokeOven extends MTEHatch {
         if (baseMetaTileEntity.isClientSide()) return;
         mode = mode.next();
         baseMetaTileEntity.issueTileUpdate();
-        GTUtility.sendChatToPlayer(player, mode.toString());
+        GTUtility.sendChatTrans(player, mode.getUnlocalizedString());
     }
 
     private static final ITexture TEXTURE_CASING = Textures.BlockIcons
@@ -310,10 +314,12 @@ public class MTEHatchCokeOven extends MTEHatch {
         };
     }
 
+    @Override
     public ITexture[] getTexturesActive(ITexture baseTexture) {
         return null;
     }
 
+    @Override
     public ITexture[] getTexturesInactive(ITexture baseTexture) {
         return null;
     }

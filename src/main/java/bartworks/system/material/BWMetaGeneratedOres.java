@@ -37,7 +37,6 @@ import gregtech.api.enums.StoneType;
 import gregtech.api.interfaces.IBlockWithTextures;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.render.TextureFactory;
-import gregtech.api.util.GTLanguageManager;
 import gregtech.api.util.GTOreDictUnificator;
 import gregtech.api.util.GTUtility;
 import gregtech.common.ores.BWOreAdapter;
@@ -47,7 +46,6 @@ import gregtech.common.render.GTRendererBlock;
 public class BWMetaGeneratedOres extends Block implements IBlockWithTextures {
 
     public final String blockName;
-    public final String blockTypeLocalizedName;
     public final StoneType stoneType;
     public final boolean isSmall, isNatural;
 
@@ -58,16 +56,6 @@ public class BWMetaGeneratedOres extends Block implements IBlockWithTextures {
         this.setHardness(5.0F);
         this.setResistance(5.0F);
         this.setCreativeTab(metaTab);
-
-        if (small) {
-            this.blockTypeLocalizedName = GTLanguageManager.addStringLocalization(
-                blockName,
-                OrePrefixes.oreSmall.getMaterialPrefix() + "%material" + OrePrefixes.oreSmall.getMaterialPostfix());
-        } else {
-            this.blockTypeLocalizedName = GTLanguageManager.addStringLocalization(
-                blockName,
-                OrePrefixes.ore.getMaterialPrefix() + "%material" + OrePrefixes.ore.getMaterialPostfix());
-        }
 
         this.blockName = blockName;
         this.stoneType = stoneType;
@@ -82,12 +70,10 @@ public class BWMetaGeneratedOres extends Block implements IBlockWithTextures {
     protected void doRegistrationStuff(Werkstoff w) {
         if (w == null) return;
         if (!w.hasItemType(OrePrefixes.ore)) return;
-        if ((w.getGenerationFeatures().blacklist & 0b1000) != 0) return;
 
         ItemStack self = new ItemStack(this, 1, w.getmID());
-        OrePrefixes prefix = isSmall ? OrePrefixes.oreSmall : OrePrefixes.ore;
 
-        GTOreDictUnificator.registerOre(prefix + w.getVarName(), self);
+        GTOreDictUnificator.registerOre(getPrefix() + w.getVarName(), self);
     }
 
     @Override
@@ -119,8 +105,7 @@ public class BWMetaGeneratedOres extends Block implements IBlockWithTextures {
     public void getSubBlocks(Item aItem, CreativeTabs aTab, List<ItemStack> aList) {
         if (!isNatural) {
             for (Werkstoff tMaterial : Werkstoff.werkstoffHashSet) {
-                if (tMaterial != null && tMaterial.hasItemType(OrePrefixes.ore)
-                    && (tMaterial.getGenerationFeatures().blacklist & 0x8) == 0) {
+                if (tMaterial != null && tMaterial.hasItemType(OrePrefixes.ore)) {
                     aList.add(new ItemStack(aItem, 1, tMaterial.getmID()));
                 }
             }
@@ -170,7 +155,7 @@ public class BWMetaGeneratedOres extends Block implements IBlockWithTextures {
     public ITexture[][] getTextures(int metadata) {
         Werkstoff material = Werkstoff.werkstoffHashMap.get((short) metadata);
 
-        OrePrefixes prefix = isSmall ? OrePrefixes.oreSmall : OrePrefixes.ore;
+        OrePrefixes prefix = getPrefix();
 
         ITexture oreTexture;
 
@@ -188,5 +173,9 @@ public class BWMetaGeneratedOres extends Block implements IBlockWithTextures {
         }
 
         return out;
+    }
+
+    public OrePrefixes getPrefix() {
+        return isSmall ? OrePrefixes.oreSmall : OrePrefixes.ore;
     }
 }

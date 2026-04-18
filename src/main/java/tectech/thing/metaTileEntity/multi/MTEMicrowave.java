@@ -90,7 +90,7 @@ public class MTEMicrowave extends TTMultiblockBase implements ISurvivalConstruct
             'B',
             ofChain(
                 buildHatchAdder(MTEMicrowave.class).atLeast(Maintenance, Energy, OutputBus)
-                    .dot(1)
+                    .hint(1)
                     .casingIndex(CASING_INDEX)
                     .buildAndChain(sBlockCasings4, 1),
                 ofHatchAdderOptional(MTEMicrowave::addClassicToMachineList, CASING_INDEX, 1, sBlockCasings4, 1)))
@@ -340,6 +340,11 @@ public class MTEMicrowave extends TTMultiblockBase implements ISurvivalConstruct
 
     @Override
     public boolean isSafeVoidButtonEnabled() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsSingleRecipeLocking() {
         return false;
     }
 }

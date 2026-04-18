@@ -35,7 +35,6 @@ import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.logic.ProcessingLogic;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.recipe.RecipeMap;
-import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.common.pollution.PollutionConfig;
@@ -48,7 +47,6 @@ import mcp.mobius.waila.api.IWailaDataAccessor;
 public class MTENuclearSaltProcessingPlant extends GTPPMultiBlockBase<MTENuclearSaltProcessingPlant>
     implements ISurvivalConstructable {
 
-    protected GTRecipe lastRecipeToBuffer;
     private int casing;
     private static IStructureDefinition<MTENuclearSaltProcessingPlant> STRUCTURE_DEFINITION = null;
 
@@ -62,7 +60,7 @@ public class MTENuclearSaltProcessingPlant extends GTPPMultiBlockBase<MTENuclear
 
     @Override
     public String getMachineType() {
-        return "Reactor Processing Unit, Cold Trap";
+        return "Reactor Processing Unit, Cold Trap, NSPP";
     }
 
     @Override
@@ -88,7 +86,7 @@ public class MTENuclearSaltProcessingPlant extends GTPPMultiBlockBase<MTENuclear
             .addInfo("Inputs go on the left side of the multi, outputs on the right side")
             .addPollutionAmount(getPollutionPerSecond(null))
             .beginStructureBlock(3, 3, 3, true)
-            .addController("Front Center")
+            .addController("Front center")
             .addCasingInfoMin("IV Machine Casing", 58, false)
             .addCasingInfoMin("Thermally Insulated Casing", 1, false)
             .addInputBus("Left Half", 2)
@@ -142,31 +140,31 @@ public class MTENuclearSaltProcessingPlant extends GTPPMultiBlockBase<MTENuclear
                     'B',
                     buildHatchAdder(MTENuclearSaltProcessingPlant.class).atLeast(InputBus, InputHatch)
                         .casingIndex(TAE.getIndexFromPage(0, 10))
-                        .dot(2)
+                        .hint(2)
                         .buildAndChain(onElementPass(x -> ++x.casing, ofBlock(ModBlocks.blockSpecialMultiCasings, 8))))
                 .addElement(
                     'C',
                     buildHatchAdder(MTENuclearSaltProcessingPlant.class).atLeast(OutputBus, OutputHatch)
                         .casingIndex(TAE.getIndexFromPage(0, 10))
-                        .dot(3)
+                        .hint(3)
                         .buildAndChain(onElementPass(x -> ++x.casing, ofBlock(ModBlocks.blockSpecialMultiCasings, 8))))
                 .addElement(
                     'D',
                     buildHatchAdder(MTENuclearSaltProcessingPlant.class).atLeast(Muffler)
                         .casingIndex(TAE.getIndexFromPage(0, 10))
-                        .dot(4)
+                        .hint(4)
                         .buildAndChain(onElementPass(x -> ++x.casing, ofBlock(ModBlocks.blockSpecialMultiCasings, 8))))
                 .addElement(
                     'E',
                     buildHatchAdder(MTENuclearSaltProcessingPlant.class).atLeast(Energy)
                         .casingIndex(TAE.getIndexFromPage(0, 10))
-                        .dot(5)
+                        .hint(5)
                         .buildAndChain(onElementPass(x -> ++x.casing, ofBlock(ModBlocks.blockSpecialMultiCasings, 8))))
                 .addElement(
                     'F',
                     buildHatchAdder(MTENuclearSaltProcessingPlant.class).atLeast(Maintenance)
                         .casingIndex(TAE.getIndexFromPage(0, 10))
-                        .dot(6)
+                        .hint(6)
                         .buildAndChain(onElementPass(x -> ++x.casing, ofBlock(ModBlocks.blockSpecialMultiCasings, 8))))
                 .build();
         }
@@ -209,22 +207,6 @@ public class MTENuclearSaltProcessingPlant extends GTPPMultiBlockBase<MTENuclear
     @Override
     public int getMaxParallelRecipes() {
         return 2 * (Math.max(1, GTUtility.getTier(getMaxInputVoltage())));
-    }
-
-    @Override
-    public String[] getExtraInfoData() {
-        final String running = (this.mMaxProgresstime > 0 ? "Salt Plant running" : "Salt Plant stopped");
-        final String maintenance = (this.getIdealStatus() == this.getRepairStatus() ? "No Maintenance issues"
-            : "Needs Maintenance");
-        String tSpecialText;
-
-        if (lastRecipeToBuffer != null && lastRecipeToBuffer.mOutputs[0].getDisplayName() != null) {
-            tSpecialText = "Currently processing: " + lastRecipeToBuffer.mOutputs[0].getDisplayName();
-        } else {
-            tSpecialText = "Currently processing: Nothing";
-        }
-
-        return new String[] { "Nuclear Salt Processing Plant", running, maintenance, tSpecialText };
     }
 
     @Override

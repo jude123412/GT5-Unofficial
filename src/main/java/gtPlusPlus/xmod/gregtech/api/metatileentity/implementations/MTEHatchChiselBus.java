@@ -1,19 +1,21 @@
 package gtPlusPlus.xmod.gregtech.api.metatileentity.implementations;
 
-import net.minecraft.util.EnumChatFormatting;
+import com.cleanroommc.modularui.factory.PosGuiData;
+import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 
-import com.gtnewhorizons.modularui.api.screen.ModularWindow;
-import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
-import com.gtnewhorizons.modularui.common.widget.Scrollable;
-import com.gtnewhorizons.modularui.common.widget.SlotWidget;
-
+import gregtech.api.enums.GTAuthors;
 import gregtech.api.interfaces.ITexture;
-import gregtech.api.interfaces.modularui.IAddUIWidgets;
+import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.implementations.MTEHatchInputBus;
+import gregtech.common.gui.modularui.hatch.MTEHatchChiselBusGui;
+import gtPlusPlus.core.util.Utils;
 
-public class MTEHatchChiselBus extends MTEHatchInputBus implements IAddUIWidgets {
+@IMetaTileEntity.SkipGenerateDescription
+public class MTEHatchChiselBus extends MTEHatchInputBus {
 
     public MTEHatchChiselBus(int id, String name, String nameRegional, int tier) {
         super(id, name, nameRegional, tier);
@@ -21,6 +23,11 @@ public class MTEHatchChiselBus extends MTEHatchInputBus implements IAddUIWidgets
 
     public MTEHatchChiselBus(String aName, int aTier, String[] aDescription, ITexture[][][] aTextures) {
         super(aName, aTier, getSlots(aTier), aDescription, aTextures);
+    }
+
+    @Override
+    public ModularPanel buildUI(PosGuiData data, PanelSyncManager syncManager, UISettings uiSettings) {
+        return new MTEHatchChiselBusGui(this).build(data, syncManager, uiSettings);
     }
 
     @Override
@@ -44,37 +51,10 @@ public class MTEHatchChiselBus extends MTEHatchInputBus implements IAddUIWidgets
 
     @Override
     public String[] getDescription() {
-        return new String[] {
-            "Item Input Bus for " + EnumChatFormatting.YELLOW + "Industrial Chisel" + EnumChatFormatting.RESET,
-            getSlots(this.mTier) - 1 + " + 1 " + " Slots",
-            "Added by: " + EnumChatFormatting.AQUA
-                + "Quetz4l"
-                + " - "
-                + EnumChatFormatting.RED
-                + "[GT++]"
-                + EnumChatFormatting.RESET };
-    }
-
-    @Override
-    public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
-        int slotIndex = 0;
-        final Scrollable scrollable = new Scrollable().setVerticalScroll();
-        for (int row = 0; row * 4 < inventoryHandler.getSlots() - 1; row++) {
-            int columnsToMake = Math.min(inventoryHandler.getSlots() - row * 4, 4);
-            for (int column = 0; column < columnsToMake; column++) {
-                scrollable.widget(
-                    new SlotWidget(inventoryHandler, slotIndex++).setPos(column * 18, row * 18)
-                        .setSize(18, 18));
-
-            }
-        }
-
-        builder.widget(
-            scrollable.setSize(18 * 4 + 4, 18 * 4)
-                .setPos(52, 7)); // main slots
-        builder.widget(
-            new SlotWidget(inventoryHandler, slotIndex).setPos(18, 18)
-                .setSize(18, 18)); // slot for target
+        return Utils.splitLocalizedFormattedWithAuthor(
+            "gt.blockmachines.input_bus_chisel.desc",
+            GTAuthors.AuthorQuetz4l,
+            getSlots(this.mTier) - 1);
     }
 
 }

@@ -1,11 +1,9 @@
 package tectech.thing.metaTileEntity.multi;
 
+import static com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil.formatNumber;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.onElementPass;
 import static gregtech.api.GregTechAPI.sBlockCasings1;
-import static gregtech.api.enums.GTValues.TIER_COLORS;
-import static gregtech.api.enums.GTValues.V;
-import static gregtech.api.enums.GTValues.VN;
 import static gregtech.api.enums.HatchElement.Dynamo;
 import static gregtech.api.enums.HatchElement.Energy;
 import static gregtech.api.util.GTStructureUtility.buildHatchAdder;
@@ -23,16 +21,11 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.common.util.ForgeDirection;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 
 import com.gtnewhorizon.structurelib.alignment.constructable.ISurvivalConstructable;
 import com.gtnewhorizon.structurelib.structure.IItemSource;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
-import com.gtnewhorizons.modularui.common.widget.DynamicPositionedColumn;
-import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
-import com.gtnewhorizons.modularui.common.widget.SlotWidget;
-import com.gtnewhorizons.modularui.common.widget.TextWidget;
 
 import gregtech.api.enums.SoundResource;
 import gregtech.api.enums.Textures;
@@ -43,7 +36,6 @@ import gregtech.api.metatileentity.implementations.MTEHatchDynamo;
 import gregtech.api.metatileentity.implementations.MTEHatchEnergy;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.SimpleCheckRecipeResult;
-import gregtech.api.util.GTTextBuilder;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.common.gui.modularui.multiblock.MTEActiveTransformerGui;
@@ -116,7 +108,7 @@ public class MTEActiveTransformer extends TTMultiblockBase implements ISurvivalC
             buildHatchAdder(MTEActiveTransformer.class)
                 .atLeast(Energy, HatchElement.EnergyMulti, Dynamo, HatchElement.DynamoMulti)
                 .casingIndex(BlockGTCasingsTT.textureOffset)
-                .dot(1)
+                .hint(1)
                 .buildAndChain(onElementPass(t -> t.casingCount++, ofBlock(TTCasingsContainer.sBlockCasingsTT, 0))))
         .build();
     private int casingCount = 0;
@@ -302,11 +294,11 @@ public class MTEActiveTransformer extends TTMultiblockBase implements ISurvivalC
             unit++;
         }
 
-        return GTUtility.formatNumbers(amps) + AMP_UNITS[unit];
+        return formatNumber(amps) + AMP_UNITS[unit];
     }
 
     public static String formatUIEUt(double eut) {
-        if (eut < 1_000_000_000) return GTUtility.formatNumbers(eut);
+        if (eut < 1_000_000_000) return formatNumber(eut);
 
         int exp = 0;
 
@@ -315,7 +307,7 @@ public class MTEActiveTransformer extends TTMultiblockBase implements ISurvivalC
             exp += 3;
         }
 
-        return GTUtility.formatNumbers(eut) + "e" + exp;
+        return formatNumber(eut) + "e" + exp;
     }
 
     @Override
@@ -355,56 +347,6 @@ public class MTEActiveTransformer extends TTMultiblockBase implements ISurvivalC
     @Override
     public boolean canBeMuffled() {
         return false;
-    }
-
-    @Override
-    protected void drawTexts(DynamicPositionedColumn screenElements, SlotWidget inventorySlot) {
-        super.drawTexts(screenElements, inventorySlot);
-
-        MutableInt hatchTier = new MutableInt();
-
-        screenElements
-            .widget(new FakeSyncWidget.DoubleSyncer(() -> transferredLast5Secs, value -> transferredLast5Secs = value));
-        screenElements.widget(
-            new FakeSyncWidget.DoubleSyncer(() -> transferredLast30Secs, value -> transferredLast30Secs = value));
-        screenElements
-            .widget(new FakeSyncWidget.DoubleSyncer(() -> transferredLast1Min, value -> transferredLast1Min = value));
-        screenElements.widget(new FakeSyncWidget.IntegerSyncer(this::calculateHatchTier, hatchTier::setValue));
-
-        screenElements.widget(TextWidget.localised("GT5U.gui.text.at_eu_transferred"));
-
-        screenElements.widget(TextWidget.localised("GT5U.gui.text.at_past_5secs.header"));
-
-        screenElements.widget(TextWidget.dynamicString(() -> {
-            return new GTTextBuilder("GT5U.gui.text.at_history.values").setBase(EnumChatFormatting.GRAY)
-                .addNumber(formatUIEUt(transferredLast5Secs))
-                .addNumber(formatUIAmperage(transferredLast5Secs / V[hatchTier.getValue()]))
-                .add(TIER_COLORS[hatchTier.getValue()], VN[hatchTier.getValue()])
-                .toString();
-        })
-            .setSynced(false));
-
-        screenElements.widget(TextWidget.localised("GT5U.gui.text.at_past_30secs.header"));
-
-        screenElements.widget(TextWidget.dynamicString(() -> {
-            return new GTTextBuilder("GT5U.gui.text.at_history.values").setBase(EnumChatFormatting.GRAY)
-                .addNumber(formatUIEUt(transferredLast30Secs))
-                .addNumber(formatUIAmperage(transferredLast30Secs / V[hatchTier.getValue()]))
-                .add(TIER_COLORS[hatchTier.getValue()], VN[hatchTier.getValue()])
-                .toString();
-        })
-            .setSynced(false));
-
-        screenElements.widget(TextWidget.localised("GT5U.gui.text.at_past_min.header"));
-
-        screenElements.widget(TextWidget.dynamicString(() -> {
-            return new GTTextBuilder("GT5U.gui.text.at_history.values").setBase(EnumChatFormatting.GRAY)
-                .addNumber(formatUIEUt(transferredLast1Min))
-                .addNumber(formatUIAmperage(transferredLast1Min / V[hatchTier.getValue()]))
-                .add(TIER_COLORS[hatchTier.getValue()], VN[hatchTier.getValue()])
-                .toString();
-        })
-            .setSynced(false));
     }
 
     @Override
@@ -454,6 +396,11 @@ public class MTEActiveTransformer extends TTMultiblockBase implements ISurvivalC
 
     @Override
     public boolean getDefaultHasMaintenanceChecks() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsSingleRecipeLocking() {
         return false;
     }
 

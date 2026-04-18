@@ -2,9 +2,17 @@ package gregtech.api.interfaces;
 
 import java.util.List;
 
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.StatCollector;
+
+import org.jetbrains.annotations.Nullable;
+
 import bartworks.system.material.Werkstoff;
 import gregtech.api.enums.Materials;
+import gregtech.api.enums.OrePrefixes;
 import gregtech.api.enums.TextureSet;
+import gregtech.api.util.GTOreDictUnificator;
 import gtPlusPlus.core.material.Material;
 
 /**
@@ -12,19 +20,47 @@ import gtPlusPlus.core.material.Material;
  * Once the new material system is finished, this should be removed and all the code referencing this should be migrated
  * to the new system.
  */
-public interface IOreMaterial {
+public interface IOreMaterial extends ISubTagContainer {
 
-    String getLocalizedName();
+    /**
+     * Add tooltips(mainly chemical formula) for material items。
+     * 
+     * @param list the list parameter in the {@link Item#addInformation} method (for tooltips).
+     */
+    void addTooltips(List<String> list);
 
     int getId();
 
     String getInternalName();
+
+    default String getLocalizedNameKey() {
+        return "Material." + getInternalName().toLowerCase();
+    }
+
+    default String getLocalizedName() {
+        return StatCollector.translateToLocal(getLocalizedNameKey());
+    }
 
     short[] getRGBA();
 
     TextureSet getTextureSet();
 
     List<IStoneType> getValidStones();
+
+    @Nullable
+    Materials getGTMaterial();
+
+    boolean generatesPrefix(OrePrefixes prefix);
+
+    default ItemStack getPart(OrePrefixes prefix, int amount) {
+        Materials gt = getGTMaterial();
+
+        if (gt != null) {
+            return GTOreDictUnificator.get(prefix, gt, amount);
+        } else {
+            return GTOreDictUnificator.get(prefix.get(this.getInternalName()), 1);
+        }
+    }
 
     public static IOreMaterial findMaterial(String name) {
         Werkstoff bw = Werkstoff.werkstoffVarNameHashMap.get(name);

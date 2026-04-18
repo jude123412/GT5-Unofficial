@@ -54,7 +54,7 @@ public class MTEIndustrialExtractor extends MTEExtendedPowerMultiBlockBase<MTEIn
             'C',
             buildHatchAdder(MTEIndustrialExtractor.class).atLeast(InputBus, OutputBus, Maintenance, Energy)
                 .casingIndex(((BlockCasings4) GregTechAPI.sBlockCasings4).getTextureIndex(1))
-                .dot(1)
+                .hint(1)
                 .buildAndChain(
                     onElementPass(MTEIndustrialExtractor::onCasingAdded, ofBlock(GregTechAPI.sBlockCasings4, 1))))
         .addElement(
@@ -159,7 +159,7 @@ public class MTEIndustrialExtractor extends MTEExtendedPowerMultiBlockBase<MTEIn
             .addStaticSpeedInfo(3F)
             .addStaticEuEffInfo(0.85F)
             .beginStructureBlock(5, 5, 5, false)
-            .addController("Front Center")
+            .addController("Front bottom center")
             .addCasingInfoMin("Stainless Steel Machine Casing", 45, false)
             .addCasingInfoExactly("Item Pipe Casing", 19, true)
             .addCasingInfoExactly("Any Tiered Glass", 8, false)
@@ -235,11 +235,6 @@ public class MTEIndustrialExtractor extends MTEExtendedPowerMultiBlockBase<MTEIn
 
     @Override
     public boolean supportsInputSeparation() {
-        return true;
-    }
-
-    @Override
-    public boolean supportsSingleRecipeLocking() {
         return true;
     }
 }

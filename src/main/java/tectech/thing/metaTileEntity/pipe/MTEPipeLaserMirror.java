@@ -8,11 +8,13 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.GTMod;
 import gregtech.api.enums.Dyes;
 import gregtech.api.enums.Textures;
+import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IColoredTileEntity;
@@ -27,7 +29,7 @@ import tectech.util.CommonValues;
 
 public class MTEPipeLaserMirror extends MTEPipeLaser {
 
-    private static Textures.BlockIcons.CustomIcon EMpipe;
+    private static IIconContainer EMpipe;
     private final ForgeDirection[] connectedSides = { null, null };
     private ForgeDirection chainedFrontFacing = null;
 
@@ -49,7 +51,7 @@ public class MTEPipeLaserMirror extends MTEPipeLaser {
     @Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IIconRegister aBlockIconRegister) {
-        EMpipe = new Textures.BlockIcons.CustomIcon("iconsets/EM_LASERMIRROR");
+        EMpipe = Textures.BlockIcons.custom("iconsets/EM_LASERMIRROR");
         super.registerIcons(aBlockIconRegister);
     }
 
@@ -76,11 +78,12 @@ public class MTEPipeLaserMirror extends MTEPipeLaser {
                 if (TecTech.RANDOM.nextInt(15) == 0) {
                     NetworkDispatcher.INSTANCE.sendToAllAround(
                         new PipeActivityMessage.PipeActivityData(this),
-                        aBaseMetaTileEntity.getWorld().provider.dimensionId,
-                        aBaseMetaTileEntity.getXCoord(),
-                        aBaseMetaTileEntity.getYCoord(),
-                        aBaseMetaTileEntity.getZCoord(),
-                        256);
+                        new NetworkRegistry.TargetPoint(
+                            aBaseMetaTileEntity.getWorld().provider.dimensionId,
+                            aBaseMetaTileEntity.getXCoord(),
+                            aBaseMetaTileEntity.getYCoord(),
+                            aBaseMetaTileEntity.getZCoord(),
+                            256));
                 }
                 if (active) {
                     active = false;

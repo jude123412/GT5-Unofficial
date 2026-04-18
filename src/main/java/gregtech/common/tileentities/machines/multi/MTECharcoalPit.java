@@ -20,11 +20,11 @@ import net.minecraft.world.ChunkPosition;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.oredict.OreDictionary;
 
+import cpw.mods.fml.common.registry.GameRegistry;
 import gregtech.GTMod;
 import gregtech.api.GregTechAPI;
 import gregtech.api.enums.OrePrefixes;
 import gregtech.api.enums.ParticleFX;
-import gregtech.api.interfaces.ISecondaryDescribable;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
@@ -36,9 +36,11 @@ import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.api.util.WorldSpawnedEventBuilder;
 import gregtech.common.pollution.Pollution;
 
-public class MTECharcoalPit extends MTETooltipMultiBlockBase implements ISecondaryDescribable {
+public class MTECharcoalPit extends MTETooltipMultiBlockBase {
 
     private boolean running = false;
+
+    private static final Block EtFuturumDirtPath = GameRegistry.findBlock("etfuturum", "grass_path");
 
     public MTECharcoalPit(int aID, String aName, String aNameRegional) {
         super(aID, aName, aNameRegional);
@@ -165,6 +167,8 @@ public class MTECharcoalPit extends MTETooltipMultiBlockBase implements ISeconda
             if (!aList1.contains(new ChunkPosition(aX, aY + 1, aZ))
                 && (!aList2.contains(new ChunkPosition(aX, aY + 1, aZ)))) expandToChunkYPos = true;
         } else if (!(blockYPos == Blocks.dirt || blockYPos == Blocks.grass
+            || blockYPos == Blocks.farmland
+            || (EtFuturumDirtPath != null && blockYPos == EtFuturumDirtPath)
             || (aX == 0 && aY == -1 && aZ == 0 && blockYPos == GregTechAPI.sBlockMachines))) {
                 return false;
             }
@@ -217,6 +221,7 @@ public class MTECharcoalPit extends MTETooltipMultiBlockBase implements ISeconda
         return new MTECharcoalPit(mName);
     }
 
+    @Override
     protected MultiblockTooltipBuilder createTooltip() {
         final MultiblockTooltipBuilder tt = new MultiblockTooltipBuilder();
         tt.addMachineType("Charcoal Pile Igniter, CPI")
@@ -224,8 +229,8 @@ public class MTECharcoalPit extends MTETooltipMultiBlockBase implements ISeconda
             .addInfo("Automatically starts when formed")
             .addPollutionAmount(getPollutionPerSecond(null))
             .beginVariableStructureBlock(3, 13, 3, 7, 3, 13, false)
+            .addController("Top layer, directly touching a wood log")
             .addStructureInfo("Can be up to 13x7x13 in size, including the dirt; shape doesn't matter")
-            .addOtherStructurePart("Controller", "Top layer, directly touching a wood log")
             .addOtherStructurePart("Dirt/Grass", "Top and middle layers, covering wood logs")
             .addOtherStructurePart("Bricks", "Bottom layer, under all wood logs")
             .addOtherStructurePart("Wood Logs", "Up to 5 layers, inside the previously mentioned blocks")
@@ -275,6 +280,11 @@ public class MTECharcoalPit extends MTETooltipMultiBlockBase implements ISeconda
 
     @Override
     public boolean getDefaultHasMaintenanceChecks() {
+        return false;
+    }
+
+    @Override
+    public boolean supportsSingleRecipeLocking() {
         return false;
     }
 }

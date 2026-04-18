@@ -72,11 +72,12 @@ public class TileEntityModuleResearch extends TileEntityModuleBase {
             .addInfo(GTUtility.translate("gt.blockmachines.multimachine.project.ig.desc2"))
             .addInfo(GTUtility.translate("gt.blockmachines.multimachine.project.ig.motorT2"))
             .beginStructureBlock(1, 5, 2, false)
+            .addController("Front, 4th layer")
             .addCasingInfoRange(GTUtility.translate("gt.blockcasings.ig.0.name"), 0, 9, false)
-            .addInputBus(GTUtility.translate("ig.elevator.structure.AnyBaseCasingWith1Dot"), 1)
-            .addOutputBus(GTUtility.translate("ig.elevator.structure.AnyBaseCasingWith1Dot"), 1)
-            .addInputHatch(GTUtility.translate("ig.elevator.structure.AnyBaseCasingWith1Dot"), 1)
-            .addOutputHatch(GTUtility.translate("ig.elevator.structure.AnyBaseCasingWith1Dot"), 1)
+            .addInputBus(GTUtility.translate("ig.elevator.structure.AnyBaseCasingWithHintNumber1"), 1)
+            .addOutputBus(GTUtility.translate("ig.elevator.structure.AnyBaseCasingWithHintNumber1"), 1)
+            .addInputHatch(GTUtility.translate("ig.elevator.structure.AnyBaseCasingWithHintNumber1"), 1)
+            .addOutputHatch(GTUtility.translate("ig.elevator.structure.AnyBaseCasingWithHintNumber1"), 1)
             .toolTipFinisher();
         return tt;
     }

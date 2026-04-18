@@ -88,7 +88,7 @@ public class MTEManualTrafo extends MTEEnhancedMultiBlockBase<MTEManualTrafo> im
             'b',
             ofChain(
                 buildHatchAdder(MTEManualTrafo.class).atLeast(Energy, Maintenance)
-                    .dot(1)
+                    .hint(1)
                     .casingIndex(CASING_INDEX)
                     .build(),
                 ofBlock(GregTechAPI.sBlockCasings1, 2)))
@@ -96,7 +96,7 @@ public class MTEManualTrafo extends MTEEnhancedMultiBlockBase<MTEManualTrafo> im
             'o',
             ofChain(
                 buildHatchAdder(MTEManualTrafo.class).atLeast(Dynamo)
-                    .dot(2)
+                    .hint(2)
                     .casingIndex(CASING_INDEX)
                     .build(),
                 ofBlock(GregTechAPI.sBlockCasings1, 2)))
@@ -390,5 +390,10 @@ public class MTEManualTrafo extends MTEEnhancedMultiBlockBase<MTEManualTrafo> im
         }
         mTiers = mHeight - 1;
         return survivalBuildPiece(STRUCTURE_PIECE_TOP, stackSize, 1, mHeight + 1, 0, elementBudget, env, false, true);
+    }
+
+    @Override
+    public boolean supportsSingleRecipeLocking() {
+        return false;
     }
 }

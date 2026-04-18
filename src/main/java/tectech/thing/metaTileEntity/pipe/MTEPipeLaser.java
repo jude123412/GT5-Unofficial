@@ -10,12 +10,14 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraftforge.common.util.ForgeDirection;
 
+import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import gregtech.GTMod;
 import gregtech.api.enums.Dyes;
 import gregtech.api.enums.HarvestTool;
 import gregtech.api.enums.Textures;
+import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IColoredTileEntity;
@@ -31,14 +33,14 @@ import tectech.util.CommonValues;
 
 public class MTEPipeLaser extends MetaPipeEntity implements IConnectsToEnergyTunnel, IActivePipe {
 
-    static Textures.BlockIcons.CustomIcon EMcandy, EMCandyActive;
-    private static Textures.BlockIcons.CustomIcon EMpipe;
+    static IIconContainer EMcandy, EMCandyActive;
+    private static IIconContainer EMpipe;
     public byte connectionCount = 0;
 
     private boolean active;
 
     public MTEPipeLaser(int aID, String aName, String aNameRegional) {
-        super(aID, aName, aNameRegional, 0);
+        super(aID, aName, 0);
     }
 
     public MTEPipeLaser(String aName) {
@@ -53,9 +55,9 @@ public class MTEPipeLaser extends MetaPipeEntity implements IConnectsToEnergyTun
     @Override
     @SideOnly(Side.CLIENT)
     public void registerIcons(IIconRegister aBlockIconRegister) {
-        EMcandy = new Textures.BlockIcons.CustomIcon("iconsets/EM_CANDY");
-        EMCandyActive = new Textures.BlockIcons.CustomIcon("iconsets/EM_CANDY_ACTIVE");
-        EMpipe = new Textures.BlockIcons.CustomIcon("iconsets/EM_LASER");
+        EMcandy = Textures.BlockIcons.custom("iconsets/EM_CANDY");
+        EMCandyActive = Textures.BlockIcons.custom("iconsets/EM_CANDY_ACTIVE");
+        EMpipe = Textures.BlockIcons.custom("iconsets/EM_LASER");
         super.registerIcons(aBlockIconRegister);
     }
 
@@ -162,11 +164,12 @@ public class MTEPipeLaser extends MetaPipeEntity implements IConnectsToEnergyTun
                 if (TecTech.RANDOM.nextInt(15) == 0) {
                     NetworkDispatcher.INSTANCE.sendToAllAround(
                         new PipeActivityMessage.PipeActivityData(this),
-                        aBaseMetaTileEntity.getWorld().provider.dimensionId,
-                        aBaseMetaTileEntity.getXCoord(),
-                        aBaseMetaTileEntity.getYCoord(),
-                        aBaseMetaTileEntity.getZCoord(),
-                        256);
+                        new NetworkRegistry.TargetPoint(
+                            aBaseMetaTileEntity.getWorld().provider.dimensionId,
+                            aBaseMetaTileEntity.getXCoord(),
+                            aBaseMetaTileEntity.getYCoord(),
+                            aBaseMetaTileEntity.getZCoord(),
+                            256));
                 }
             }
         } else if (aBaseMetaTileEntity.isClientSide() && GTMod.clientProxy()

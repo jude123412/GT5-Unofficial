@@ -68,8 +68,7 @@ public enum Mods implements IMod {
     CraftTweaker(ModIDs.CRAFT_TWEAKER),
     MineTweaker(ModIDs.MINE_TWEAKER),
     CreativeCore(ModIDs.CREATIVE_CORE),
-    CropLoadCore(ModIDs.CROP_LOAD_CORE),
-    CropsPlusPlus(ModIDs.CROPS_PLUS_PLUS),
+    CropsNH(ModIDs.CROPS_NH),
     CustomMainMenu(ModIDs.CUSTOM_MAIN_MENU),
     Darkerer(ModIDs.DARKERER),
     DefaultConfigs(ModIDs.DEFAULT_CONFIGS),
@@ -86,6 +85,7 @@ public enum Mods implements IMod {
     EnhancedLootBags(ModIDs.ENHANCED_LOOT_BAGS),
     EtFuturumRequiem(ModIDs.ET_FUTURUM_REQUIEM),
     EternalSingularity(ModIDs.ETERNAL_SINGULARITY),
+    Fether(ModIDs.FETHER),
     FindIt(ModIDs.FIND_IT),
     FloodLights(ModIDs.FLOOD_LIGHTS),
     ForbiddenMagic(ModIDs.FORBIDDEN_MAGIC),
@@ -154,6 +154,7 @@ public enum Mods implements IMod {
     NotEnoughIDs(ModIDs.NOT_ENOUGH_I_DS),
     NotEnoughItems(ModIDs.NOT_ENOUGH_ITEMS),
     IC2NuclearControl(ModIDs.I_C2_NUCLEAR_CONTROL),
+    NuclearHorizons(ModIDs.NUCLEAR_HORIZONS),
     Nutrition(ModIDs.NUTRITION),
     OpenGlasses(ModIDs.OPEN_GLASSES),
     OpenBlocks(ModIDs.OPEN_BLOCKS),
@@ -177,6 +178,7 @@ public enum Mods implements IMod {
     ProjectRedTransmission(ModIDs.PROJECT_RED_TRANSMISSION),
     ProjectRedTransportation(ModIDs.PROJECT_RED_TRANSPORTATION),
     Railcraft(ModIDs.RAILCRAFT),
+    RandomBoubles(ModIDs.RANDOM_BOUBLES),
     RandomThings(ModIDs.RANDOM_THINGS),
     RWG(ModIDs.RWG),
     RemoteIO(ModIDs.REMOTE_IO),
@@ -260,7 +262,6 @@ public enum Mods implements IMod {
     ExtraUtilities(ModIDs.EXTRA_UTILITIES),
     GraviSuite(ModIDs.GRAVI_SUITE),
     HungerOverhaul(ModIDs.HUNGER_OVERHAUL),
-    IC2CropPlugin(ModIDs.I_C2_CROP_PLUGIN),
     IndustrialCraft2(ModIDs.INDUSTRIAL_CRAFT2),
     JourneyMap(ModIDs.JOURNEY_MAP),
     Morpheus(ModIDs.MORPHEUS),
@@ -408,8 +409,7 @@ public enum Mods implements IMod {
         public static final String CRAFT_TWEAKER = "MineTweaker3",
             MINE_TWEAKER = "MineTweaker3";
         public static final String CREATIVE_CORE = "creativecore";
-        public static final String CROP_LOAD_CORE = "croploadcore";
-        public static final String CROPS_PLUS_PLUS = "berriespp";
+        public static final String CROPS_NH = "cropsnh";
         public static final String CUSTOM_MAIN_MENU = "custommainmenu";
         public static final String DARKERER = "darkerer";
         public static final String DEFAULT_CONFIGS = "defaultkeys";
@@ -426,6 +426,7 @@ public enum Mods implements IMod {
         public static final String ENHANCED_LOOT_BAGS = "enhancedlootbags";
         public static final String ET_FUTURUM_REQUIEM = "etfuturum";
         public static final String ETERNAL_SINGULARITY = "eternalsingularity";
+        public static final String FETHER = "fether";
         public static final String FIND_IT = "findit";
         public static final String FLOOD_LIGHTS = "FloodLights";
         public static final String FORBIDDEN_MAGIC = "ForbiddenMagic";
@@ -494,6 +495,7 @@ public enum Mods implements IMod {
         public static final String NOT_ENOUGH_I_DS = "neid";
         public static final String NOT_ENOUGH_ITEMS = "NotEnoughItems";
         public static final String I_C2_NUCLEAR_CONTROL = "IC2NuclearControl"; // "Nuclear-Control"
+        public static final String NUCLEAR_HORIZONS = "nuclear_horizons";
         public static final String NUTRITION = "nutrition";
         public static final String OPEN_GLASSES = "openglasses"; // "OCGlasses"
         public static final String OPEN_BLOCKS = "OpenBlocks";
@@ -517,6 +519,7 @@ public enum Mods implements IMod {
             PROJECT_RED_TRANSMISSION = "ProjRed|Transmission",
             PROJECT_RED_TRANSPORTATION = "ProjRed|Transportation";
         public static final String RAILCRAFT = "Railcraft";
+        public static final String RANDOM_BOUBLES = "randomboubles";
         public static final String RANDOM_THINGS = "RandomThings";
         public static final String RWG = "RWG";
         public static final String REMOTE_IO = "RIO";
@@ -603,7 +606,6 @@ public enum Mods implements IMod {
         public static final String GRAVI_SUITE = "GraviSuite";
         // "Healer" - Don't know what this is or where it comes from but it's in the list
         public static final String HUNGER_OVERHAUL = "HungerOverhaul";
-        public static final String I_C2_CROP_PLUGIN = "Ic2Nei";
         public static final String INDUSTRIAL_CRAFT2 = "IC2";
         // JourneyMap Server
         public static final String JOURNEY_MAP = "journeymap";

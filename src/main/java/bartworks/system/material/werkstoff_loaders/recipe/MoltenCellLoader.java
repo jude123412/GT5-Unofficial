@@ -13,9 +13,7 @@
 
 package bartworks.system.material.werkstoff_loaders.recipe;
 
-import static gregtech.api.enums.Mods.Forestry;
 import static gregtech.api.enums.OrePrefixes.bolt;
-import static gregtech.api.enums.OrePrefixes.capsuleMolten;
 import static gregtech.api.enums.OrePrefixes.cellMolten;
 import static gregtech.api.enums.OrePrefixes.dust;
 import static gregtech.api.enums.OrePrefixes.dustSmall;
@@ -25,7 +23,6 @@ import static gregtech.api.enums.OrePrefixes.gearGtSmall;
 import static gregtech.api.enums.OrePrefixes.ingot;
 import static gregtech.api.enums.OrePrefixes.nugget;
 import static gregtech.api.enums.OrePrefixes.plate;
-import static gregtech.api.enums.OrePrefixes.plateDouble;
 import static gregtech.api.enums.OrePrefixes.ring;
 import static gregtech.api.enums.OrePrefixes.rotor;
 import static gregtech.api.enums.OrePrefixes.screw;
@@ -40,20 +37,14 @@ import static gregtech.api.util.GTRecipeBuilder.NUGGETS;
 import static gregtech.api.util.GTRecipeBuilder.QUARTER_INGOTS;
 import static gregtech.api.util.GTRecipeBuilder.SECONDS;
 
-import java.util.Objects;
-
 import net.minecraftforge.fluids.FluidContainerRegistry;
-import net.minecraftforge.fluids.FluidStack;
 
 import bartworks.system.material.Werkstoff;
-import bartworks.system.material.WerkstoffLoader;
 import bartworks.system.material.werkstoff_loaders.IWerkstoffRunnable;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;
 import gregtech.api.recipe.RecipeCategories;
-import gregtech.api.util.GTModHandler;
-import gregtech.api.util.GTUtility;
 
 public class MoltenCellLoader implements IWerkstoffRunnable {
 
@@ -310,34 +301,10 @@ public class MoltenCellLoader implements IWerkstoffRunnable {
 
         }
 
-        if (werkstoff.getGenerationFeatures()
-            .hasMultipleMetalSolidifierRecipes() && !werkstoff.hasItemType(plateDouble)) {
-            // No multiple plate molds
-            return;
-        }
-
         // Tank "Recipe"
-        final FluidContainerRegistry.FluidContainerData data = new FluidContainerRegistry.FluidContainerData(
-            new FluidStack(Objects.requireNonNull(WerkstoffLoader.molten.get(werkstoff)), 1 * INGOTS),
-            werkstoff.get(cellMolten),
-            Materials.Empty.getCells(1));
         FluidContainerRegistry.registerFluidContainer(
             werkstoff.getMolten(1 * INGOTS),
             werkstoff.get(cellMolten),
             Materials.Empty.getCells(1));
-        GTUtility.addFluidContainerData(data);
-
-        if (!Forestry.isModLoaded()) return;
-
-        final FluidContainerRegistry.FluidContainerData emptyData = new FluidContainerRegistry.FluidContainerData(
-            new FluidStack(Objects.requireNonNull(WerkstoffLoader.molten.get(werkstoff)), 1 * INGOTS),
-            werkstoff.get(capsuleMolten),
-            GTModHandler.getModItem(Forestry.ID, "refractoryEmpty", 1));
-        FluidContainerRegistry.registerFluidContainer(
-            werkstoff.getMolten(1 * INGOTS),
-            werkstoff.get(capsuleMolten),
-            GTModHandler.getModItem(Forestry.ID, "refractoryEmpty", 1));
-        GTUtility.addFluidContainerData(emptyData);
-
     }
 }

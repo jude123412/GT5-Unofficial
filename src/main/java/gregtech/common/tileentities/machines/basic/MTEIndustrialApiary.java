@@ -1,6 +1,7 @@
 package gregtech.common.tileentities.machines.basic;
 
-import static gregtech.api.enums.GTValues.AuthorKuba;
+import static com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil.formatNumber;
+import static gregtech.api.enums.GTAuthors.AuthorKuba;
 import static gregtech.api.enums.GTValues.V;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_BOTTOM_INDUSTRIAL_APIARY;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_BOTTOM_INDUSTRIAL_APIARY_ACTIVE;
@@ -20,7 +21,6 @@ import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_TOP_INDUSTRIAL_APIA
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_TOP_INDUSTRIAL_APIARY_GLOW;
 import static gregtech.api.metatileentity.BaseTileEntity.STALLED_STUTTERING_TOOLTIP;
 import static gregtech.api.metatileentity.BaseTileEntity.TOOLTIP_DELAY;
-import static gregtech.api.util.GTUtility.moveMultipleItemStacks;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -100,10 +100,10 @@ import forestry.apiculture.genetics.alleles.AlleleEffectThrottled;
 import forestry.core.errors.EnumErrorCode;
 import forestry.plugins.PluginApiculture;
 import gregtech.GTMod;
+import gregtech.api.enums.GTAuthors;
 import gregtech.api.gui.modularui.GTUIInfos;
 import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.interfaces.ITexture;
-import gregtech.api.interfaces.modularui.IAddUIWidgets;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.implementations.MTEBasicMachine;
@@ -111,12 +111,13 @@ import gregtech.api.recipe.BasicUIProperties;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTApiaryModifier;
 import gregtech.api.util.GTApiaryUpgrade;
+import gregtech.api.util.GTItemTransfer;
 import gregtech.api.util.GTUtility;
 import mcp.mobius.waila.api.IWailaConfigHandler;
 import mcp.mobius.waila.api.IWailaDataAccessor;
 
 public class MTEIndustrialApiary extends MTEBasicMachine
-    implements IBeeHousing, IBeeHousingInventory, IErrorLogic, IBeeModifier, IBeeListener, IAddUIWidgets {
+    implements IBeeHousing, IBeeHousingInventory, IErrorLogic, IBeeModifier, IBeeListener {
 
     public static final int beeCycleLength = 550;
     public static final int baseEUtUsage = 37;
@@ -142,7 +143,7 @@ public class MTEIndustrialApiary extends MTEBasicMachine
             aNameRegional,
             aTier,
             4,
-            new String[] { "BEES GOES BRRRR", EnumChatFormatting.GRAY + AuthorKuba,
+            new String[] { "BEES GOES BRRRR", EnumChatFormatting.GRAY + GTAuthors.buildAuthorsWithFormat(AuthorKuba),
                 "Effective production chance as a percent is", "2.8 * b^0.52 * (p + t)^0.52 * s^0.37",
                 "where b is the base production chance as a percent,",
                 "p is the production modifier (2 w/o upgrades, or 4 * 1.2^n with n production upgrades),",
@@ -223,7 +224,7 @@ public class MTEIndustrialApiary extends MTEBasicMachine
                 return true;
             }
         }
-        GTUtility.sendChatToPlayer(aPlayer, "No free Side!");
+        GTUtility.sendChatTrans(aPlayer, "GT5U.chat.machine.no_free_side");
         return true;
     }
 
@@ -639,24 +640,12 @@ public class MTEIndustrialApiary extends MTEBasicMachine
                     aBaseMetaTileEntity.setActive(false);
 
                     if (doesAutoOutput() && !isOutputEmpty() && aBaseMetaTileEntity.getFrontFacing() != mMainFacing) {
-                        final TileEntity tTileEntity2 = aBaseMetaTileEntity
-                            .getTileEntityAtSide(aBaseMetaTileEntity.getFrontFacing());
-                        final long tStoredEnergy = aBaseMetaTileEntity.getUniversalEnergyStored();
-                        int tMaxStacks = (int) (tStoredEnergy / 64L);
-                        if (tMaxStacks > mOutputItems.length) tMaxStacks = mOutputItems.length;
+                        GTItemTransfer transfer = new GTItemTransfer();
 
-                        moveMultipleItemStacks(
-                            aBaseMetaTileEntity,
-                            tTileEntity2,
-                            aBaseMetaTileEntity.getFrontFacing(),
-                            aBaseMetaTileEntity.getBackFacing(),
-                            null,
-                            false,
-                            (byte) 64,
-                            (byte) 1,
-                            (byte) 64,
-                            (byte) 1,
-                            tMaxStacks);
+                        transfer.outOfMachine(this, aBaseMetaTileEntity.getFrontFacing());
+                        transfer.setStacksToTransfer(mOutputItems.length);
+
+                        transfer.transfer();
                     }
 
                     if (aBaseMetaTileEntity.isAllowedToWork() && checkRecipe() == FOUND_AND_SUCCESSFULLY_USED_RECIPE)
@@ -1245,7 +1234,7 @@ public class MTEIndustrialApiary extends MTEBasicMachine
             .widget(
                 new DrawableWidget().setDrawable(GTUITextures.PICTURE_INFORMATION)
                     .setGTTooltip(() -> {
-                        final String energyreq = GTUtility.formatNumbers(
+                        final String energyreq = formatNumber(
                             (int) ((float) MTEIndustrialApiary.baseEUtUsage * getEnergyModifier() * getAcceleration())
                                 + getAdditionalEnergyUsage());
                         // The localization in Forestry is written like this.
@@ -1307,7 +1296,7 @@ public class MTEIndustrialApiary extends MTEBasicMachine
                     () -> mTooltipCache.getUncachedTooltipData(
                         mLockedSpeed ? SPEED_LOCKED_TOOLTIP : SPEED_TOOLTIP,
                         getAcceleration(),
-                        GTUtility.formatNumbers(getAdditionalEnergyUsage())))
+                        formatNumber(getAdditionalEnergyUsage())))
                 .attachSyncer(
                     new FakeSyncWidget.IntegerSyncer(() -> mSpeed, val -> mSpeed = val),
                     builder,
@@ -1509,19 +1498,23 @@ public class MTEIndustrialApiary extends MTEBasicMachine
         final NBTTagCompound tag = accessor.getNBTData();
         if (tag.hasKey("queen")) {
             currenttip.add(
-                "Current Queen: " + EnumChatFormatting.GREEN + StatCollector.translateToLocal(tag.getString("queen")));
+                StatCollector.translateToLocalFormatted(
+                    "GT5U.waila.industrial_apiary.current_queen",
+                    EnumChatFormatting.GREEN + StatCollector.translateToLocal(tag.getString("queen"))));
         }
         if (tag.hasKey("dummyProduction")) {
             currenttip.add(
-                "Effective Production: " + EnumChatFormatting.AQUA
-                    + String.format("b^0.52 * %.2f", tag.getFloat("dummyProduction")));
+                StatCollector.translateToLocalFormatted(
+                    "GT5U.waila.industrial_apiary.effective_production",
+                    EnumChatFormatting.AQUA + String.format("b^0.52 * %.2f", tag.getFloat("dummyProduction"))));
         }
         if (tag.hasKey("errors")) {
             NBTTagCompound errorNbt = tag.getCompoundTag("errors");
             for (int i = 0; i < errorNbt.getInteger("size"); i++) {
                 currenttip.add(
-                    "Error: " + EnumChatFormatting.RED
-                        + StatCollector.translateToLocal("for." + errorNbt.getString("e" + i)));
+                    StatCollector.translateToLocalFormatted(
+                        "GT5U.waila.industrial_apiary.error",
+                        EnumChatFormatting.RED + StatCollector.translateToLocal("for." + errorNbt.getString("e" + i))));
             }
         }
     }

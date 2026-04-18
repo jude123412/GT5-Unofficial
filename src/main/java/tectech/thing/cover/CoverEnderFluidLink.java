@@ -3,9 +3,11 @@ package tectech.thing.cover;
 import java.util.UUID;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagInt;
+import net.minecraft.util.ChatComponentTranslation;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
@@ -16,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import com.google.common.io.ByteArrayDataInput;
 import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 
-import eu.usrv.yamcore.auxiliary.PlayerChatHelper;
 import gregtech.api.covers.CoverContext;
 import gregtech.api.gui.modularui.CoverUIBuildContext;
 import gregtech.api.interfaces.ITexture;
@@ -25,7 +26,6 @@ import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.common.covers.Cover;
 import gregtech.common.gui.modularui.cover.base.CoverBaseGui;
 import gregtech.common.gui.mui1.cover.EnderFluidLinkUIFactory;
-import gtPlusPlus.core.tileentities.base.TileEntityBase;
 import io.netty.buffer.ByteBuf;
 import tectech.mechanics.enderStorage.EnderLinkTag;
 import tectech.mechanics.enderStorage.EnderWorldSavedData;
@@ -97,11 +97,8 @@ public class CoverEnderFluidLink extends Cover {
     public static UUID getOwner(Object te) {
         if (te instanceof IGregTechTileEntity igte) {
             return igte.getOwnerUuid();
-        } else if (te instanceof TileEntityBase teb) {
-            return teb.getOwnerUUID();
-        } else {
-            return null;
         }
+        return null;
     }
 
     @Override
@@ -132,10 +129,10 @@ public class CoverEnderFluidLink extends Cover {
     public void onCoverScrewdriverClick(EntityPlayer aPlayer, float aX, float aY, float aZ) {
         export = !export;
 
-        if (export) {
-            PlayerChatHelper.SendInfo(aPlayer, "Ender Filling Engaged!");
-        } else {
-            PlayerChatHelper.SendInfo(aPlayer, "Ender Suction Engaged!"); // TODO Translation support
+        if (aPlayer instanceof EntityPlayerMP) {
+            aPlayer.addChatMessage(
+                new ChatComponentTranslation(
+                    export ? "tt.cover.ender_fluid_link.fill" : "tt.cover.ender_fluid_link.suck"));
         }
     }
 

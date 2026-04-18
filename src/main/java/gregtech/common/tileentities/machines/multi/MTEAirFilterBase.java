@@ -1,5 +1,6 @@
 package gregtech.common.tileentities.machines.multi;
 
+import static com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil.formatNumber;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.lazy;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofChain;
@@ -108,7 +109,7 @@ public abstract class MTEAirFilterBase extends MTEEnhancedMultiBlockBase<MTEAirF
                             x -> ofChain(
                                 buildHatchAdder(MTEAirFilterBase.class)
                                     .atLeast(Maintenance, InputBus, InputHatch, OutputHatch, OutputBus, Energy)
-                                    .dot(1)
+                                    .hint(1)
                                     .casingIndex(x.getCasingIndex())
                                     .build(),
                                 ofBlock(GregTechAPI.sBlockCasingsNH, x.getCasingMeta())))))
@@ -120,7 +121,7 @@ public abstract class MTEAirFilterBase extends MTEEnhancedMultiBlockBase<MTEAirF
                         lazy(
                             x -> ofChain(
                                 buildHatchAdder(MTEAirFilterBase.class).atLeast(Muffler)
-                                    .dot(2)
+                                    .hint(2)
                                     .casingIndex(x.getCasingIndex())
                                     .build(),
                                 ofBlock(GregTechAPI.sBlockCasingsNH, x.getCasingMeta())))))
@@ -187,7 +188,7 @@ public abstract class MTEAirFilterBase extends MTEEnhancedMultiBlockBase<MTEAirF
     @Override
     protected MultiblockTooltipBuilder createTooltip() {
         final MultiblockTooltipBuilder tt = new MultiblockTooltipBuilder();
-        tt.addMachineType("Air Filter")
+        tt.addMachineType("Air Filter, EAF")
             .addInfo("Needs a Turbine in the controller")
             .addInfo("Can process " + (2 * multiTier + 1) + "x" + (2 * multiTier + 1) + " chunks")
             .addInfo("Each muffler hatch reduces pollution in one chunk of the working area by:")
@@ -207,7 +208,7 @@ public abstract class MTEAirFilterBase extends MTEEnhancedMultiBlockBase<MTEAirF
             .addInfo("  to double pollution cleaning amount (30 uses per item)")
             .addInfo("Each maintenance issue reduces cleaning amount by 10%")
             .beginStructureBlock(3, 4, 3, true)
-            .addController("Front bottom")
+            .addController("Front bottom center")
             .addOtherStructurePart(getCasingString(), "Top and bottom layers")
             .addOtherStructurePart(getPipeString(), "Corners of the middle two layers")
             .addOtherStructurePart("Muffler Hatch", "Sides of the middle two layers")
@@ -376,7 +377,7 @@ public abstract class MTEAirFilterBase extends MTEEnhancedMultiBlockBase<MTEAirF
     private ItemStack getCleanFilter() {
         if (cleanFilter == null) {
             if (Mods.NewHorizonsCoreMod.isModLoaded()) {
-                cleanFilter = GTModHandler.getModItem(Mods.NewHorizonsCoreMod.ID, "item.AdsorptionFilter", 1, 0);
+                cleanFilter = GTModHandler.getModItem(Mods.NewHorizonsCoreMod.ID, "AdsorptionFilter", 1, 0);
             }
             if (cleanFilter == null) {
                 // fallback for dev environment
@@ -389,7 +390,7 @@ public abstract class MTEAirFilterBase extends MTEEnhancedMultiBlockBase<MTEAirF
     private ItemStack getDirtyFilter() {
         if (dirtyFilter == null) {
             if (Mods.NewHorizonsCoreMod.isModLoaded()) {
-                dirtyFilter = GTModHandler.getModItem(Mods.NewHorizonsCoreMod.ID, "item.AdsorptionFilterDirty", 1, 0);
+                dirtyFilter = GTModHandler.getModItem(Mods.NewHorizonsCoreMod.ID, "AdsorptionFilterDirty", 1, 0);
             }
             if (dirtyFilter == null) {
                 // fallback for dev environment
@@ -542,7 +543,7 @@ public abstract class MTEAirFilterBase extends MTEEnhancedMultiBlockBase<MTEAirF
             xyz[0] + tile.getXCoord(),
             xyz[1] + tile.getYCoord(),
             xyz[2] + tile.getZCoord(),
-            getExtendedFacing(),
+            getExtendedFacing().with(ForgeDirection.UP),
             tTextures,
             overlayTickets);
     }
@@ -630,7 +631,15 @@ public abstract class MTEAirFilterBase extends MTEEnhancedMultiBlockBase<MTEAirF
                     + Integer.toString(getPollutionCleaningRatePerTick(baseEff, mEfficiency / 10000f, isFilterLoaded))
                     + EnumChatFormatting.RESET),
             StatCollector.translateToLocalFormatted("GT5U.infodata.air_filter.has_filter", isFilterLoaded),
-            StatCollector
-                .translateToLocalFormatted("GT5U.infodata.air_filter.remaining_cycles", filterUsageRemaining) };
+            StatCollector.translateToLocalFormatted("GT5U.infodata.air_filter.remaining_cycles", filterUsageRemaining),
+            StatCollector.translateToLocalFormatted("GT5U.multiblock.recipesDone") + ": "
+                + EnumChatFormatting.GREEN
+                + formatNumber(recipesDone)
+                + EnumChatFormatting.RESET };
+    }
+
+    @Override
+    public boolean supportsSingleRecipeLocking() {
+        return false;
     }
 }

@@ -69,7 +69,7 @@ public class MTEIndustrialSifter extends GTPPMultiBlockBase<MTEIndustrialSifter>
             .addBulkMachineInfo(4, 5f, 0.75f)
             .addPollutionAmount(getPollutionPerSecond(null))
             .beginStructureBlock(5, 3, 5, false)
-            .addController("Bottom Center")
+            .addController("Front bottom center")
             .addCasingInfoMin("Sieve Grate", 18, false)
             .addCasingInfoMin("Sieve Casings", 35, false)
             .addInputBus("Any Casing", 1)
@@ -98,7 +98,7 @@ public class MTEIndustrialSifter extends GTPPMultiBlockBase<MTEIndustrialSifter>
                     buildHatchAdder(MTEIndustrialSifter.class)
                         .atLeast(InputBus, OutputBus, Maintenance, Energy, Muffler, InputHatch, OutputHatch)
                         .casingIndex(TAE.GTPP_INDEX(21))
-                        .dot(1)
+                        .hint(1)
                         .buildAndChain(onElementPass(x -> ++x.mCasing, ofBlock(ModBlocks.blockCasings2Misc, 5))))
                 .addElement('M', ofBlock(ModBlocks.blockCasings2Misc, 6))
                 .build();

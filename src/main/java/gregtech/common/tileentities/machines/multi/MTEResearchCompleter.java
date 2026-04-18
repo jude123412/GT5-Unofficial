@@ -84,7 +84,7 @@ public class MTEResearchCompleter extends MTEEnhancedMultiBlockBase<MTEResearchC
             'c',
             ofChain( // Magical machine casing or hatch
                 buildHatchAdder(MTEResearchCompleter.class).atLeast(InputBus, OutputBus, Energy, Maintenance)
-                    .dot(1)
+                    .hint(1)
                     .casingIndex(CASING_INDEX)
                     .build(),
                 onElementPass(MTEResearchCompleter::onCasingFound, ofBlock(GregTechAPI.sBlockCasings8, 8))))
@@ -402,5 +402,10 @@ public class MTEResearchCompleter extends MTEEnhancedMultiBlockBase<MTEResearchC
             env,
             false,
             true);
+    }
+
+    @Override
+    public boolean supportsSingleRecipeLocking() {
+        return false;
     }
 }

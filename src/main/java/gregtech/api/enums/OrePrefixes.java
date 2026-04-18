@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.oredict.OreDictionary;
 
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 
 import gregtech.api.enums.TCAspects.TC_AspectStack;
 import gregtech.api.interfaces.ICondition;
+import gregtech.api.interfaces.IOreMaterial;
 import gregtech.api.interfaces.IOreRecipeRegistrator;
 import gregtech.api.interfaces.ISubTagContainer;
 import gregtech.api.objects.GTArrayList;
@@ -191,6 +193,17 @@ public class OrePrefixes {
     /** In case of an End-Ores Mod. Ore -> Material is a Oneway Operation! */
     public static final OrePrefixes oreEnd = new OrePrefixBuilder("oreEnd").withDefaultLocalName("End Ores")
         .withPrefix("End ")
+        .withSuffix(" Ore")
+        .unifiable()
+        .materialBased()
+        .materialGenerationBits(ORE)
+        .defaultStackSize(ORE_STACK_SIZE)
+        .build();
+
+    /** Prefix of EFR */
+    public static final OrePrefixes oreDeepslate = new OrePrefixBuilder("oreDeepslate")
+        .withDefaultLocalName("Deepslate Ores")
+        .withPrefix("Deepslate ")
         .withSuffix(" Ore")
         .unifiable()
         .materialBased()
@@ -1090,6 +1103,19 @@ public class OrePrefixes {
     /** IGNORE */
     public static final OrePrefixes block_ = new OrePrefixBuilder("block_").withDefaultLocalName("Random Blocks")
         .defaultStackSize(OTHER_STACK_SIZE)
+        .build();
+
+    /** A decorative sheet metal block. */
+    public static final OrePrefixes sheetmetal = new OrePrefixBuilder("sheetmetal")
+        .withDefaultLocalName("Sheetmetal Blocks")
+        .withSuffix(" Sheetmetal")
+        .unifiable()
+        .recyclable()
+        .materialBased()
+        .materialAmount(M * 2)
+        .materialGenerationBits(METAL)
+        .defaultStackSize(OTHER_STACK_SIZE)
+        .textureIndex(OrePrefixTextureID.BLOCK_SHEETMETAL)
         .build();
 
     /** Storage Block consisting out of 9 Ingots/Gems/Dusts. Introduced by CovertJaguar */
@@ -2152,7 +2178,7 @@ public class OrePrefixes {
     }
 
     private void addAspect(TCAspects aspect, int amount) {
-        new TC_AspectStack(TCAspects.MACHINA, 1).addToAspectList(mAspects);
+        new TC_AspectStack(aspect, amount).addToAspectList(mAspects);
     }
 
     public @NotNull String getDefaultLocalName() {
@@ -2355,6 +2381,9 @@ public class OrePrefixes {
 
         wireFine.mCondition = SubTag.METAL;
 
+        sheetmetal.mCondition = new ICondition.And<>(
+            obj -> obj instanceof Materials mat && mat.hasMetalItems(),
+            new ICondition.Nor<>(SubTag.STRETCHY, SubTag.SOFT, SubTag.BOUNCY, SubTag.NO_SMASHING));
         // -----
 
         pipeRestrictiveTiny.mSecondaryMaterial = new MaterialStack(Materials.Steel, ring.materialAmount);
@@ -2362,12 +2391,6 @@ public class OrePrefixes {
         pipeRestrictiveMedium.mSecondaryMaterial = new MaterialStack(Materials.Steel, ring.materialAmount * 3);
         pipeRestrictiveLarge.mSecondaryMaterial = new MaterialStack(Materials.Steel, ring.materialAmount * 4);
         pipeRestrictiveHuge.mSecondaryMaterial = new MaterialStack(Materials.Steel, ring.materialAmount * 5);
-        cableGt16.mSecondaryMaterial = new MaterialStack(Materials.Rubber, plate.materialAmount * 5);
-        cableGt12.mSecondaryMaterial = new MaterialStack(Materials.Rubber, plate.materialAmount * 4);
-        cableGt08.mSecondaryMaterial = new MaterialStack(Materials.Rubber, plate.materialAmount * 3);
-        cableGt04.mSecondaryMaterial = new MaterialStack(Materials.Rubber, plate.materialAmount * 2);
-        cableGt02.mSecondaryMaterial = new MaterialStack(Materials.Rubber, plate.materialAmount);
-        cableGt01.mSecondaryMaterial = new MaterialStack(Materials.Rubber, plate.materialAmount);
         bucket.mSecondaryMaterial = new MaterialStack(Materials.Iron, ingot.materialAmount * 3);
         bucketClay.mSecondaryMaterial = new MaterialStack(Materials.Clay, dust.materialAmount * 5);
         CELL_TYPES
@@ -2710,9 +2733,9 @@ public class OrePrefixes {
     }
 
     @SuppressWarnings("incomplete-switch")
-    public String getDefaultLocalNameFormatForItem(Materials aMaterial) {
+    public String getDefaultLocalNameFormatForItem(IOreMaterial aMaterial) {
         // Certain Materials have slightly different Localizations.
-        switch (aMaterial.mName) {
+        switch (aMaterial.getInternalName()) {
             case "Glass", "BorosilicateGlass" -> {
                 if (name.startsWith("gem")) return materialPrefix + "%material" + " Crystal";
                 if (name.startsWith("plate")) return materialPrefix + "%material" + " Pane";
@@ -2732,7 +2755,7 @@ public class OrePrefixes {
                 if (name.startsWith("nugget")) return materialPrefix + "%material" + " Chip";
                 if (name.startsWith("plate")) return materialPrefix + "%material" + " Plank";
             }
-            case "Plastic", "Rubber", "Polyethylene", "Epoxid", "EpoxidFiberReinforced", "Polydimethylsiloxane", "Silicone", "Polysiloxane", "Polycaprolactam", "Polytetrafluoroethylene", "PolyvinylChloride", "Polystyrene", "StyreneButadieneRubber" -> {
+            case "Plastic", "Rubber", "Polyethylene", "Epoxid", "EpoxidFiberReinforced", "Polydimethylsiloxane", "Silicone", "Polysiloxane", "Polycaprolactam", "Polytetrafluoroethylene", "PolyvinylChloride", "Polystyrene", "StyreneButadieneRubber", "Polybenzimidazole", "RadoxPoly", "PolyphenyleneSulfide" -> {
                 if (name.startsWith("dust")) return materialPrefix + "%material" + " Pulp";
                 if (name.startsWith("plate")) return materialPrefix + "%material" + " Sheet";
                 if (name.startsWith("ingot")) return materialPrefix + "%material" + " Bar";
@@ -2799,7 +2822,7 @@ public class OrePrefixes {
             }
         }
         if (ProcessingModSupport.aEnableThaumcraftMats) {
-            switch (aMaterial.mName) {
+            switch (aMaterial.getInternalName()) {
                 case "InfusedAir", "InfusedDull", "InfusedEarth", "InfusedEntropy", "InfusedFire", "InfusedOrder", "InfusedVis", "InfusedWater" -> {
                     if (name.startsWith("gem")) return materialPrefix + "Shard of " + "%material";
                     if (name.startsWith("crystal")) return materialPrefix + "Shard of " + "%material";
@@ -2819,7 +2842,7 @@ public class OrePrefixes {
         }
 
         if (this == ore) {
-            return switch (aMaterial.mName) {
+            return switch (aMaterial.getInternalName()) {
                 case "InfusedAir", "InfusedDull", "InfusedEarth", "InfusedEntropy", "InfusedFire", "InfusedOrder", "InfusedVis", "InfusedWater" -> "%material Infused Stone";
                 case "Vermiculite", "Bentonite", "Kaolinite", "Talc", "BasalticMineralSand", "GraniticMineralSand", "GlauconiteSand", "CassiteriteSand", "GarnetSand", "QuartzSand", "Pitchblende", "FullersEarth" -> "%material";
                 default -> materialPrefix + "%material" + materialPostfix;
@@ -2828,5 +2851,42 @@ public class OrePrefixes {
 
         // Use Standard Localization
         return materialPrefix + "%material" + materialPostfix;
+    }
+
+    public String getDefaultLocalNameFormatForItem() {
+        return getDefaultLocalNameForItem(Materials._NULL);
+    }
+
+    public static String getOreprefixKey(String prefix, String formatString) {
+        return "gt.oreprefix." + prefix.toLowerCase()
+            .replace(" ", "_")
+            .replace(formatString, "material");
+    }
+
+    public static String getOreprefixKey(String prefix) {
+        return getOreprefixKey(prefix, "%material");
+    }
+
+    public String getOreprefixKey(IOreMaterial materials) {
+        return "gt.oreprefix." + this.getDefaultLocalNameFormatForItem(materials)
+            .toLowerCase()
+            .replace(" ", "_")
+            .replace("%material", "material");
+    }
+
+    public String getOreprefixKey() {
+        return getOreprefixKey(Materials._NULL);
+    }
+
+    public String getLocalizedNameForItem(IOreMaterial materials) {
+        return StatCollector.translateToLocalFormatted(getOreprefixKey(materials), materials.getLocalizedName());
+    }
+
+    public static String getLocalizedNameForItem(String prefix, String materialName) {
+        return StatCollector.translateToLocalFormatted(getOreprefixKey(prefix), materialName);
+    }
+
+    public static String getLocalizedNameForItem(String prefix, String formatString, String materialName) {
+        return StatCollector.translateToLocalFormatted(getOreprefixKey(prefix, formatString), materialName);
     }
 }

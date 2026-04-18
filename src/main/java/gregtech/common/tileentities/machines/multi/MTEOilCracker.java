@@ -19,8 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
@@ -47,7 +45,6 @@ import gregtech.api.metatileentity.implementations.MTEHatchMultiInput;
 import gregtech.api.metatileentity.implementations.MTEHatchOutput;
 import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.RecipeMaps;
-import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.maps.OilCrackerBackend;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.MultiblockTooltipBuilder;
@@ -79,7 +76,7 @@ public class MTEOilCracker extends MTEEnhancedMultiBlockBase<MTEOilCracker> impl
                     HatchElement.InputHatch.withAdder(MTEOilCracker::addLeftHatchToMachineList),
                     HatchElement.Energy,
                     HatchElement.Maintenance)
-                .dot(2)
+                .hint(2)
                 .casingIndex(CASING_INDEX)
                 .buildAndChain(onElementPass(MTEOilCracker::onCasingAdded, ofBlock(GregTechAPI.sBlockCasings4, 1))))
         .addElement(
@@ -89,7 +86,7 @@ public class MTEOilCracker extends MTEEnhancedMultiBlockBase<MTEOilCracker> impl
                     HatchElement.OutputHatch.withAdder(MTEOilCracker::addRightHatchToMachineList),
                     HatchElement.Energy,
                     HatchElement.Maintenance)
-                .dot(3)
+                .hint(3)
                 .casingIndex(CASING_INDEX)
                 .buildAndChain(onElementPass(MTEOilCracker::onCasingAdded, ofBlock(GregTechAPI.sBlockCasings4, 1))))
         .addElement(
@@ -101,7 +98,7 @@ public class MTEOilCracker extends MTEEnhancedMultiBlockBase<MTEOilCracker> impl
                     HatchElement.InputBus,
                     HatchElement.Energy,
                     HatchElement.Maintenance)
-                .dot(1)
+                .hint(1)
                 .casingIndex(CASING_INDEX)
                 .buildAndChain(onElementPass(MTEOilCracker::onCasingAdded, ofBlock(GregTechAPI.sBlockCasings4, 1))))
         .build();
@@ -183,15 +180,7 @@ public class MTEOilCracker extends MTEEnhancedMultiBlockBase<MTEOilCracker> impl
 
     @Override
     protected ProcessingLogic createProcessingLogic() {
-        return new ProcessingLogic() {
-
-            @Nonnull
-            @Override
-            public CheckRecipeResult process() {
-                setEuModifier(1.0F - Math.min(0.1F * (heatLevel.getTier() + 1), 0.5F));
-                return super.process();
-            }
-        };
+        return new ProcessingLogic().setEuModifierSupplier(this::getEuModifier);
     }
 
     @Override
@@ -205,6 +194,10 @@ public class MTEOilCracker extends MTEEnhancedMultiBlockBase<MTEOilCracker> impl
 
     public void setCoilLevel(HeatingCoilLevel aCoilLevel) {
         heatLevel = aCoilLevel;
+    }
+
+    public double getEuModifier() {
+        return 1.0F - Math.min(0.1F * (heatLevel.getTier() + 1), 0.5F);
     }
 
     private boolean addMiddleInputToMachineList(IGregTechTileEntity aTileEntity, int aBaseCasingIndex) {

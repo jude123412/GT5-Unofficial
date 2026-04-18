@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -51,6 +52,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemBow;
 import net.minecraft.item.ItemStack;
@@ -85,6 +87,7 @@ import net.minecraftforge.oredict.ShapelessOreRecipe;
 
 import org.lwjgl.input.Keyboard;
 
+import com.google.common.collect.ImmutableSet;
 import com.gtnewhorizon.gtnhlib.keybind.SyncedKeybind;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -155,10 +158,12 @@ import gregtech.api.util.GTShapelessRecipe;
 import gregtech.api.util.GTSpawnEventHandler;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.WorldSpawnedEventBuilder;
+import gregtech.client.renderer.waila.TTRenderGTProgressBar;
 import gregtech.common.config.OPStuff;
 import gregtech.common.data.GTPowerfailTracker;
 import gregtech.common.data.maglev.TetherManager;
 import gregtech.common.handlers.OffhandToolFunctionalityHandler;
+import gregtech.common.items.ItemGTToolbox;
 import gregtech.common.items.MetaGeneratedItem98;
 import gregtech.common.misc.GlobalEnergyWorldSavedData;
 import gregtech.common.misc.GlobalMetricsCoverDatabase;
@@ -593,7 +598,6 @@ public class GTProxy implements IFuelHandler {
     public boolean mEnableAllMaterials = false;
     public boolean mEnableCleanroom = true;
     public boolean mLowGravProcessing = false;
-    public boolean mCropNeedBlock = true;
     public boolean mAMHInteraction = true;
     public boolean mForceFreeFace = true;
     public boolean mMixedOreOnlyYieldsTwoThirdsOfPureOre = false;
@@ -679,6 +683,18 @@ public class GTProxy implements IFuelHandler {
     public boolean mWailaTransformerVoltageTier = true;
     /** This enables showing the cpu load in nanoseconds via waila. */
     public boolean wailaAverageNS = false;
+    /** Color preset of the waila progress bar. */
+    public TTRenderGTProgressBar.ProgressBarColor wailaProgressBarColorPreset = TTRenderGTProgressBar.ProgressBarColor.Green;
+    /** First color of the waila progress bar. */
+    public int wailaProgressBarColor1 = 0xFFDD5555;
+    /** Second color of the waila progress bar. */
+    public int wailaProgressBarColor2 = 0xFFDD2222;
+    /** First color of the waila progress bar's border (top and left). */
+    public int wailaProgressBorderColor1 = 0xFF505050;
+    /** Second color of the waila progress bar's border (bottom and right). */
+    public int wailaProgressBorderColor2 = 0xFF505050;
+
+    public Set<Item> toolboxBans = ImmutableSet.of();
 
     public static final int GUI_ID_COVER_SIDE_BASE = 10; // Takes GUI ID 10 - 15
 
@@ -698,6 +714,7 @@ public class GTProxy implements IFuelHandler {
     public TetherManager tetherManager;
 
     public SyncedKeybind TOOL_MODE_SWITCH_KEYBIND;
+    public SyncedKeybind CTRL_KEYBIND;
 
     static {
         oreDictBurnTimes.put("dustTinyWood", 11);
@@ -865,17 +882,10 @@ public class GTProxy implements IFuelHandler {
         ItemList.IC2_Item_Casing_Tin.set(GTModHandler.getIC2Item("casingtin", 1L));
         ItemList.IC2_Item_Casing_Lead.set(GTModHandler.getIC2Item("casinglead", 1L));
         ItemList.IC2_Item_Casing_Steel.set(GTModHandler.getIC2Item("casingadviron", 1L));
-        ItemList.IC2_Spray_WeedEx.set(GTModHandler.getIC2Item("weedEx", 1L));
         ItemList.IC2_Mixed_Metal_Ingot.set(GTModHandler.getIC2Item("mixedMetalIngot", 1L));
-        ItemList.IC2_Fertilizer.set(GTModHandler.getIC2Item("fertilizer", 1L));
-        ItemList.IC2_CoffeeBeans.set(GTModHandler.getIC2Item("coffeeBeans", 1L));
-        ItemList.IC2_CoffeePowder.set(GTModHandler.getIC2Item("coffeePowder", 1L));
-        ItemList.IC2_Hops.set(GTModHandler.getIC2Item("hops", 1L));
         ItemList.IC2_Resin.set(GTModHandler.getIC2Item("resin", 1L));
         ItemList.IC2_Plantball.set(GTModHandler.getIC2Item("plantBall", 1L));
         ItemList.IC2_PlantballCompressed.set(GTModHandler.getIC2Item("compressedPlantBall", 1L, ItemList.IC2_Plantball.get(1L)));
-        ItemList.IC2_Crop_Seeds.set(GTModHandler.getIC2Item("cropSeed", 1L));
-        ItemList.IC2_Grin_Powder.set(GTModHandler.getIC2Item("grinPowder", 1L));
         ItemList.IC2_Energium_Dust.set(GTModHandler.getIC2Item("energiumDust", 1L));
         ItemList.IC2_Scrap.set(GTModHandler.getIC2Item("scrap", 1L));
         ItemList.IC2_Scrapbox.set(GTModHandler.getIC2Item("scrapBox", 1L));
@@ -959,7 +969,6 @@ public class GTProxy implements IFuelHandler {
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("cfPack", 1L, 32767));
         // GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("jetpack", 1L, 32767));
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("treetap", 1L, 32767));
-        GTModHandler.sNonReplaceableItems.add(ItemList.IC2_Spray_WeedEx.getWithDamage(1L, 32767));
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("staticBoots", 1L, 32767));
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("compositeArmor", 1L, 32767));
         GTModHandler.sNonReplaceableItems.add(GTModHandler.getIC2Item("hazmatHelmet", 1L, 32767));
@@ -1051,7 +1060,9 @@ public class GTProxy implements IFuelHandler {
         MinecraftForge.EVENT_BUS.register(new OffhandToolFunctionalityHandler());
         TOOL_MODE_SWITCH_KEYBIND = SyncedKeybind
             .createConfigurable("key.gt.tool_mode_switch", "Gregtech", Keyboard.KEY_PERIOD)
-            .registerGlobalListener(MetaGeneratedTool::switchToolMode);
+            .registerGlobalListener(MetaGeneratedTool::switchCurrentToolMode)
+            .registerGlobalListener(ItemGTToolbox::switchToolMode);
+        CTRL_KEYBIND = SyncedKeybind.create(Keyboard.KEY_LCONTROL);
 
         GregTechAPI.sLoadStarted = true;
         for (FluidContainerRegistry.FluidContainerData tData : FluidContainerRegistry
@@ -1093,7 +1104,7 @@ public class GTProxy implements IFuelHandler {
             if (GregTechAPI.METATILEENTITIES[i] != null) {
                 try {
                     GregTechAPI.METATILEENTITIES[i].onConfigLoad();
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     GT_FML_LOGGER.error("Could not load config for MTE " + GregTechAPI.METATILEENTITIES[i], e);
                 }
             }
@@ -1203,7 +1214,7 @@ public class GTProxy implements IFuelHandler {
             if (GregTechAPI.METATILEENTITIES[i] != null) {
                 try {
                     GregTechAPI.METATILEENTITIES[i].onServerStart();
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     throw new RuntimeException("Could not call onServerStart MTE " + GregTechAPI.METATILEENTITIES[i], e);
                 }
             }
@@ -1266,8 +1277,11 @@ public class GTProxy implements IFuelHandler {
         UUID_BY_NAME = null;
         // spotless:on
 
+        GTCapesLoader.clearSelectedCapes();
         PowerGogglesEventHandler.getInstance()
             .onServerStopped(event);
+        GTChunkManager.instance.onServerStopped();
+        dimensionWisePollution.clear();
     }
 
     /**
@@ -1456,6 +1470,9 @@ public class GTProxy implements IFuelHandler {
                 aEvent.isSilkTouching,
                 aEvent);
         }
+        if (aStack.getItem() instanceof final ItemGTToolbox toolbox) {
+            toolbox.onBlockHarvestingEvent(aEvent);
+        }
         if (EnchantmentHelper.getEnchantmentLevel(Enchantment.fireAspect.effectId, aStack) > 2) {
             try {
                 for (ItemStack tDrop : aEvent.drops) {
@@ -1466,7 +1483,7 @@ public class GTProxy implements IFuelHandler {
                         GTUtility.setStack(tDrop, tSmeltingOutput);
                     }
                 }
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 e.printStackTrace(GTLog.err);
             }
         }
@@ -1925,7 +1942,7 @@ public class GTProxy implements IFuelHandler {
             if (this.mOreDictActivated) {
                 OreDictEventContainer.registerRecipes(tOre);
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             GT_FML_LOGGER
                 .error("Could not register ore (oredict name=" + aEvent.Name + ", item stack=" + aEvent.Ore + ")", e);
         }
@@ -1953,7 +1970,7 @@ public class GTProxy implements IFuelHandler {
         }
         GTOreDictUnificator.addToBlacklist(aFluidEvent.data.emptyContainer);
         GTOreDictUnificator.addToBlacklist(aFluidEvent.data.filledContainer);
-        GTUtility.addFluidContainerData(aFluidEvent.data);
+        GTUtility.insertInFluidToContainersMap(aFluidEvent.data);
     }
 
     @SubscribeEvent
@@ -2188,12 +2205,13 @@ public class GTProxy implements IFuelHandler {
             : "autogenerated";
 
         return GTFluidFactory.builder(aMaterial.mName.toLowerCase(Locale.ENGLISH))
-            .withLocalizedName(aMaterial.mDefaultLocalName)
+            .withDefaultLocalName(aMaterial.mDefaultLocalName)
             .withTextureName(fluidTexture)
             .withColorRGBA(aMaterial.mRGBa)
             .withStateAndTemperature(LIQUID, aMaterial.getLiquidTemperature())
             .buildAndRegister()
             .configureMaterials(aMaterial)
+            .addLocalizedName(aMaterial)
             .registerBContainers(GTOreDictUnificator.get(OrePrefixes.cell, aMaterial, 1L), ItemList.Cell_Empty.get(1L))
             .asFluid();
     }
@@ -2206,12 +2224,13 @@ public class GTProxy implements IFuelHandler {
             : "autogenerated";
 
         return GTFluidFactory.builder(aMaterial.mName.toLowerCase(Locale.ENGLISH))
-            .withLocalizedName(aMaterial.mDefaultLocalName)
+            .withDefaultLocalName(aMaterial.mDefaultLocalName)
             .withTextureName(fluidTexture)
             .withColorRGBA(aMaterial.mRGBa)
             .withStateAndTemperature(GAS, aMaterial.getGasTemperature())
             .buildAndRegister()
             .configureMaterials(aMaterial)
+            .addLocalizedName(aMaterial)
             .registerBContainers(GTOreDictUnificator.get(OrePrefixes.cell, aMaterial, 1L), ItemList.Cell_Empty.get(1L))
             .asFluid();
     }
@@ -2225,12 +2244,13 @@ public class GTProxy implements IFuelHandler {
             : "plasma.autogenerated";
 
         return GTFluidFactory.builder("plasma." + aMaterial.mName.toLowerCase(Locale.ENGLISH))
-            .withLocalizedName(aMaterial.mDefaultLocalName + " Plasma")
+            .withDefaultLocalName(aMaterial.mDefaultLocalName + " Plasma")
             .withTextureName(fluidTexture)
             .withColorRGBA(aMaterial.mMoltenRGBa)
             .withStateAndTemperature(PLASMA, 10000)
             .buildAndRegister()
             .configureMaterials(aMaterial)
+            .addLocalizedName(aMaterial)
             .registerContainers(
                 GTOreDictUnificator.get(OrePrefixes.cellPlasma, aMaterial, 1L),
                 ItemList.Cell_Empty.get(1L),
@@ -2247,12 +2267,13 @@ public class GTProxy implements IFuelHandler {
             : "molten.autogenerated";
 
         return GTFluidFactory.builder("molten." + aMaterial.mName.toLowerCase(Locale.ENGLISH))
-            .withLocalizedName("Molten " + aMaterial.mDefaultLocalName)
+            .withDefaultLocalName("Molten " + aMaterial.mDefaultLocalName)
             .withTextureName(fluidTexture)
             .withColorRGBA(aMaterial.mMoltenRGBa)
             .withStateAndTemperature(MOLTEN, aMaterial.mMeltingPoint < 0 ? 1000 : aMaterial.mMeltingPoint)
             .buildAndRegister()
             .configureMaterials(aMaterial)
+            .addLocalizedName(aMaterial)
             .registerContainers(
                 GTOreDictUnificator.get(OrePrefixes.cellMolten, aMaterial, 1L),
                 ItemList.Cell_Empty.get(1L),
@@ -2276,10 +2297,11 @@ public class GTProxy implements IFuelHandler {
         for (int i = 0; i < 3; i++) {
             crackedFluids[i] = GTFluidFactory.builder(namePrefixes[i] + aMaterial.mName.toLowerCase(Locale.ENGLISH))
                 .withIconsFrom(uncrackedFluid)
-                .withLocalizedName(orePrefixes[i].getMaterialPrefix() + aMaterial.mDefaultLocalName)
+                .withDefaultLocalName(orePrefixes[i].getMaterialPrefix() + aMaterial.mDefaultLocalName)
                 .withColorRGBA(aMaterial.mRGBa)
                 .withStateAndTemperature(GAS, 775)
                 .buildAndRegister()
+                .addLocalizedName(aMaterial)
                 .registerBContainers(
                     GTOreDictUnificator.get(orePrefixes[i], aMaterial, 1L),
                     ItemList.Cell_Empty.get(1L))
@@ -2287,15 +2309,16 @@ public class GTProxy implements IFuelHandler {
 
             int hydrogenAmount = 2 * i + 2;
             GTValues.RA.stdBuilder()
-                .itemInputs(GTUtility.getIntegratedCircuit(i + 1))
+                .circuit(i + 1)
                 .fluidInputs(new FluidStack(uncrackedFluid, 1000), Materials.Hydrogen.getGas(hydrogenAmount * 800))
                 .fluidOutputs(new FluidStack(crackedFluids[i], 1000))
                 .duration((1 + i) * SECONDS)
-                .eut(240)
+                .eut(TierEU.RECIPE_HV / 2)
                 .addTo(crackingRecipes);
 
             GTValues.RA.stdBuilder()
-                .itemInputs(Materials.Hydrogen.getCells(hydrogenAmount), GTUtility.getIntegratedCircuit(i + 1))
+                .itemInputs(Materials.Hydrogen.getCells(hydrogenAmount))
+                .circuit(i + 1)
                 .itemOutputs(Materials.Empty.getCells(hydrogenAmount))
                 .fluidInputs(new FluidStack(uncrackedFluid, 1000))
                 .fluidOutputs(new FluidStack(crackedFluids[i], 800))
@@ -2304,7 +2327,8 @@ public class GTProxy implements IFuelHandler {
                 .addTo(RecipeMaps.chemicalReactorRecipes);
 
             GTValues.RA.stdBuilder()
-                .itemInputs(aMaterial.getCells(1), GTUtility.getIntegratedCircuit(i + 1))
+                .itemInputs(aMaterial.getCells(1))
+                .circuit(i + 1)
                 .itemOutputs(Materials.Empty.getCells(1))
                 .fluidInputs(Materials.Hydrogen.getGas(hydrogenAmount * 1000))
                 .fluidOutputs(new FluidStack(crackedFluids[i], 800))
@@ -2313,7 +2337,7 @@ public class GTProxy implements IFuelHandler {
                 .addTo(RecipeMaps.chemicalReactorRecipes);
 
             GTValues.RA.stdBuilder()
-                .itemInputs(GTUtility.getIntegratedCircuit(i + 1))
+                .circuit(i + 1)
                 .fluidInputs(new FluidStack(uncrackedFluid, 1000), Materials.Hydrogen.getGas(hydrogenAmount * 1000))
                 .fluidOutputs(new FluidStack(crackedFluids[i], 800))
                 .duration((4 + 2 * i) * SECONDS)
@@ -2337,25 +2361,27 @@ public class GTProxy implements IFuelHandler {
         for (int i = 0; i < 3; i++) {
             crackedFluids[i] = GTFluidFactory.builder(namePrefixes[i] + aMaterial.mName.toLowerCase(Locale.ENGLISH))
                 .withIconsFrom(uncrackedFluid)
-                .withLocalizedName(orePrefixes[i].getMaterialPrefix() + aMaterial.mDefaultLocalName)
+                .withDefaultLocalName(orePrefixes[i].getMaterialPrefix() + aMaterial.mDefaultLocalName)
                 .withColorRGBA(aMaterial.mRGBa)
                 .withStateAndTemperature(GAS, 775)
                 .buildAndRegister()
+                .addLocalizedName(aMaterial)
                 .registerBContainers(
                     GTOreDictUnificator.get(orePrefixes[i], aMaterial, 1L),
                     ItemList.Cell_Empty.get(1L))
                 .asFluid();
 
             GTValues.RA.stdBuilder()
-                .itemInputs(GTUtility.getIntegratedCircuit(i + 1))
+                .circuit(i + 1)
                 .fluidInputs(new FluidStack(uncrackedFluid, 1_000), Materials.Steam.getGas(1_000))
                 .fluidOutputs(new FluidStack(crackedFluids[i], 1_200))
                 .duration((1 + i) * SECONDS)
-                .eut(240)
+                .eut(TierEU.RECIPE_HV / 2)
                 .addTo(crackingRecipes);
 
             GTValues.RA.stdBuilder()
-                .itemInputs(GTModHandler.getIC2Item("steamCell", 1L), GTUtility.getIntegratedCircuit(i + 1))
+                .itemInputs(GTModHandler.getIC2Item("steamCell", 1L))
+                .circuit(i + 1)
                 .itemOutputs(Materials.Empty.getCells(1))
                 .fluidInputs(new FluidStack(uncrackedFluid, 1_000))
                 .fluidOutputs(new FluidStack(crackedFluids[i], 800))
@@ -2364,7 +2390,8 @@ public class GTProxy implements IFuelHandler {
                 .addTo(RecipeMaps.chemicalReactorRecipes);
 
             GTValues.RA.stdBuilder()
-                .itemInputs(aMaterial.getCells(1), GTUtility.getIntegratedCircuit(i + 1))
+                .itemInputs(aMaterial.getCells(1))
+                .circuit(i + 1)
                 .itemOutputs(Materials.Empty.getCells(1))
                 .fluidInputs(Materials.Steam.getGas(1_000))
                 .fluidOutputs(new FluidStack(crackedFluids[i], 800))
@@ -2373,7 +2400,8 @@ public class GTProxy implements IFuelHandler {
                 .addTo(RecipeMaps.chemicalReactorRecipes);
 
             GTValues.RA.stdBuilder()
-                .itemInputs(aMaterial.getCells(1), GTUtility.getIntegratedCircuit(i + 1))
+                .itemInputs(aMaterial.getCells(1))
+                .circuit(i + 1)
                 .itemOutputs(Materials.Empty.getCells(1))
                 .fluidInputs(getFluidStack("ic2steam", 1000))
                 .fluidOutputs(new FluidStack(crackedFluids[i], 800))
@@ -2382,7 +2410,7 @@ public class GTProxy implements IFuelHandler {
                 .addTo(RecipeMaps.chemicalReactorRecipes);
 
             GTValues.RA.stdBuilder()
-                .itemInputs(GTUtility.getIntegratedCircuit(i + 1))
+                .circuit(i + 1)
                 .fluidInputs(new FluidStack(uncrackedFluid, 1_000), Materials.Steam.getGas(1_000))
                 .fluidOutputs(new FluidStack(crackedFluids[i], 800))
                 .duration((4 + 2 * i) * SECONDS)

@@ -34,7 +34,6 @@ import gregtech.api.enums.Materials;
 import gregtech.api.enums.TierEU;
 import gregtech.api.fluid.GTFluidFactory;
 import gregtech.api.util.GTModHandler;
-import gregtech.api.util.GTUtility;
 
 public final class BioObjectAdder {
 
@@ -184,10 +183,11 @@ public final class BioObjectAdder {
                                     .getGreen() })
                         .withStateAndTemperature(FluidState.LIQUID, 300)
                         .buildAndRegister()
+                        .addLocalizedName()
                         .asFluid());
 
                 GTValues.RA.stdBuilder()
-                    .itemInputs(GTUtility.getIntegratedCircuit(10))
+                    .circuit(10)
                     .fluidInputs(new FluidStack(B.getFluid(), 1000))
                     .fluidOutputs(dnaFluid)
                     .duration(25 * SECONDS)

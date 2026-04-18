@@ -12,6 +12,10 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.cleanroommc.modularui.factory.PosGuiData;
+import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.value.sync.PanelSyncManager;
 import com.gtnewhorizon.structurelib.alignment.enumerable.ExtendedFacing;
 import com.gtnewhorizons.modularui.api.screen.ModularWindow;
 import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
@@ -32,7 +36,7 @@ import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTModHandler;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.GTUtilityClient;
-import gtPlusPlus.api.objects.Logger;
+import gregtech.common.gui.modularui.hatch.MTEHatchTurbineGui;
 import gtPlusPlus.api.objects.minecraft.BlockPos;
 import gtPlusPlus.core.handler.PacketHandler;
 import gtPlusPlus.core.lib.GTPPCore;
@@ -48,7 +52,6 @@ public class MTEHatchTurbine extends MTEHatch {
     public int mEUt = 0;
 
     protected final List<RenderOverlay.OverlayTicket> overlayTickets = new ArrayList<>();
-    private boolean mFormed;
     private boolean mHasTurbine;
 
     public MTEHatchTurbine(int aID, String aName, String aNameRegional, int aTier) {
@@ -115,10 +118,6 @@ public class MTEHatchTurbine extends MTEHatch {
         return null;
     }
 
-    public boolean canWork() {
-        return hasTurbine();
-    }
-
     public boolean insertTurbine(ItemStack aTurbine) {
         if (MTELargerTurbineBase.isValidTurbine(aTurbine)) {
             this.mInventory[0] = aTurbine;
@@ -154,10 +153,6 @@ public class MTEHatchTurbine extends MTEHatch {
     @Override
     public int getInventoryStackLimit() {
         return 1;
-    }
-
-    public void damageTurbine(int aEUt, int damageFactorLow, float damageFactorHigh) {
-        damageTurbine((long) aEUt, damageFactorLow, damageFactorHigh);
     }
 
     public void damageTurbine(long aEUt, int damageFactorLow, float damageFactorHigh) {
@@ -214,29 +209,19 @@ public class MTEHatchTurbine extends MTEHatch {
     public boolean isControllerActive() {
         MTELargerTurbineBase x = getController();
         if (x != null) {
-            // Logger.INFO("Checking Status of Controller. Running? "+(x.mEUt > 0));
             return x.lEUt > 0;
         }
-        // Logger.INFO("Status of Controller failed, controller is null.");
         return false;
     }
 
     public MTELargerTurbineBase getController() {
         if (this.mHasController && this.mControllerLocation != null) {
             BlockPos p = mControllerLocation;
-            // Logger.INFO(p.getLocationString());
             IGregTechTileEntity tTileEntity = getBaseMetaTileEntity().getIGregTechTileEntity(p.xPos, p.yPos, p.zPos);
             if (tTileEntity != null && tTileEntity.getMetaTileEntity() instanceof MTELargerTurbineBase) {
                 return (MTELargerTurbineBase) tTileEntity.getMetaTileEntity();
-            } else {
-                if (tTileEntity == null) {
-                    Logger.INFO("Controller MTE is null, somehow?");
-                } else {
-                    Logger.INFO("Controller is a different MTE to expected");
-                }
             }
         }
-        // Logger.INFO("Failed to Get Controller.");
         return null;
     }
 
@@ -249,7 +234,6 @@ public class MTEHatchTurbine extends MTEHatch {
         if (canSetNewController()) {
             mControllerLocation = aPos;
             mHasController = true;
-            Logger.INFO("Successfully injected controller into this Turbine Assembly Hatch.");
         }
         return mHasController;
     }
@@ -360,7 +344,7 @@ public class MTEHatchTurbine extends MTEHatch {
                 Materials aMat = MetaGeneratedTool.getPrimaryMaterial(getTurbine());
                 String aSize = MTELargerTurbineBase
                     .getTurbineSizeString(MTELargerTurbineBase.getTurbineSize(getTurbine()));
-                GTUtility.sendChatToPlayer(aPlayer, "Using: " + aMat.mLocalizedName + " " + aSize);
+                GTUtility.sendChatToPlayer(aPlayer, "Using: " + aMat.getLocalizedName() + " " + aSize);
             }
         } else {
             this.mUsingAnimation = !mUsingAnimation;
@@ -450,9 +434,18 @@ public class MTEHatchTurbine extends MTEHatch {
                 .setPos(79, 34));
     }
 
+    @Override
+    public ModularPanel buildUI(PosGuiData data, PanelSyncManager syncManager, UISettings uiSettings) {
+        return new MTEHatchTurbineGui(this).build(data, syncManager, uiSettings);
+    }
+
+    @Override
+    protected boolean useMui2() {
+        return true;
+    }
+
     public void receiveUpdate(PacketTurbineHatchUpdate message) {
         mHasTurbine = message.isHasTurbine();
-        mFormed = message.isFormed();
         if (message.getController() != null) clearController();
         else setController(message.getController());
         getBaseMetaTileEntity().issueTextureUpdate();

@@ -65,7 +65,7 @@ public class MTEIndustrialFluidHeater extends GTPPMultiBlockBase<MTEIndustrialFl
             .addBulkMachineInfo(8, 2.2f, 0.9f)
             .addPollutionAmount(getPollutionPerSecond(null))
             .beginStructureBlock(5, 6, 5, true)
-            .addController("Front Center")
+            .addController("Front center, 2nd layer")
             .addCasingInfoMin("Top/Bottom layer: Multi-use Casings", 34, false)
             .addCasingInfoMin("Middle layers: Thermal Containment Casing", 47, false)
             .addInputBus("Bottom Layer (optional)", 1)
@@ -97,7 +97,7 @@ public class MTEIndustrialFluidHeater extends GTPPMultiBlockBase<MTEIndustrialFl
                     buildHatchAdder(MTEIndustrialFluidHeater.class)
                         .atLeast(InputBus, InputHatch, Maintenance, Energy, Muffler)
                         .casingIndex(getCasingTextureIndex())
-                        .dot(1)
+                        .hint(1)
                         .buildAndChain(onElementPass(x -> ++x.mCasing1, ofBlock(getCasingBlock2(), getCasingMeta2()))))
                 .addElement('X', ofBlock(getCasingBlock1(), getCasingMeta1()))
                 .addElement(
@@ -105,7 +105,7 @@ public class MTEIndustrialFluidHeater extends GTPPMultiBlockBase<MTEIndustrialFl
                     buildHatchAdder(MTEIndustrialFluidHeater.class)
                         .atLeast(OutputBus, OutputHatch, Maintenance, Energy, Muffler)
                         .casingIndex(getCasingTextureIndex())
-                        .dot(1)
+                        .hint(1)
                         .buildAndChain(onElementPass(x -> ++x.mCasing1, ofBlock(getCasingBlock2(), getCasingMeta2()))))
                 .build();
         }
@@ -127,7 +127,6 @@ public class MTEIndustrialFluidHeater extends GTPPMultiBlockBase<MTEIndustrialFl
     public boolean checkMachine(IGregTechTileEntity aBaseMetaTileEntity, ItemStack aStack) {
         mCasing1 = 0;
         boolean didBuild = checkPiece(mName, 2, 4, 0);
-        log("Built? " + didBuild + ", " + mCasing1);
         return didBuild && mCasing1 >= 34 && checkHatch();
     }
 

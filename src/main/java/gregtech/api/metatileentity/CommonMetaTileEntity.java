@@ -25,6 +25,10 @@ import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.screen.ModularScreen;
 import com.cleanroommc.modularui.screen.UISettings;
 import com.cleanroommc.modularui.value.sync.PanelSyncManager;
+import com.gtnewhorizon.gtnhlib.capability.item.ItemIO;
+import com.gtnewhorizon.gtnhlib.capability.item.ItemSink;
+import com.gtnewhorizon.gtnhlib.capability.item.ItemSource;
+import com.gtnewhorizon.gtnhlib.item.InventoryItemSource;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -32,8 +36,10 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gregtech.GTMod;
 import gregtech.api.GregTechAPI;
+import gregtech.api.enums.Dyes;
 import gregtech.api.enums.GTValues;
 import gregtech.api.gui.modularui.GTUIInfos;
+import gregtech.api.implementation.items.GTItemSink;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.modularui.IAddUIWidgets;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
@@ -44,7 +50,6 @@ import gregtech.api.modularui2.GTModularScreen;
 import gregtech.api.modularui2.MetaTileEntityGuiHandler;
 import gregtech.api.render.ISBRInventoryContext;
 import gregtech.api.render.ISBRWorldContext;
-import gregtech.api.util.GTLanguageManager;
 import gregtech.api.util.GTUtility;
 import gregtech.common.covers.Cover;
 
@@ -76,7 +81,7 @@ public abstract class CommonMetaTileEntity implements IMetaTileEntity {
      */
     public long mSoundRequests = 0;
 
-    protected CommonMetaTileEntity(int id, String basicName, String regionalName, int invSlotCount) {
+    protected CommonMetaTileEntity(int id, String basicName, int invSlotCount) {
         if (GregTechAPI.sPostloadStarted || !GregTechAPI.sPreloadStarted)
             throw new IllegalAccessError("This Constructor has to be called in the load Phase");
         if (GregTechAPI.METATILEENTITIES[id] == null) {
@@ -95,7 +100,6 @@ public abstract class CommonMetaTileEntity implements IMetaTileEntity {
         mInventory = new ItemStack[invSlotCount];
         mName = basicName.replace(" ", "_")
             .toLowerCase(Locale.ENGLISH);
-        GTLanguageManager.addStringLocalization("gt.blockmachines." + mName + ".name", regionalName);
     }
 
     protected CommonMetaTileEntity(String name, int invSlotCount) {
@@ -109,6 +113,28 @@ public abstract class CommonMetaTileEntity implements IMetaTileEntity {
     @Nullable
     @Override
     public <T> T getCapability(@NotNull Class<T> capability, @NotNull ForgeDirection side) {
+        if (capability == ItemSink.class) {
+            return capability.cast(getItemSink(side));
+        }
+        if (capability == ItemSource.class) {
+            return capability.cast(getItemSource(side));
+        }
+        if (capability == ItemIO.class) {
+            return capability.cast(getItemIO(side));
+        }
+
+        return null;
+    }
+
+    protected ItemSink getItemSink(ForgeDirection side) {
+        return getSizeInventory() == 0 ? null : new GTItemSink(this, side);
+    }
+
+    protected ItemSource getItemSource(ForgeDirection side) {
+        return getSizeInventory() == 0 ? null : new InventoryItemSource(this, side);
+    }
+
+    protected ItemIO getItemIO(ForgeDirection side) {
         return null;
     }
 
@@ -202,6 +228,7 @@ public abstract class CommonMetaTileEntity implements IMetaTileEntity {
         }
     }
 
+    @Override
     public final void sendLoopStart(byte aIndex) {
         if (!getBaseMetaTileEntity().isMuffled()) {
             getBaseMetaTileEntity().sendBlockEvent(GregTechTileClientEvents.START_SOUND_LOOP, aIndex);
@@ -414,6 +441,7 @@ public abstract class CommonMetaTileEntity implements IMetaTileEntity {
     public int[] getAccessibleSlotsFromSide(int ordinalSide) {
         final TIntList tList = new TIntArrayList();
         final IGregTechTileEntity tTileEntity = getBaseMetaTileEntity();
+        if (tTileEntity == null || tTileEntity.isDead()) return GTValues.emptyIntArray;
         final Cover tileCover = tTileEntity.getCoverAtSide(ForgeDirection.getOrientation(ordinalSide));
         final boolean tSkip = tileCover.letsItemsIn(-2) || tileCover.letsItemsOut(-2);
         for (int i = 0; i < getSizeInventory(); i++) {
@@ -633,6 +661,15 @@ public abstract class CommonMetaTileEntity implements IMetaTileEntity {
     @SideOnly(Side.CLIENT)
     @Override
     public ModularScreen createScreen(PosGuiData data, ModularPanel mainPanel) {
-        return new GTModularScreen(mainPanel, getGuiTheme());
+        return new GTModularScreen(mainPanel, getColoredTheme());
+    }
+
+    private GTGuiTheme getColoredTheme() {
+        GTGuiTheme baseTheme = getGuiTheme();
+        if (baseTheme != GTGuiThemes.STANDARD) return baseTheme;
+        byte color = this.getBaseMetaTileEntity()
+            .getColorization();
+        Dyes dye = Dyes.get(color);
+        return dye.mui2Theme.get();
     }
 }

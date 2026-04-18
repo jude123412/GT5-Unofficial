@@ -103,7 +103,7 @@ public class MTEIndustrialVacuumFreezer extends GTPPMultiBlockBase<MTEIndustrial
             .addInfo("Constructed exactly the same as a normal Vacuum Freezer")
             .addPollutionAmount(getPollutionPerSecond(null))
             .beginStructureBlock(3, 3, 3, true)
-            .addController("Front Center")
+            .addController("Front center")
             .addCasingInfoMin(CASING_NAME, 10, false)
             .addInputBus("Any Casing", 1)
             .addOutputBus("Any Casing", 1)
@@ -133,12 +133,12 @@ public class MTEIndustrialVacuumFreezer extends GTPPMultiBlockBase<MTEIndustrial
                             .shouldReject(x -> !x.mCryotheumHatches.isEmpty())
                             .hatchId(MetaTileEntityIDs.Hatch_Input_Cryotheum.ID)
                             .casingIndex(CASING_TEXTURE_ID)
-                            .dot(1)
+                            .hint(1)
                             .build(),
                         buildHatchAdder(MTEIndustrialVacuumFreezer.class)
                             .atLeast(InputBus, OutputBus, Maintenance, Energy, Muffler, InputHatch, OutputHatch)
                             .casingIndex(CASING_TEXTURE_ID)
-                            .dot(1)
+                            .hint(1)
                             .build(),
                         onElementPass(x -> ++x.mCasing, ofBlock(ModBlocks.blockCasings3Misc, 10))))
                 .build();

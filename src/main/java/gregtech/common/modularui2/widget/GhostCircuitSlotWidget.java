@@ -7,7 +7,6 @@ import static gregtech.common.modularui2.sync.GhostCircuitSyncHandler.SYNC_CIRCU
 import org.jetbrains.annotations.NotNull;
 
 import com.cleanroommc.modularui.api.IPanelHandler;
-import com.cleanroommc.modularui.api.ITheme;
 import com.cleanroommc.modularui.api.UpOrDown;
 import com.cleanroommc.modularui.api.drawable.IDrawable;
 import com.cleanroommc.modularui.api.drawable.IKey;
@@ -54,8 +53,8 @@ public class GhostCircuitSlotWidget extends PhantomItemSlot {
     }
 
     @Override
-    public IDrawable getCurrentBackground(ITheme theme, WidgetThemeEntry<?> widgetTheme) {
-        IDrawable background = super.getCurrentBackground(theme, widgetTheme);
+    public IDrawable getCurrentBackground(WidgetThemeEntry<?> widgetTheme) {
+        IDrawable background = super.getCurrentBackground(widgetTheme);
         return new DrawableStack(background, GTGuiTextures.OVERLAY_SLOT_INT_CIRCUIT);
     }
 
@@ -75,7 +74,7 @@ public class GhostCircuitSlotWidget extends PhantomItemSlot {
     @Override
     public boolean onMouseScroll(UpOrDown scrollDirection, int amount) {
         if (isSelectorPanelOpen()) return true;
-        MouseData mouseData = MouseData.create(scrollDirection.modifier);
+        MouseData mouseData = MouseData.create(-scrollDirection.modifier);
         getSyncHandler().syncToServer(PhantomItemSlotSH.SYNC_SCROLL, mouseData::writeToPacket);
         return true;
     }
@@ -83,8 +82,7 @@ public class GhostCircuitSlotWidget extends PhantomItemSlot {
     @Override
     public PhantomItemSlot slot(ModularSlot slot) {
         ItemSlotSH sh = new GhostCircuitSyncHandler(slot);
-        isValidSyncHandler(sh);
-        setSyncHandler(sh);
+        this.setSyncOrValue(sh);
         return this;
     }
 
@@ -128,8 +126,7 @@ public class GhostCircuitSlotWidget extends PhantomItemSlot {
 
     private IPanelHandler buildSelectorPanel(IntSyncValue selectedSyncHandler) {
 
-        // TODO: fix crash on shift click, it does not work.
-        return syncManager.panel("ghostCircuitPanel", (mainPanel, player) -> {
+        return syncManager.syncedPanel("ghostCircuitPanel", true, (mainPanel, player) -> {
             ModularPanel panel = GTGuis.createPopUpPanel(GUI_ID);
             return new SelectItemGuiBuilder(panel, GTUtility.getAllIntegratedCircuits()) //
                 .setHeaderItem(mte.getStackForm(1))
@@ -142,12 +139,12 @@ public class GhostCircuitSlotWidget extends PhantomItemSlot {
                         buffer.writeShort(circuitConfig);
                     });
                     if (mouseData.shift) {
-                        panel.animateClose();
+                        panel.closeIfOpen();
                     }
                 })
                 .setCurrentItemSlotOverlay(GTGuiTextures.OVERLAY_SLOT_INT_CIRCUIT)
                 .setAllowDeselected(true)
                 .build();
-        }, true);
+        });
     }
 }

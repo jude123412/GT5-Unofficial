@@ -11,9 +11,12 @@ import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
@@ -21,17 +24,20 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import eu.usrv.yamcore.auxiliary.PlayerChatHelper;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.Textures;
+import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.interfaces.ITexture;
+import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.BaseMetaTileEntity;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.implementations.MTETieredMachineBlock;
 import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTLog;
+import gregtech.api.util.GTUtility;
 
+@IMetaTileEntity.SkipGenerateDescription
 public class MTEWorldAccelerator extends MTETieredMachineBlock {
 
     // simple name is rather expensive to compute and it's not cached
@@ -86,10 +92,10 @@ public class MTEWorldAccelerator extends MTETieredMachineBlock {
     }
 
     private byte mMode = 1; // 0: RandomTicks around 1: TileEntities with range 1
-    private static Textures.BlockIcons.CustomIcon _mGTIco_Norm_Idle;
-    private static Textures.BlockIcons.CustomIcon _mGTIco_Norm_Active;
-    private static Textures.BlockIcons.CustomIcon _mGTIco_TE_Idle;
-    private static Textures.BlockIcons.CustomIcon _mGTIco_TE_Active;
+    private static IIconContainer _mGTIco_Norm_Idle;
+    private static IIconContainer _mGTIco_Norm_Active;
+    private static IIconContainer _mGTIco_TE_Idle;
+    private static IIconContainer _mGTIco_TE_Active;
     public static final int[] mAccelerateStatic = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 512, 512, 512, 512, 512,
         512 };
     private static final int AMPERAGE_NORMAL = 3;
@@ -98,10 +104,10 @@ public class MTEWorldAccelerator extends MTETieredMachineBlock {
     @Override
     public void registerIcons(IIconRegister aBlockIconRegister) {
         super.registerIcons(aBlockIconRegister);
-        _mGTIco_Norm_Idle = new Textures.BlockIcons.CustomIcon("iconsets/OVERLAY_ACCELERATOR");
-        _mGTIco_Norm_Active = new Textures.BlockIcons.CustomIcon("iconsets/OVERLAY_ACCELERATOR_ACTIVE");
-        _mGTIco_TE_Idle = new Textures.BlockIcons.CustomIcon("iconsets/OVERLAY_ACCELERATOR_TE");
-        _mGTIco_TE_Active = new Textures.BlockIcons.CustomIcon("iconsets/OVERLAY_ACCELERATOR_TE_ACTIVE");
+        _mGTIco_Norm_Idle = Textures.BlockIcons.customOptional("iconsets/OVERLAY_ACCELERATOR");
+        _mGTIco_Norm_Active = Textures.BlockIcons.customOptional("iconsets/OVERLAY_ACCELERATOR_ACTIVE");
+        _mGTIco_TE_Idle = Textures.BlockIcons.customOptional("iconsets/OVERLAY_ACCELERATOR_TE");
+        _mGTIco_TE_Active = Textures.BlockIcons.customOptional("iconsets/OVERLAY_ACCELERATOR_TE_ACTIVE");
     }
 
     @SideOnly(Side.CLIENT)
@@ -121,16 +127,12 @@ public class MTEWorldAccelerator extends MTETieredMachineBlock {
 
     @Override
     public String[] getDescription() {
-        return new String[] { "Machine Type: " + EnumChatFormatting.YELLOW + "World Accelerator, WA",
-            "Max Speed Bonus " + EnumChatFormatting.GREEN + String.format("x%d", mAccelerateStatic[mTier]),
-            EnumChatFormatting.GOLD + "Blocks Mode: "
-                + EnumChatFormatting.RESET
-                + String.format("Range: 1-%d blocks to each side | Amps \u2264%s", mTier, AMPERAGE_NORMAL),
-            EnumChatFormatting.GOLD + "TileEntity Mode: "
-                + EnumChatFormatting.RESET
-                + String.format("Adjacent blocks only | Amps \u2264%s", AMPERAGE_TE),
-            "Use a screwdriver to change mode, sneak to change range", "Use a wrench to change speed",
-            "Power consumption increases with speed/range" };
+        return GTUtility.translateMultiline(
+            "gt.blockmachines.basicmachine.accelerator.tooltip",
+            mAccelerateStatic[mTier],
+            mTier,
+            AMPERAGE_NORMAL,
+            AMPERAGE_TE);
     }
 
     @Override
@@ -269,8 +271,6 @@ public class MTEWorldAccelerator extends MTETieredMachineBlock {
         return 8;
     }
 
-    private static final String[] mModeStr = { "Blocks", "TileEntities" };
-
     private static final String[] mUnlocalizedModeStr = { "GT5U.word_accelerator.mode.blocks",
         "GT5U.word_accelerator.mode.tile_entities" };
 
@@ -282,9 +282,12 @@ public class MTEWorldAccelerator extends MTETieredMachineBlock {
         getBaseMetaTileEntity().issueTileUpdate();
 
         markDirty();
-        PlayerChatHelper.SendInfo(
-            pPlayer,
-            String.format("Machine acceleration changed to x%d", mAccelerateStatic[getSpeedTierOverride()]));
+        if (pPlayer instanceof EntityPlayerMP playerMP) {
+            playerMP.addChatMessage(
+                new ChatComponentTranslation(
+                    "tt.block.world_accelerator.set_speed",
+                    mAccelerateStatic[getSpeedTierOverride()]));
+        }
 
         return true;
     }
@@ -297,13 +300,26 @@ public class MTEWorldAccelerator extends MTETieredMachineBlock {
                 incRadiusTierOverride();
 
                 markDirty();
-                PlayerChatHelper
-                    .SendInfo(pPlayer, String.format("Machine range changed to %d Blocks", getRadiusTierOverride()));
-            } else PlayerChatHelper.SendError(pPlayer, "Can't change range; Machine is in TileEntity Mode!");
+                if (pPlayer instanceof EntityPlayerMP playerMP) {
+                    playerMP.addChatMessage(
+                        new ChatComponentTranslation("tt.block.world_accelerator.set_range", getRadiusTierOverride()));
+                }
+            } else {
+                if (pPlayer instanceof EntityPlayerMP playerMP) {
+                    playerMP.addChatMessage(
+                        new ChatComponentTranslation("tt.block.world_accelerator.set_range_fail")
+                            .setChatStyle(new ChatStyle().setColor(EnumChatFormatting.RED)));
+                }
+            }
         } else {
             mMode = (byte) (mMode == 0x00 ? 0x01 : 0x00);
             markDirty();
-            PlayerChatHelper.SendInfo(pPlayer, String.format("Switched mode to: %s", mModeStr[mMode]));
+            if (pPlayer instanceof EntityPlayerMP playerMP) {
+                playerMP.addChatMessage(
+                    new ChatComponentTranslation(
+                        "tt.block.world_accelerator.set_mode",
+                        new ChatComponentTranslation(mUnlocalizedModeStr[mMode])));
+            }
         }
     }
 

@@ -1,7 +1,8 @@
 package gregtech.common.tileentities.machines.multi;
 
+import static com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil.formatNumber;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
-import static gregtech.api.enums.GTValues.AuthorColen;
+import static gregtech.api.enums.GTAuthors.AuthorColen;
 import static gregtech.api.enums.GTValues.VN;
 import static gregtech.api.enums.HatchElement.Energy;
 import static gregtech.api.enums.HatchElement.ExoticEnergy;
@@ -15,14 +16,11 @@ import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_DTPF_ON;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_FUSION1_GLOW;
 import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_RAINBOWSCREEN_GLOW;
 import static gregtech.api.enums.Textures.BlockIcons.casingTexturePages;
-import static gregtech.api.metatileentity.BaseTileEntity.TOOLTIP_DELAY;
 import static gregtech.api.util.GTStructureUtility.activeCoils;
 import static gregtech.api.util.GTStructureUtility.buildHatchAdder;
 import static gregtech.api.util.GTStructureUtility.ofCoil;
 import static gregtech.api.util.GTUtility.validMTEList;
-import static net.minecraft.util.StatCollector.translateToLocal;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
@@ -30,11 +28,13 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
+import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
@@ -46,17 +46,6 @@ import com.gtnewhorizon.structurelib.alignment.constructable.ISurvivalConstructa
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import com.gtnewhorizon.structurelib.structure.StructureDefinition;
-import com.gtnewhorizons.modularui.api.drawable.IDrawable;
-import com.gtnewhorizons.modularui.api.drawable.UITexture;
-import com.gtnewhorizons.modularui.api.math.Alignment;
-import com.gtnewhorizons.modularui.api.math.Color;
-import com.gtnewhorizons.modularui.api.math.Size;
-import com.gtnewhorizons.modularui.api.screen.ModularWindow;
-import com.gtnewhorizons.modularui.api.screen.UIBuildContext;
-import com.gtnewhorizons.modularui.common.widget.ButtonWidget;
-import com.gtnewhorizons.modularui.common.widget.FakeSyncWidget;
-import com.gtnewhorizons.modularui.common.widget.TextWidget;
-import com.gtnewhorizons.modularui.common.widget.textfield.NumericWidget;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -65,7 +54,6 @@ import gregtech.api.enums.HeatingCoilLevel;
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.Materials;
 import gregtech.api.enums.SoundResource;
-import gregtech.api.gui.modularui.GTUITextures;
 import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
@@ -85,8 +73,11 @@ import gregtech.api.util.GTUtility;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.api.util.OverclockCalculator;
 import gregtech.api.util.ParallelHelper;
+import gregtech.common.gui.modularui.multiblock.MTEPlasmaForgeGui;
+import gregtech.common.gui.modularui.multiblock.base.MTEMultiBlockBaseGui;
 import gregtech.common.misc.GTStructureChannels;
-import tectech.thing.gui.TecTechUITextures;
+import mcp.mobius.waila.api.IWailaConfigHandler;
+import mcp.mobius.waila.api.IWailaDataAccessor;
 
 public class MTEPlasmaForge extends MTEExtendedPowerMultiBlockBase<MTEPlasmaForge> implements ISurvivalConstructable {
 
@@ -559,7 +550,7 @@ public class MTEPlasmaForge extends MTEExtendedPowerMultiBlockBase<MTEPlasmaForg
             buildHatchAdder(MTEPlasmaForge.class)
                 .atLeast(InputHatch, OutputHatch, InputBus, OutputBus, Energy, ExoticEnergy, Maintenance)
                 .casingIndex(DIM_INJECTION_CASING)
-                .dot(3)
+                .hint(3)
                 .buildAndChain(GregTechAPI.sBlockCasings1, DIM_INJECTION_CASING))
         .addElement('N', ofBlock(GregTechAPI.sBlockCasings1, DIM_TRANS_CASING))
         .addElement('s', ofBlock(GregTechAPI.sBlockCasings1, DIM_BRIDGE_CASING))
@@ -585,17 +576,17 @@ public class MTEPlasmaForge extends MTEExtendedPowerMultiBlockBase<MTEPlasmaForg
             .addInfo("Transcending Dimensional Boundaries.")
             .addInfo(
                 "Takes " + EnumChatFormatting.RED
-                    + GTUtility.formatNumbers(max_efficiency_time_in_ticks / (3600 * 20))
+                    + formatNumber(max_efficiency_time_in_ticks / (3600 * 20))
                     + EnumChatFormatting.GRAY
                     + " hours of continuous run time to fully breach dimensional")
             .addInfo(
                 "boundaries and achieve maximum efficiency, reducing fuel consumption by up to "
                     + EnumChatFormatting.RED
-                    + GTUtility.formatNumbers(100 * maximum_discount)
+                    + formatNumber(100 * maximum_discount)
                     + "%")
             .addInfo(
                 "When no recipe is running, fuel discount decays x" + EnumChatFormatting.RED
-                    + GTUtility.formatNumbers(efficiency_decay_rate)
+                    + formatNumber(efficiency_decay_rate)
                     + EnumChatFormatting.GRAY
                     + " as fast as it builds up, draining")
             .addInfo("the total amount of stored runtime")
@@ -623,6 +614,7 @@ public class MTEPlasmaForge extends MTEExtendedPowerMultiBlockBase<MTEPlasmaForg
             .addInfo("but the extra power cost is instead added in form of increased catalyst amounts")
             .addUnlimitedTierSkips()
             .beginStructureBlock(33, 24, 33, false)
+            .addController("Middle of the structure, 3rd layer")
             .addStructureInfo(EnumChatFormatting.GOLD + "2,112" + EnumChatFormatting.GRAY + " Heating coils required")
             .addStructureInfo(
                 EnumChatFormatting.GOLD + "120" + EnumChatFormatting.GRAY + " Dimensional bridge blocks required.")
@@ -679,11 +671,12 @@ public class MTEPlasmaForge extends MTEExtendedPowerMultiBlockBase<MTEPlasmaForg
                     + EnumChatFormatting.GRAY
                     + "-"
                     + EnumChatFormatting.GOLD
-                    + max_input_bus
+                    + max_output_bus
                     + EnumChatFormatting.GRAY
                     + " output buses")
             .addStructureInfo("")
             .addSubChannelUsage(GTStructureChannels.HEATING_COIL)
+            .addTecTechHatchInfo()
             .toolTipFinisher(AuthorColen);
         return tt;
     }
@@ -743,6 +736,7 @@ public class MTEPlasmaForge extends MTEExtendedPowerMultiBlockBase<MTEPlasmaForg
     protected ProcessingLogic createProcessingLogic() {
         return new ProcessingLogic() {
 
+            @Override
             @Nonnull
             protected Stream<GTRecipe> findRecipeMatches(@Nullable RecipeMap<?> map) {
                 if (map == null) {
@@ -946,30 +940,30 @@ public class MTEPlasmaForge extends MTEExtendedPowerMultiBlockBase<MTEPlasmaForg
                 + "------------",
             StatCollector.translateToLocal("GT5U.multiblock.Progress") + ": "
                 + EnumChatFormatting.GREEN
-                + GTUtility.formatNumbers(mProgresstime)
+                + formatNumber(mProgresstime)
                 + EnumChatFormatting.RESET
                 + "t / "
                 + EnumChatFormatting.YELLOW
-                + GTUtility.formatNumbers(mMaxProgresstime)
+                + formatNumber(mMaxProgresstime)
                 + EnumChatFormatting.RESET
                 + "t",
             StatCollector.translateToLocal("GT5U.multiblock.energy") + ": "
                 + EnumChatFormatting.GREEN
-                + GTUtility.formatNumbers(storedEnergy)
+                + formatNumber(storedEnergy)
                 + EnumChatFormatting.RESET
                 + " EU / "
                 + EnumChatFormatting.YELLOW
-                + GTUtility.formatNumbers(maxEnergy)
+                + formatNumber(maxEnergy)
                 + EnumChatFormatting.RESET
                 + " EU",
             StatCollector.translateToLocal("GT5U.multiblock.usage") + ": "
                 + EnumChatFormatting.RED
-                + GTUtility.formatNumbers(getActualEnergyUsage())
+                + formatNumber(getActualEnergyUsage())
                 + EnumChatFormatting.RESET
                 + " EU/t",
             StatCollector.translateToLocal("GT5U.multiblock.mei") + ": "
                 + EnumChatFormatting.YELLOW
-                + GTUtility.formatNumbers(voltage)
+                + formatNumber(voltage)
                 + EnumChatFormatting.RESET
                 + " EU/t(*"
                 + EnumChatFormatting.YELLOW
@@ -983,13 +977,13 @@ public class MTEPlasmaForge extends MTEExtendedPowerMultiBlockBase<MTEPlasmaForg
                 + EnumChatFormatting.RESET,
             StatCollector.translateToLocal("GT5U.EBF.heat") + ": "
                 + EnumChatFormatting.GREEN
-                + GTUtility.formatNumbers(mHeatingCapacity)
+                + formatNumber(mHeatingCapacity)
                 + EnumChatFormatting.RESET
                 + " K",
             StatCollector.translateToLocalFormatted(
                 "GT5U.infodata.plasma_forge.ticks_run_fuel_discount",
-                EnumChatFormatting.GREEN + GTUtility.formatNumbers(running_time) + EnumChatFormatting.RESET,
-                EnumChatFormatting.RED + GTUtility.formatNumbers(100 * (1 - discount)) + EnumChatFormatting.RESET + "%",
+                EnumChatFormatting.GREEN + formatNumber(running_time) + EnumChatFormatting.RESET,
+                EnumChatFormatting.RED + formatNumber(100 * (1 - discount)) + EnumChatFormatting.RESET + "%",
                 extraCatalystNeeded),
             StatCollector.translateToLocalFormatted(
                 "GT5U.infodata.plasma_forge.convergence",
@@ -1001,10 +995,14 @@ public class MTEPlasmaForge extends MTEExtendedPowerMultiBlockBase<MTEPlasmaForg
                             ? StatCollector.translateToLocal("GT5U.infodata.plasma_forge.convergence.achieved")
                             : StatCollector.translateToLocalFormatted(
                                 "GT5U.infodata.plasma_forge.convergence.progress",
-                                GTUtility.formatNumbers((max_efficiency_time_in_ticks - running_time) / (20 * 60))))
+                                formatNumber((max_efficiency_time_in_ticks - running_time) / (20 * 60))))
 
                     : EnumChatFormatting.RED
                         + StatCollector.translateToLocal("GT5U.infodata.plasma_forge.convergence.inactive"))),
+            StatCollector.translateToLocal("GT5U.multiblock.recipesDone") + ": "
+                + EnumChatFormatting.GREEN
+                + formatNumber(recipesDone)
+                + EnumChatFormatting.RESET,
             EnumChatFormatting.STRIKETHROUGH + "-----------------------------------------" };
     }
 
@@ -1125,84 +1123,24 @@ public class MTEPlasmaForge extends MTEExtendedPowerMultiBlockBase<MTEPlasmaForg
     private static final int CATALYST_WINDOW_ID = 10;
 
     @Override
-    protected boolean useMui2() {
-        return false;
+    protected @NotNull MTEMultiBlockBaseGui<?> getGui() {
+        return new MTEPlasmaForgeGui(this);
     }
 
-    @Override
-    public void addUIWidgets(ModularWindow.Builder builder, UIBuildContext buildContext) {
-        buildContext.addSyncedWindow(CATALYST_WINDOW_ID, this::createCatalystWindow);
-        builder.widget(new ButtonWidget().setOnClick((clickData, widget) -> {
-            ItemStack controllerStack = this.getControllerSlot();
-            if (clickData.mouseButton == 0) {
-                if (controllerStack != null
-                    && controllerStack.isItemEqual(ItemList.Transdimensional_Alignment_Matrix.get(1))) {
-                    convergence = !convergence;
-                }
-            } else if (clickData.mouseButton == 1 && !widget.isClient()) {
-                widget.getContext()
-                    .openSyncedWindow(CATALYST_WINDOW_ID);
-            }
-        })
-            .setPlayClickSound(true)
-            .setBackground(() -> {
-                List<UITexture> ret = new ArrayList<>();
-                if (convergence) {
-                    ret.add(GTUITextures.BUTTON_STANDARD_PRESSED);
-                    ret.add(TecTechUITextures.OVERLAY_BUTTON_SAFE_VOID_ON);
-                } else {
-                    ret.add(GTUITextures.BUTTON_STANDARD);
-                    ret.add(TecTechUITextures.OVERLAY_BUTTON_SAFE_VOID_OFF);
-                }
-                return ret.toArray(new IDrawable[0]);
-            })
-            .addTooltip(translateToLocal("GT5U.DTPF.convergencebutton"))
-            .addTooltip(EnumChatFormatting.GRAY + translateToLocal("GT5U.DTPF.convergencebuttontooltip.0"))
-            .addTooltip(EnumChatFormatting.GRAY + translateToLocal("GT5U.DTPF.convergencebuttontooltip.1"))
-            .setTooltipShowUpDelay(TOOLTIP_DELAY)
-            .setPos(174, 112)
-            .setSize(16, 16)
-            .attachSyncer(new FakeSyncWidget.BooleanSyncer(() -> convergence, (val) -> convergence = val), builder));
-        super.addUIWidgets(builder, buildContext);
+    public boolean getConvergenceStatus() {
+        return this.convergence;
     }
 
-    protected ModularWindow createCatalystWindow(final EntityPlayer player) {
-        final int WIDTH = 58;
-        final int HEIGHT = 52;
-        final int PARENT_WIDTH = getGUIWidth();
-        final int PARENT_HEIGHT = getGUIHeight();
-        ModularWindow.Builder builder = ModularWindow.builder(WIDTH, HEIGHT);
-        builder.setBackground(GTUITextures.BACKGROUND_SINGLEBLOCK_DEFAULT);
-        builder.setGuiTint(getGUIColorization());
-        builder.setDraggable(true);
-        builder.setPos(
-            (size, window) -> Alignment.Center.getAlignedPos(size, new Size(PARENT_WIDTH, PARENT_HEIGHT))
-                .add(
-                    Alignment.BottomRight.getAlignedPos(new Size(PARENT_WIDTH, PARENT_HEIGHT), new Size(WIDTH, HEIGHT))
-                        .add(WIDTH - 3, 0)
-                        .subtract(0, 10)));
-        builder.widget(
-            TextWidget.localised("GT5U.DTPF.catalysttier")
-                .setPos(3, 4)
-                .setSize(50, 20))
-            .widget(
-                new NumericWidget().setSetter(val -> catalystTypeForRecipesWithoutCatalyst = (int) val)
-                    .setGetter(() -> catalystTypeForRecipesWithoutCatalyst)
-                    .setBounds(1, 5)
-                    .setDefaultValue(1)
-                    .setScrollValues(1, 4, 64)
-                    .setTextAlignment(Alignment.Center)
-                    .setTextColor(Color.WHITE.normal)
-                    .setSize(50, 18)
-                    .setPos(4, 25)
-                    .setBackground(GTUITextures.BACKGROUND_TEXT_FIELD)
-                    .addTooltip(translateToLocal("GT5U.DTPF.catalystinfotooltip"))
-                    .attachSyncer(
-                        new FakeSyncWidget.IntegerSyncer(
-                            () -> catalystTypeForRecipesWithoutCatalyst,
-                            (val) -> catalystTypeForRecipesWithoutCatalyst = val),
-                        builder));
-        return builder.build();
+    public void setConvergenceStatus(boolean value) {
+        this.convergence = value;
+    }
+
+    public int getCatalystTypeForRecipesWithoutCatalyst() {
+        return this.catalystTypeForRecipesWithoutCatalyst;
+    }
+
+    public void setCatalystTypeForRecipesWithoutCatalyst(int value) {
+        this.catalystTypeForRecipesWithoutCatalyst = value;
     }
 
     @Override
@@ -1242,22 +1180,35 @@ public class MTEPlasmaForge extends MTEExtendedPowerMultiBlockBase<MTEPlasmaForg
     }
 
     @Override
+    public boolean supportsSingleRecipeLocking() {
+        return false;
+    }
+
+    @Override
     public boolean getDefaultHasMaintenanceChecks() {
         return false;
     }
 
     @Override
-    public boolean onWireCutterRightClick(ForgeDirection side, ForgeDirection wrenchingSide, EntityPlayer aPlayer,
-        float aX, float aY, float aZ, ItemStack aTool) {
-        if (aPlayer.isSneaking()) {
-            batchMode = !batchMode;
-            if (batchMode) {
-                GTUtility.sendChatToPlayer(aPlayer, StatCollector.translateToLocal("misc.BatchModeTextOn"));
-            } else {
-                GTUtility.sendChatToPlayer(aPlayer, StatCollector.translateToLocal("misc.BatchModeTextOff"));
-            }
-            return true;
+    public void getWailaNBTData(EntityPlayerMP player, TileEntity tile, NBTTagCompound tag, World world, int x, int y,
+        int z) {
+        super.getWailaNBTData(player, tile, tag, world, x, y, z);
+        tag.setDouble("discount", discount);
+    }
+
+    @Override
+    public void getWailaBody(ItemStack itemStack, List<String> currentTip, IWailaDataAccessor accessor,
+        IWailaConfigHandler config) {
+        super.getWailaBody(itemStack, currentTip, accessor, config);
+        final NBTTagCompound tag = accessor.getNBTData();
+        if (tag.hasKey("discount")) {
+            currentTip.add(
+                StatCollector.translateToLocalFormatted(
+                    "GT5U.infodata.plasma_forge.fuel_discount",
+                    EnumChatFormatting.GOLD + formatNumber(100 * (1 - tag.getDouble("discount")))
+                        + EnumChatFormatting.RESET
+                        + "%"));
+
         }
-        return false;
     }
 }

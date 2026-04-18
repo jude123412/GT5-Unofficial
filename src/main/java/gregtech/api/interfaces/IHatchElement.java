@@ -7,6 +7,7 @@ import java.util.function.BiPredicate;
 import java.util.function.ToLongFunction;
 
 import net.minecraft.block.Block;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import com.google.common.collect.ImmutableList;
@@ -14,6 +15,7 @@ import com.gtnewhorizon.structurelib.structure.IStructureElement;
 
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.util.GTLanguageManager;
 import gregtech.api.util.GTStructureUtility;
 import gregtech.api.util.IGTHatchAdder;
 
@@ -26,7 +28,8 @@ public interface IHatchElement<T> {
     String name();
 
     default String getDisplayName() {
-        return name();
+        GTLanguageManager.addStringLocalization("hatch_type_" + name().toLowerCase(), name());
+        return StatCollector.translateToLocal("hatch_type_" + name().toLowerCase());
     }
 
     long count(T t);
@@ -67,47 +70,48 @@ public interface IHatchElement<T> {
         return new HatchElement<>(null, null, null, null, aCount, this);
     }
 
-    default <T2 extends T> IStructureElement<T2> newAny(int aCasingIndex, int aDot) {
-        if (aCasingIndex < 0 || aDot < 0) throw new IllegalArgumentException();
+    default <T2 extends T> IStructureElement<T2> newAny(int aCasingIndex, int aHintNumber) {
+        if (aCasingIndex < 0 || aHintNumber < 0) throw new IllegalArgumentException();
         return GTStructureUtility.<T2>buildHatchAdder()
             .anyOf(this)
             .casingIndex(aCasingIndex)
-            .dot(aDot)
+            .hint(aHintNumber)
             .continueIfSuccess()
             .exclusive()
             .build();
     }
 
-    default <T2 extends T> IStructureElement<T2> newAnyOrCasing(int aCasingIndex, int aDot, Block casingBlock,
+    default <T2 extends T> IStructureElement<T2> newAnyOrCasing(int aCasingIndex, int aHintNumber, Block casingBlock,
         int casingMeta) {
-        if (aCasingIndex < 0 || aDot < 0) throw new IllegalArgumentException();
+        if (aCasingIndex < 0 || aHintNumber < 0) throw new IllegalArgumentException();
         return GTStructureUtility.<T2>buildHatchAdder()
             .anyOf(this)
             .casingIndex(aCasingIndex)
-            .dot(aDot)
+            .hint(aHintNumber)
             .continueIfSuccess()
             .buildAndChain(com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock(casingBlock, casingMeta));
     }
 
-    default <T2 extends T> IStructureElement<T2> newAny(int aCasingIndex, int aDot, ForgeDirection... allowedFacings) {
-        if (aCasingIndex < 0 || aDot < 0) throw new IllegalArgumentException();
+    default <T2 extends T> IStructureElement<T2> newAny(int aCasingIndex, int aHintNumber,
+        ForgeDirection... allowedFacings) {
+        if (aCasingIndex < 0 || aHintNumber < 0) throw new IllegalArgumentException();
         return GTStructureUtility.<T2>buildHatchAdder()
             .anyOf(this)
             .casingIndex(aCasingIndex)
-            .dot(aDot)
+            .hint(aHintNumber)
             .continueIfSuccess()
             .allowOnly(allowedFacings)
             .exclusive()
             .build();
     }
 
-    default <T2 extends T> IStructureElement<T2> newAny(int aCasingIndex, int aDot,
+    default <T2 extends T> IStructureElement<T2> newAny(int aCasingIndex, int aHintNumber,
         BiPredicate<? super T2, ? super IGregTechTileEntity> aShouldSkip) {
-        if (aCasingIndex < 0 || aDot < 0 || aShouldSkip == null) throw new IllegalArgumentException();
+        if (aCasingIndex < 0 || aHintNumber < 0 || aShouldSkip == null) throw new IllegalArgumentException();
         return GTStructureUtility.<T2>buildHatchAdder()
             .anyOf(this)
             .casingIndex(aCasingIndex)
-            .dot(aDot)
+            .hint(aHintNumber)
             .shouldSkip(aShouldSkip)
             .continueIfSuccess()
             .build();
