@@ -206,7 +206,8 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                         }
                     }
                 } else {
-                    // Return capacitor tier to default if removed
+                    // Return capacitor tier
+                    // to default if removed
                     if (controllerSlot == null) {
                         capacitorTier = 1.0F;
                     }
@@ -224,10 +225,6 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                 this.mMaxProgresstime = 1;
                 this.mEfficiencyIncrease = (int) (getEfficiencyIncrease() * capacitorTier);
                 return CheckRecipeResultRegistry.GENERATING;
-            }
-
-            if (this.mEfficiency > 10000 && capacitorTier > 1.0F) {
-                this.mEfficiency = (int) (10000 * capacitorTier);
             }
         }
         this.mEUt = 0;
@@ -252,8 +249,8 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
 
     private static int getCapacitorMaxExtract(ItemStack capacitor) {
         ICapacitor cap = getCapacitor(capacitor);
-        if (cap != null) return 512 * (cap.getMaxEnergyExtracted() / 20);
-        return 512;
+        if (cap != null) return cap.getMaxEnergyExtracted();
+        return 20;
     }
 
     @Override
