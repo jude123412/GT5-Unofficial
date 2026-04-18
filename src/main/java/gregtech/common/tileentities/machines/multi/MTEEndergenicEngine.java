@@ -4,24 +4,16 @@ import static com.gtnewhorizon.structurelib.structure.StructureUtility.*;
 import static gregtech.api.GregTechAPI.*;
 import static gregtech.api.enums.HatchElement.*;
 import static gregtech.api.enums.Textures.BlockIcons.*;
-import static gregtech.api.util.GTModHandler.getModItem;
 import static gregtech.api.util.GTStructureUtility.buildHatchAdder;
 import static gregtech.api.util.GTStructureUtility.chainAllGlasses;
 import static gregtech.api.util.GTUtility.validMTEList;
 
 import java.util.ArrayList;
 
-import crazypants.enderio.material.ItemCapacitor;
-import crazypants.enderio.power.ICapacitor;
-import crazypants.enderio.power.ICapacitorItem;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.EntityFX;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.StatCollector;
-import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
@@ -34,8 +26,8 @@ import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import com.gtnewhorizon.structurelib.structure.StructureDefinition;
 
-import crazypants.enderio.EnderIO;
-import gregtech.api.enums.Mods;
+import crazypants.enderio.material.ItemCapacitor;
+import crazypants.enderio.power.ICapacitor;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
@@ -51,7 +43,6 @@ import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.MultiblockTooltipBuilder;
-import gregtech.common.render.EndergenicBubbleRenderer;
 
 public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenicEngine>
     implements ISurvivalConstructable {
@@ -202,7 +193,8 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                     boostedFuelValue = GTUtility.safeInt((long) (fuelValue * getCapacitorTier(controllerSlot)));
                     boostedOutput = getCapacitorMaxExtract(controllerSlot) * getCapacitorTier(controllerSlot);
 
-                    fuelConsumption = tLiquid.amount = (int) (getCapacitorTier(controllerSlot) * getCapacitorMaxExtract(controllerSlot)
+                    fuelConsumption = tLiquid.amount = (int) (getCapacitorTier(controllerSlot)
+                        * getCapacitorMaxExtract(controllerSlot)
                         / fuelValue);
 
                     if (boostedFuelValue * 2 > boostedOutput) {
