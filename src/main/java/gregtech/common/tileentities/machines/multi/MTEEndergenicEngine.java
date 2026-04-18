@@ -11,8 +11,12 @@ import static gregtech.api.util.GTUtility.validMTEList;
 
 import java.util.ArrayList;
 
+import crazypants.enderio.material.ItemCapacitor;
+import crazypants.enderio.power.ICapacitor;
+import crazypants.enderio.power.ICapacitorItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.EntityFX;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
@@ -24,6 +28,7 @@ import net.minecraftforge.fluids.FluidStack;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.gtnewhorizon.gtnhlib.util.numberformatting.NumberFormatUtil;
 import com.gtnewhorizon.structurelib.alignment.constructable.ISurvivalConstructable;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
 import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
@@ -75,16 +80,14 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                     lazy(
                         t -> buildHatchAdder(MTEEndergenicEngine.class).atLeast(InputHatch, InputHatch, Maintenance)
                             .casingIndex(50)
-                            .dot(1)
+                            .hint(1)
                             .buildAndChain(sBlockCasings4, 2)))
                 .addElement(
                     'n',
-                    ofChain(
-                        isAir(),
-                        ofBlock(
-                            FluidRegistry.getFluid("nutrient_distillation")
-                                .getBlock(),
-                            0)))
+                    ofBlock(
+                        FluidRegistry.getFluid("nutrient_distillation")
+                            .getBlock(),
+                        0))
                 .build();
         }
     };
@@ -174,7 +177,7 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
     }
 
     protected int getNominalOutput() {
-        return 2048;
+        return 512;
     }
 
     protected int getEfficiencyIncrease() {
@@ -185,79 +188,6 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
     @NotNull
     public CheckRecipeResult checkProcessing() {
         ArrayList<FluidStack> tFluids = getStoredFluids();
-
-        int runtime = this.mRuntime % 20;
-        if (runtime == 15) {
-            Minecraft minecraft = Minecraft.getMinecraft();
-            World world = minecraft.thePlayer.worldObj;
-            float random = world.rand.nextFloat();
-
-            int xCoord = getBaseMetaTileEntity().getBackFacing().offsetX;
-            int yCoord = getBaseMetaTileEntity().getBackFacing().offsetY;
-
-            // Get Facing direction
-            IGregTechTileEntity aBaseMetaTileEntity = this.getBaseMetaTileEntity();
-            int mDirectionX = aBaseMetaTileEntity.getBackFacing().offsetX;
-            int mCurrentDirectionX;
-            int mCurrentDirectionZ;
-            int mOffsetX_Lower = -1;
-            int mOffsetX_Upper = -1;
-            int mOffsetZ_Lower = -1;
-            int mOffsetZ_Upper = -1;
-
-            if (mDirectionX == 0) {
-                mCurrentDirectionX = 0;
-                mCurrentDirectionZ = 3;
-                mOffsetX_Lower = 3;
-                mOffsetX_Upper = 0;
-                mOffsetZ_Lower = 3;
-                mOffsetZ_Upper = 0;
-            } else {
-                mCurrentDirectionX = 3;
-                mCurrentDirectionZ = 0;
-                mOffsetX_Lower = 0;
-                mOffsetX_Upper = 3;
-                mOffsetZ_Lower = 0;
-                mOffsetZ_Upper = 3;
-            }
-
-            final int xDir = aBaseMetaTileEntity.getBackFacing().offsetX * mCurrentDirectionX;
-            final int zDir = aBaseMetaTileEntity.getBackFacing().offsetZ * mCurrentDirectionZ;
-
-            // Play bubble sound every 15 ticks with random pitch
-            world.playSound(
-                xDir + 0.5,
-                yCoord + 1,
-                zDir + 0.5,
-                EnderIO.MODID + ":generator.zombie.bubble",
-                0.100F,
-                world.rand.nextFloat() * 0.75F,
-                false);
-
-            // Spawn bubbles in sync with bubble sound
-            for (float x = mOffsetX_Lower; x < mOffsetX_Upper; x++) {
-                for (float z = mOffsetZ_Lower; z < mOffsetZ_Upper; z++) {
-                    if (x == 1 && z == 1) {
-                        continue; // Skip center of 3x3, Thanks ChatGPT xD.
-                    }
-
-                    float aOffset = 0.1F * random;
-                    float bOffset = random > 0.25f ? (float) 0.25 : random;
-
-                    EntityFX bubbleFX = new EndergenicBubbleRenderer(
-                        world,
-                        xDir + x,
-                        yCoord,
-                        zDir + z,
-                        aOffset,
-                        0.5f,
-                        aOffset);
-                    minecraft.effectRenderer.addEffect(bubbleFX);
-                }
-            }
-        }
-
-        // fast track lookup
         if (!tFluids.isEmpty()) {
             double boostedFuelValue = 0;
             double boostedOutput = 0;
@@ -317,29 +247,17 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
         return CheckRecipeResultRegistry.NO_FUEL_FOUND;
     }
 
-    public static float getCapacitorTier(ItemStack capacitor) {
-        ItemStack capacitorDouble = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 1);
-        ItemStack capacitorOctadic = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 2);
-        ItemStack capacitorCrystalline = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 3);
-        ItemStack capacitorMelodic = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 4);
-        ItemStack capacitorStellar = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 5);
-        ItemStack capacitorTotemic = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 7);
-        ItemStack capacitorEndergetic = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 8);
-        ItemStack capacitorEndergized = getModItem(Mods.EnderIO.ID, "itemBasicCapacitor", 1L, 9);
-
-        if (capacitor.isItemEqual(capacitorDouble) || capacitor.isItemEqual(capacitorEndergetic)) {
-            return 2.0F;
-        } else if (capacitor.isItemEqual(capacitorOctadic) || capacitor.isItemEqual(capacitorEndergized)) {
-            return 3.0F;
-        } else if (capacitor.isItemEqual(capacitorCrystalline) || capacitor.isItemEqual(capacitorTotemic)) {
-            return 3.5F;
-        } else if (capacitor.isItemEqual(capacitorMelodic)) {
-            return 4.0F;
-        } else if (capacitor.isItemEqual(capacitorStellar)) {
-            return 5.0F;
-        } else {
-            return 1.0F;
+    private static ICapacitor getCapacitor(ItemStack stack) {
+        if (stack.getItem() instanceof ItemCapacitor cap) {
+            return cap.getCapacitor(stack);
         }
+        return null;
+    }
+
+    public static float getCapacitorTier(ItemStack capacitor) {
+        ICapacitor cap = getCapacitor(capacitor);
+        if (cap != null) return cap.getTier();
+        return 1.0F;
     }
 
     @Override
@@ -398,11 +316,11 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                 + EnumChatFormatting.RESET,
             StatCollector.translateToLocal("GT5U.multiblock.energy") + ": "
                 + EnumChatFormatting.GREEN
-                + GTUtility.formatNumbers(storedEnergy)
+                + NumberFormatUtil.formatNumber(storedEnergy)
                 + EnumChatFormatting.RESET
                 + " EU / "
                 + EnumChatFormatting.YELLOW
-                + GTUtility.formatNumbers(maxEnergy)
+                + NumberFormatUtil.formatNumber(maxEnergy)
                 + EnumChatFormatting.RESET
                 + " EU",
             getIdealStatus() == getRepairStatus()
@@ -412,22 +330,22 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                     + EnumChatFormatting.RESET,
             StatCollector.translateToLocal("GT5U.engine.output") + ": "
                 + EnumChatFormatting.RED
-                + GTUtility.formatNumbers(((long) mEUt * mEfficiency / 10000))
+                + NumberFormatUtil.formatNumber(((long) mEUt * mEfficiency / 10000))
                 + EnumChatFormatting.RESET
                 + " EU/t",
             StatCollector.translateToLocal("GT5U.engine.consumption") + ": "
                 + EnumChatFormatting.YELLOW
-                + GTUtility.formatNumbers(fuelConsumption)
+                + NumberFormatUtil.formatNumber(fuelConsumption)
                 + EnumChatFormatting.RESET
                 + " L/t",
             StatCollector.translateToLocal("GT5U.engine.value") + ": "
                 + EnumChatFormatting.YELLOW
-                + GTUtility.formatNumbers(fuelValue)
+                + NumberFormatUtil.formatNumber(fuelValue)
                 + EnumChatFormatting.RESET
                 + " EU/L",
             StatCollector.translateToLocal("GT5U.turbine.fuel") + ": "
                 + EnumChatFormatting.GOLD
-                + GTUtility.formatNumbers(fuelRemaining)
+                + NumberFormatUtil.formatNumber(fuelRemaining)
                 + EnumChatFormatting.RESET
                 + " L",
             StatCollector.translateToLocal("GT5U.engine.efficiency") + ": "
