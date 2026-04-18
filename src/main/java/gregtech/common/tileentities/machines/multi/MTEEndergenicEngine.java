@@ -176,10 +176,6 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
         return false;
     }
 
-    protected int getNominalOutput() {
-        return 512;
-    }
-
     protected int getEfficiencyIncrease() {
         return 10;
     }
@@ -204,9 +200,9 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                 if (controllerSlot != null && getCapacitorTier(controllerSlot) > 1.0F) {
                     capacitorTier = getCapacitorTier(controllerSlot);
                     boostedFuelValue = GTUtility.safeInt((long) (fuelValue * getCapacitorTier(controllerSlot)));
-                    boostedOutput = getNominalOutput() * getCapacitorTier(controllerSlot);
+                    boostedOutput = getCapacitorMaxExtract(controllerSlot) * getCapacitorTier(controllerSlot);
 
-                    fuelConsumption = tLiquid.amount = (int) (getCapacitorTier(controllerSlot) * getNominalOutput()
+                    fuelConsumption = tLiquid.amount = (int) (getCapacitorTier(controllerSlot) * getCapacitorMaxExtract(controllerSlot)
                         / fuelValue);
 
                     if (boostedFuelValue * 2 > boostedOutput) {
@@ -222,16 +218,16 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                     if (controllerSlot == null) {
                         capacitorTier = 1.0F;
                     }
-                    fuelConsumption = tLiquid.amount = getNominalOutput() / fuelValue;
+                    fuelConsumption = tLiquid.amount = getCapacitorMaxExtract(controllerSlot) / fuelValue;
                 }
 
                 // Check to prevent consuming DOTV or VOL if capacitor tier is less than melodic
-                if (fuelValue > getNominalOutput() && capacitorTier < 4.0F) {
+                if (fuelValue > getCapacitorMaxExtract(controllerSlot) && capacitorTier < 4.0F) {
                     return SimpleCheckRecipeResult.ofFailure("capacitor_tier_too_low");
                 }
 
                 fuelRemaining = tFluid.amount;
-                this.mEUt = getNominalOutput();
+                this.mEUt = getCapacitorMaxExtract(controllerSlot);
                 this.mProgresstime = 1;
                 this.mMaxProgresstime = 1;
                 this.mEfficiencyIncrease = (int) (getEfficiencyIncrease() * capacitorTier);
@@ -247,17 +243,25 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
         return CheckRecipeResultRegistry.NO_FUEL_FOUND;
     }
 
-    private static ICapacitor getCapacitor(ItemStack stack) {
-        if (stack.getItem() instanceof ItemCapacitor cap) {
-            return cap.getCapacitor(stack);
+    private static ICapacitor getCapacitor(ItemStack capacitor) {
+        if (capacitor != null) {
+            if (capacitor.getItem() instanceof ItemCapacitor cap) {
+                return cap.getCapacitor(capacitor);
+            }
         }
         return null;
     }
 
-    public static float getCapacitorTier(ItemStack capacitor) {
+    private static float getCapacitorTier(ItemStack capacitor) {
         ICapacitor cap = getCapacitor(capacitor);
         if (cap != null) return cap.getTier();
         return 1.0F;
+    }
+
+    private static int getCapacitorMaxExtract(ItemStack capacitor) {
+        ICapacitor cap = getCapacitor(capacitor);
+        if (cap != null) return 512 * (cap.getMaxEnergyExtracted() / 20);
+        return 512;
     }
 
     @Override
