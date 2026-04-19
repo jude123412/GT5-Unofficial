@@ -87,7 +87,7 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
     protected int fuelValue = 0;
     protected int fuelRemaining = 0;
     protected int capacitorMaxExtract = 0;
-    protected float capacitorTier = 1.0f;
+    protected float capacitorTier = 0F;
     protected boolean boosted = false;
 
     public MTEEndergenicEngine(int aID, String aName, String aNameRegional) {
@@ -217,8 +217,8 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                 boosted = depleteInput(new FluidStack(FluidRegistry.getFluid("liquid_sunshine"), 40));
 
                 // Check to prevent consuming DOTV if not boosted
-                if (!boosted && fuelValue > capacitorMaxExtract) {
-                    return SimpleCheckRecipeResult.ofFailure("fuel_quality_too_high");
+                if (fuelValue > capacitorMaxExtract) {
+                    return SimpleCheckRecipeResult.ofFailure("capacitor_tier_too_low");
                 }
 
                 fuelRemaining = tFluid.amount;
@@ -229,6 +229,7 @@ public class MTEEndergenicEngine extends MTEEnhancedMultiBlockBase<MTEEndergenic
                 return CheckRecipeResultRegistry.GENERATING;
             }
         }
+        
         this.mEUt = 0;
         this.mEfficiency = 0;
         return CheckRecipeResultRegistry.NO_FUEL_FOUND;
