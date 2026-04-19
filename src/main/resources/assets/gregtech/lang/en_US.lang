@@ -2403,7 +2403,6 @@ GT5U.gui.text.no_lubricant=§7No lubricant found
 GT5U.gui.text.no_coolant=§7No coolant found
 GT5U.gui.text.cycle_idle=§6Waiting for cycle to start
 GT5U.gui.text.fuel_quality_too_high=§7Fuel quality too high to run without boost
-GT5U.gui.text.capacitor_tier_too_low=§7Capacitor Tier too low to consume current fuel
 GT5U.gui.text.data_stick.saved=Saved Config to Data Stick
 GT5U.gui.text.data_stick.loaded=Loaded Config from Data Stick
 GT5U.gui.text.data_stick.invalid=Invalid Data Stick configuration

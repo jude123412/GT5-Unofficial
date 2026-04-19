@@ -50,12 +50,6 @@ public class FuelRecipes implements Runnable {
             .addTo(GTRecipeConstants.Fuel);
 
         GTValues.RA.stdBuilder()
-            .itemInputs(getModItem(EnderIO.ID, "bucketVapor_of_levity", 1L))
-            .metadata(FUEL_VALUE, 3240)
-            .metadata(FUEL_TYPE, 6)
-            .addTo(GTRecipeConstants.Fuel);
-
-        GTValues.RA.stdBuilder()
             .itemInputs(GTModHandler.getIC2Item("biogasCell", 1L))
             .metadata(FUEL_VALUE, 40)
             .metadata(FUEL_TYPE, 1)
