@@ -58,7 +58,7 @@ public class CircuitImprintLoader {
             .addTo(cutterRecipes);
 
         GTValues.RA.stdBuilder()
-            .itemInputs(GTModHandler.getIC2Item("electronicCircuit", 1), ItemList.Shape_Slicer_Flat.get(0))
+            .itemInputs(ItemList.Circuit_BasicElectronic.get(1), ItemList.Shape_Slicer_Flat.get(0))
             .itemOutputs(ItemList.SlicedCircuit_ElectronicCircuit.get(1))
             .duration(15 * SECONDS)
             .eut(TierEU.RECIPE_LV / 2)
@@ -90,7 +90,7 @@ public class CircuitImprintLoader {
             .addTo(cutterRecipes);
 
         GTValues.RA.stdBuilder()
-            .itemInputs(GTModHandler.getIC2Item("advancedCircuit", 1), ItemList.Shape_Slicer_Flat.get(0))
+            .itemInputs(ItemList.Circuit_Integrated_Advanced.get(1), ItemList.Shape_Slicer_Flat.get(0))
             .itemOutputs(ItemList.SlicedCircuit_AdvancedCircuit.get(1))
             .duration(15 * SECONDS)
             .eut(TierEU.RECIPE_LV)
