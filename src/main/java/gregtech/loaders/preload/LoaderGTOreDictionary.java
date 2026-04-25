@@ -265,13 +265,6 @@ public class LoaderGTOreDictionary implements Runnable {
         GTOreDictUnificator.registerOre(OreDictNames.craftingBook, new ItemStack(Items.written_book, 1, 32767));
         GTOreDictUnificator.registerOre(OreDictNames.craftingBook, new ItemStack(Items.enchanted_book, 1, 32767));
 
-        GTOreDictUnificator.addToBlacklist(GTModHandler.getIC2Item("electronicCircuit", 1L));
-        GTOreDictUnificator.addToBlacklist(GTModHandler.getIC2Item("advancedCircuit", 1L));
-        GTOreDictUnificator
-            .registerOre(OrePrefixes.circuit, Materials.LV, GTModHandler.getIC2Item("electronicCircuit", 1L));
-        GTOreDictUnificator
-            .registerOre(OrePrefixes.circuit, Materials.HV, GTModHandler.getIC2Item("advancedCircuit", 1L));
-
         GTOreDictUnificator.registerOre(
             OrePrefixes.itemCasing,
             Materials.Copper,
