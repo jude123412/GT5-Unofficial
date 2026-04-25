@@ -169,9 +169,9 @@ public class GTAchievements {
         registerAchievement("extract", 0, -4, ItemList.Machine_Bronze_Extractor.get(1), "alloysmelter", false);
 
         registerAchievement("smallparts", 0, -5, ItemList.Circuit_Primitive.get(1), "alloysmelter", false);
-        registerAchievement("gtbasiccircuit", 0, -8, Ic2Items.electronicCircuit.copy(), "smallparts", false);
+        registerAchievement("gtbasiccircuit", 0, -8, ItemList.Circuit_BasicElectronic.get(1), "smallparts", false);
         registerAchievement("bettercircuits", 0, -9, ItemList.Circuit_Good.get(1), "gtbasiccircuit", false);
-        registerAchievement("stepforward", -2, -9, Ic2Items.advancedCircuit.copy(), "bettercircuits", false);
+        registerAchievement("stepforward", -2, -9, ItemList.Circuit_Integrated_Advanced.get(1), "bettercircuits", false);
         registerAchievement("gtmonosilicon", -5, -10, ItemList.Circuit_Silicon_Ingot.get(1), "stepforward", false);
         registerAchievement("gtlogicwafer", -7, -10, ItemList.Circuit_Wafer_ILC.get(1), "gtmonosilicon", false);
         registerAchievement("gtlogiccircuit", -9, -10, ItemList.Circuit_Basic.get(1), "gtlogicwafer", false);
