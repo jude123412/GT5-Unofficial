@@ -6627,7 +6627,7 @@ public class AssemblerRecipes implements Runnable {
         GTValues.RA.stdBuilder()
             .itemInputs(getModItem(IC2NuclearControl.ID, "ItemVanillaMachineCard", 1L, 0))
             .circuit(1)
-            .itemOutputs(GTModHandler.getIC2Item("electronicCircuit", 2))
+            .itemOutputs(ItemList.Circuit_BasicElectronic.get(2))
             .duration(10 * SECONDS)
             .eut(TierEU.RECIPE_LV)
             .addTo(assemblerRecipes);
@@ -6635,7 +6635,7 @@ public class AssemblerRecipes implements Runnable {
         GTValues.RA.stdBuilder()
             .itemInputs(getModItem(IC2NuclearControl.ID, "ItemInventoryScannerCard", 1L, 0))
             .circuit(1)
-            .itemOutputs(GTModHandler.getIC2Item("electronicCircuit", 2))
+            .itemOutputs(ItemList.Circuit_BasicElectronic.get(2))
             .duration(10 * SECONDS)
             .eut(TierEU.RECIPE_LV)
             .addTo(assemblerRecipes);
@@ -6643,7 +6643,7 @@ public class AssemblerRecipes implements Runnable {
         GTValues.RA.stdBuilder()
             .itemInputs(getModItem(IC2NuclearControl.ID, "ItemEnergySensorLocationCard", 1L, 0))
             .circuit(1)
-            .itemOutputs(GTModHandler.getIC2Item("electronicCircuit", 2))
+            .itemOutputs(ItemList.Circuit_BasicElectronic.get(2))
             .duration(10 * SECONDS)
             .eut(TierEU.RECIPE_LV)
             .addTo(assemblerRecipes);
@@ -6651,7 +6651,7 @@ public class AssemblerRecipes implements Runnable {
         GTValues.RA.stdBuilder()
             .itemInputs(getModItem(IC2NuclearControl.ID, "RFSensorCard", 1L, 0))
             .circuit(1)
-            .itemOutputs(GTModHandler.getIC2Item("electronicCircuit", 2))
+            .itemOutputs(ItemList.Circuit_BasicElectronic.get(2))
             .duration(10 * SECONDS)
             .eut(TierEU.RECIPE_LV)
             .addTo(assemblerRecipes);
@@ -6659,7 +6659,7 @@ public class AssemblerRecipes implements Runnable {
         GTValues.RA.stdBuilder()
             .itemInputs(getModItem(IC2NuclearControl.ID, "ItemMultipleSensorLocationCard", 1L, 0))
             .circuit(1)
-            .itemOutputs(GTModHandler.getIC2Item("electronicCircuit", 1))
+            .itemOutputs(ItemList.Circuit_BasicElectronic.get(1))
             .duration(10 * SECONDS)
             .eut(TierEU.RECIPE_LV)
             .addTo(assemblerRecipes);
@@ -6669,7 +6669,7 @@ public class AssemblerRecipes implements Runnable {
         GTValues.RA.stdBuilder()
             .itemInputs(getModItem(IC2NuclearControl.ID, "ItemMultipleSensorLocationCard", 1L, 1))
             .circuit(1)
-            .itemOutputs(GTModHandler.getIC2Item("electronicCircuit", 1))
+            .itemOutputs(ItemList.Circuit_BasicElectronic.get(1))
             .duration(10 * SECONDS)
             .eut(TierEU.RECIPE_LV)
             .addTo(assemblerRecipes);
@@ -6679,7 +6679,7 @@ public class AssemblerRecipes implements Runnable {
         GTValues.RA.stdBuilder()
             .itemInputs(getModItem(IC2NuclearControl.ID, "ItemMultipleSensorLocationCard", 1L, 2))
             .circuit(1)
-            .itemOutputs(GTModHandler.getIC2Item("electronicCircuit", 2))
+            .itemOutputs(ItemList.Circuit_BasicElectronic.get(2))
             .duration(10 * SECONDS)
             .eut(TierEU.RECIPE_LV)
             .addTo(assemblerRecipes);
@@ -6689,7 +6689,7 @@ public class AssemblerRecipes implements Runnable {
         GTValues.RA.stdBuilder()
             .itemInputs(getModItem(IC2NuclearControl.ID, "ItemLiquidArrayLocationCard", 1L, 0))
             .circuit(1)
-            .itemOutputs(GTModHandler.getIC2Item("electronicCircuit", 2))
+            .itemOutputs(ItemList.Circuit_BasicElectronic.get(2))
             .duration(10 * SECONDS)
             .eut(TierEU.RECIPE_LV)
             .addTo(assemblerRecipes);
@@ -6699,7 +6699,7 @@ public class AssemblerRecipes implements Runnable {
         GTValues.RA.stdBuilder()
             .itemInputs(getModItem(IC2NuclearControl.ID, "ItemEnergyArrayLocationCard", 1L, 0))
             .circuit(1)
-            .itemOutputs(GTModHandler.getIC2Item("electronicCircuit", 2))
+            .itemOutputs(ItemList.Circuit_BasicElectronic.get(2))
             .duration(10 * SECONDS)
             .eut(TierEU.RECIPE_LV)
             .addTo(assemblerRecipes);
@@ -6727,7 +6727,7 @@ public class AssemblerRecipes implements Runnable {
         GTValues.RA.stdBuilder()
             .itemInputs(getModItem(IC2NuclearControl.ID, "CardAppeng", 1L, 0))
             .circuit(1)
-            .itemOutputs(GTModHandler.getIC2Item("electronicCircuit", 2))
+            .itemOutputs(ItemList.Circuit_BasicElectronic.get(2))
             .duration(10 * SECONDS)
             .eut(TierEU.RECIPE_LV)
             .addTo(assemblerRecipes);
@@ -6735,7 +6735,7 @@ public class AssemblerRecipes implements Runnable {
         GTValues.RA.stdBuilder()
             .itemInputs(ItemList.NC_SensorCard.get(1))
             .circuit(1)
-            .itemOutputs(GTModHandler.getIC2Item("electronicCircuit", 3))
+            .itemOutputs(ItemList.Circuit_BasicElectronic.get(3))
             .duration(10 * SECONDS)
             .eut(TierEU.RECIPE_LV)
             .addTo(assemblerRecipes);
