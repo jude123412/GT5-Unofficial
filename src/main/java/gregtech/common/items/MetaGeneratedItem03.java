@@ -1297,28 +1297,28 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFi
                 "gt.item.circuit.transcendent_processor.name",
                 "gt.item.circuit.transcendent_processor.tooltip",
                 OrePrefixes.circuit.get(Materials.UIV),
-                SubTag.NO_UNIFICATION));
+                SubTag.NO_UNIFICATION)).setRender(new GlitchEffectMetaItemRenderer());
         ItemList.Circuit_TranscendentAssembly.set(
             addItemWithLocalizationKeys(
                 Circuit_TranscendentAssembly.ID,
                 "gt.item.circuit.transcendent_assembly.name",
                 "gt.item.circuit.transcendent_assembly.tooltip",
                 OrePrefixes.circuit.get(Materials.UMV),
-                SubTag.NO_UNIFICATION));
+                SubTag.NO_UNIFICATION)).setRender(new GlitchEffectMetaItemRenderer());
         ItemList.Circuit_TranscendentComputer.set(
             addItemWithLocalizationKeys(
                 Circuit_TranscendentComputer.ID,
                 "gt.item.circuit.transcendent_computer.name",
                 "gt.item.circuit.transcendent_computer.tooltip",
                 OrePrefixes.circuit.get(Materials.UXV),
-                SubTag.NO_UNIFICATION));
+                SubTag.NO_UNIFICATION)).setRender(new GlitchEffectMetaItemRenderer());
         ItemList.Circuit_TranscendentMainframe.set(
             addItemWithLocalizationKeys(
                 Circuit_TranscendentMainframe.ID,
                 "gt.item.circuit.transcendent_mainframe.name",
                 "gt.item.circuit.transcendent_mainframe.tooltip",
                 OrePrefixes.circuit.get(Materials.MAX),
-                SubTag.NO_UNIFICATION));
+                SubTag.NO_UNIFICATION)).setRender(new GlitchEffectMetaItemRenderer());
 
         ItemList.Tube_Wires.set(
             addItemWithLocalizationKeys(Tube_Wires.ID, "gt.item.tube_wires.name", "gt.item.tube_wires.tooltip", o));
