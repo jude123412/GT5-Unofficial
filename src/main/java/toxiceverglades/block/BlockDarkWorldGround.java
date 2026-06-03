@@ -14,6 +14,7 @@ public class BlockDarkWorldGround extends BlockGrass implements ITileTooltip {
         this.setBlockName("blockDarkWorldGround");
         this.setHardness(1.0F);
         this.setBlockTextureName(Minecraft.ID + ":" + "grass");
+        this.setStepSound(BlockDarkWorldGround.soundTypeGrass);
     }
 
     @Override
