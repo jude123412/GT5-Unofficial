@@ -555,6 +555,16 @@ public class OrePrefixes {
         .materialGenerationBits(ORE)
         .defaultStackSize(ORE_STACK_SIZE)
         .build();
+
+    public static final OrePrefixes oreIrradiatedStone = new OrePrefixBuilder("oreIrradiatedStone")
+        .withDefaultLocalName("Irradiated Stone Ores")
+        .withPrefix("Irradiated Stone ")
+        .withSuffix(" Ore")
+        .unifiable()
+        .materialBased()
+        .materialGenerationBits(ORE)
+        .defaultStackSize(ORE_STACK_SIZE)
+        .build();
     // endregion
 
     /** Regular Ore Prefix. Ore -> Material is a Oneway Operation! Introduced by Eloraam */

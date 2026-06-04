@@ -1,6 +1,7 @@
 package toxiceverglades.block;
 
 import static toxiceverglades.dimension.DimensionEverglades.blockFluidLakes;
+import static toxiceverglades.dimension.DimensionEverglades.blockMainFiller;
 import static toxiceverglades.dimension.DimensionEverglades.blockPortalFrame;
 import static toxiceverglades.dimension.DimensionEverglades.blockSecondLayer;
 import static toxiceverglades.dimension.DimensionEverglades.blockTopLayer;
@@ -52,12 +53,14 @@ public class DarkWorldContentLoader {
         portalBlock = new BlockEvergladesPortal();
         blockTopLayer = new BlockDarkWorldGround();
         blockSecondLayer = new BlockDarkWorldPollutedDirt();
+        blockMainFiller = new BlockDarkWorldRock();
         blockPortalFrame = new BlockDarkWorldPortalFrame();
 
         // Registry
         GameRegistry.registerBlock(portalBlock, ItemBlockToxicEverglades.class, "dimensionDarkWorld_portal");
         GameRegistry.registerBlock(blockTopLayer, ItemBlockToxicEverglades.class, "blockDarkWorldGround");
         GameRegistry.registerBlock(blockSecondLayer, ItemBlockToxicEverglades.class, "blockDarkWorldGround2");
+        GameRegistry.registerBlock(blockMainFiller, ItemBlockToxicEverglades.class, "blockDarkWorldGround3");
         GameRegistry.registerBlock(blockPortalFrame, ItemBlockToxicEverglades.class, "blockDarkWorldPortalFrame");
 
         // Make Flammable

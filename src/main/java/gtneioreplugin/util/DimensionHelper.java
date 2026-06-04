@@ -99,7 +99,7 @@ public class DimensionHelper {
         register("Twilight", TWILIGHT_FOREST, "Twilight", "TF", T0, ImmutableList.of(StoneType.Stone));
         register("The End", THE_END, "The End", "ED", T0, ImmutableList.of(StoneType.Endstone));
         register("EndAsteroid", ENDASTEROID, "EndAsteroid", "EA", T0, ImmutableList.of(StoneType.Endstone));
-        register("dimensionDarkWorld", EVERGLADES, "dimensionDarkWorld", "Eg", T0, ImmutableList.of(StoneType.Stone));
+        register("dimensionDarkWorld", EVERGLADES, "dimensionDarkWorld", "Eg", T0, ImmutableList.of(StoneType.IrradiatedStone));
 
         // T1
         register("GalacticraftCore_Moon", MOON, "Moon", "Mo", T1, ImmutableList.of(StoneType.Moon));

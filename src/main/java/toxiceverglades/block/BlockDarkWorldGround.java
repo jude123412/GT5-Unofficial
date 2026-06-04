@@ -2,6 +2,7 @@ package toxiceverglades.block;
 
 import static gregtech.api.enums.Mods.Minecraft;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockGrass;
 
 import gtPlusPlus.api.interfaces.ITileTooltip;
@@ -14,7 +15,7 @@ public class BlockDarkWorldGround extends BlockGrass implements ITileTooltip {
         this.setBlockName("blockDarkWorldGround");
         this.setHardness(1.0F);
         this.setBlockTextureName(Minecraft.ID + ":" + "grass");
-        this.setStepSound(BlockDarkWorldGround.soundTypeGrass);
+        this.setStepSound(Block.soundTypeGrass);
     }
 
     @Override

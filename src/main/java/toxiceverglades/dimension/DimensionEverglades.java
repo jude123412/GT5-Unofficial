@@ -17,7 +17,7 @@ public class DimensionEverglades {
     public static ItemEvergladesPortalTrigger portalItem;
     public static Block blockTopLayer;
     public static Block blockSecondLayer;
-    public static Block blockMainFiller = Blocks.stone;
+    public static Block blockMainFiller;
     public static Block blockSecondaryFiller;
     public static Block blockFluidLakes;
     public static Block blockPortalFrame;

@@ -111,6 +111,7 @@ public final class GTOreAdapter implements IOreAdapter<Materials> {
             StoneType.Deepslate,
             StoneType.Tuff,
             StoneType.BlueIce,
+            StoneType.IrradiatedStone
         });
 
         ores = new GTBlockOre[] { ores1, ores2, ores3, ores4, ores5, ores6 };

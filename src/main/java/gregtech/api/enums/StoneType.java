@@ -48,6 +48,7 @@ import gregtech.api.render.TextureFactory;
 import gregtech.api.util.GTDataUtils;
 import gregtech.api.util.GTOreDictUnificator;
 import it.unimi.dsi.fastutil.Pair;
+import toxiceverglades.dimension.DimensionEverglades;
 
 public enum StoneType implements IStoneType {
 
@@ -182,6 +183,12 @@ public enum StoneType implements IStoneType {
         .setDust(Materials.Ice)
         .setCategory(StoneCategory.Ice)
         .addAllowedDimensions(DimNames.ASTEROIDS, DimNames.KUIPERBELT, DimNames.MEHENBELT)),
+
+    IrradiatedStone(new StoneBuilder()
+        .setPrefix(OrePrefixes.oreIrradiatedStone)
+        .setStoneNoCobble(Mods.GTPlusPlusEverglades, "blockDarkWorldGround3", WILDCARD)
+        .setDust(Materials.Ice)
+        .setCategory(StoneCategory.Stone)),
 
     ;
     // spotless:on

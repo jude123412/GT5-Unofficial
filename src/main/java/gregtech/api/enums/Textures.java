@@ -1545,6 +1545,9 @@ public class Textures {
             LARGETURBINE_TU_ACTIVE8 = create("LARGETURBINE_TU_ACTIVE8"),
             LARGETURBINE_TU_ACTIVE9 = create("LARGETURBINE_TU_ACTIVE9"),
 
+            // Toxic Everglades
+            IRRADIATED_STONE = create("IRRADIATED_STONE"),
+
             // GTPP Casings
             AQUATIC_CASING = create("AQUATIC_CASING"),
             AQUATIC_CASING_TOP = create("AQUATIC_CASING_TOP"),
