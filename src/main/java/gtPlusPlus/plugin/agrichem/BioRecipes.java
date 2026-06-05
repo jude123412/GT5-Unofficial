@@ -5,6 +5,7 @@ import static gregtech.api.enums.Mods.Railcraft;
 import static gregtech.api.recipe.RecipeMaps.assemblerRecipes;
 import static gregtech.api.recipe.RecipeMaps.blastFurnaceRecipes;
 import static gregtech.api.recipe.RecipeMaps.centrifugeRecipes;
+import static gregtech.api.recipe.RecipeMaps.chemicalBathRecipes;
 import static gregtech.api.recipe.RecipeMaps.compressorRecipes;
 import static gregtech.api.recipe.RecipeMaps.distilleryRecipes;
 import static gregtech.api.recipe.RecipeMaps.extractorRecipes;
@@ -738,16 +739,16 @@ public class BioRecipes {
         GTValues.RA.stdBuilder()
             .itemInputs(GregtechItemList.AlgaeBiomass.get(1))
             .fluidOutputs(new FluidStack(GTPPFluids.AlgalOil, 150))
-            .itemOutputs(GregtechItemList.CelluloseFiber.get(1))
-            .outputChances(2500)
+            .itemOutputs(GTUtility.copyAmount(1, Ic2Items.plantBall))
+            .outputChances(500)
             .duration(32)
             .eut(TierEU.RECIPE_LV)
             .addTo(fluidExtractionRecipes);
 
         GTValues.RA.stdBuilder()
             .itemInputs(GregtechItemList.GreenAlgaeBiomass.get(1))
-            .itemOutputs(GregtechItemList.Compost.get(1))
-            .outputChances(1250)
+            .itemOutputs(GTUtility.copyAmount(1, Ic2Items.plantBall))
+            .outputChances(500)
             .fluidOutputs(new FluidStack(GTPPFluids.AlgalOil, 50))
             .duration(32)
             .eut(TierEU.RECIPE_LV)
@@ -755,7 +756,8 @@ public class BioRecipes {
 
         GTValues.RA.stdBuilder()
             .itemInputs(GregtechItemList.GoldenBrownAlgaeBiomass.get(1))
-            .itemOutputs(GregtechItemList.GoldenBrownCelluloseFiber.get(1))
+            .itemOutputs(GTUtility.copyAmount(1, Ic2Items.plantBall))
+            .outputChances(500)
             .outputChances(2500)
             .fluidOutputs(new FluidStack(GTPPFluids.AlgalOil, 100))
             .duration(32)
@@ -787,7 +789,7 @@ public class BioRecipes {
             .itemInputs(GregtechItemList.RedAlgaeBiomass.get(4))
             .itemOutputs(getModItem(NewHorizonsCoreMod.ID, "GTNHBioItems", 1, 2))
             .duration(30 * SECONDS)
-            .eut(TierEU.IV)
-            .addTo(compressorRecipes);
+            .eut(TierEU.HV)
+            .addTo(chemicalBathRecipes);
     }
 }
