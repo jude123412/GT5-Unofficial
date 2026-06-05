@@ -137,7 +137,8 @@ public class GTPPFluids {
 
         Butanol = FluidUtils.generateFluidNoPrefix("butanol", "Butanol", 200, new short[] { 159, 58, 56, 100 }, true);
 
-        AlgalOil = FluidUtils.generateFluidNoPrefix("algaloil", "Algal Oil", 200, new short[] { 180, 180, 0, 100 }, true);
+        AlgalOil = FluidUtils
+            .generateFluidNoPrefix("algaloil", "Algal Oil", 200, new short[] { 180, 180, 0, 100 }, true);
 
         short[] aZincFrothRGB = Materials.Sphalerite.mRGBa;
         SphaleriteFlotationFroth = FluidUtils.generateFluidNoPrefix(

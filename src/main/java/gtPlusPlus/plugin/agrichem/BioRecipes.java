@@ -1,10 +1,11 @@
 package gtPlusPlus.plugin.agrichem;
 
-import static gregtech.api.enums.Mods.BartWorks;
+import static gregtech.api.enums.Mods.NewHorizonsCoreMod;
 import static gregtech.api.enums.Mods.Railcraft;
 import static gregtech.api.recipe.RecipeMaps.assemblerRecipes;
 import static gregtech.api.recipe.RecipeMaps.blastFurnaceRecipes;
 import static gregtech.api.recipe.RecipeMaps.centrifugeRecipes;
+import static gregtech.api.recipe.RecipeMaps.compressorRecipes;
 import static gregtech.api.recipe.RecipeMaps.distilleryRecipes;
 import static gregtech.api.recipe.RecipeMaps.extractorRecipes;
 import static gregtech.api.recipe.RecipeMaps.extruderRecipes;
@@ -12,6 +13,7 @@ import static gregtech.api.recipe.RecipeMaps.fluidExtractionRecipes;
 import static gregtech.api.recipe.RecipeMaps.latheRecipes;
 import static gregtech.api.recipe.RecipeMaps.maceratorRecipes;
 import static gregtech.api.recipe.RecipeMaps.multiblockChemicalReactorRecipes;
+import static gregtech.api.util.GTModHandler.getModItem;
 import static gregtech.api.util.GTRecipeBuilder.INGOTS;
 import static gregtech.api.util.GTRecipeBuilder.MINUTES;
 import static gregtech.api.util.GTRecipeBuilder.SECONDS;
@@ -21,13 +23,10 @@ import static gregtech.api.util.GTRecipeConstants.COIL_HEAT;
 import static gregtech.api.util.GTRecipeConstants.FUEL_TYPE;
 import static gregtech.api.util.GTRecipeConstants.FUEL_VALUE;
 import static gregtech.api.util.GTRecipeConstants.UniversalChemical;
-import static gtPlusPlus.api.recipe.GTPPRecipeMaps.centrifugeNonCellRecipes;
 import static gtPlusPlus.api.recipe.GTPPRecipeMaps.chemicalDehydratorRecipes;
 import static gtPlusPlus.api.recipe.GTPPRecipeMaps.chemicalPlantRecipes;
 import static gtPlusPlus.api.recipe.GTPPRecipeMaps.cokeOvenRecipes;
 
-import gtPlusPlus.core.material.Material;
-import gtPlusPlus.core.material.MaterialsElements;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -48,6 +47,7 @@ import gregtech.api.util.GTUtility;
 import gtPlusPlus.core.fluids.GTPPFluids;
 import gtPlusPlus.core.lib.GTPPCore;
 import gtPlusPlus.core.material.MaterialsAlloy;
+import gtPlusPlus.core.material.MaterialsElements;
 import gtPlusPlus.core.util.minecraft.ItemUtils;
 import gtPlusPlus.xmod.gregtech.api.enums.GregtechItemList;
 import gtPlusPlus.xmod.railcraft.utils.RailcraftUtils;
@@ -86,6 +86,8 @@ public class BioRecipes {
         registerFuels();
         recipeAlgalOil();
         recipeIodineDust();
+        recipePlantBall();
+        if (NewHorizonsCoreMod.isModLoaded()) recipeAgar();
     }
 
     private static void registerFuels() {
@@ -735,7 +737,7 @@ public class BioRecipes {
     private static void recipeAlgalOil() {
         GTValues.RA.stdBuilder()
             .itemInputs(GregtechItemList.AlgaeBiomass.get(1))
-            .fluidOutputs(new FluidStack(GTPPFluids.AlgalOil, 25))
+            .fluidOutputs(new FluidStack(GTPPFluids.AlgalOil, 150))
             .itemOutputs(GregtechItemList.CelluloseFiber.get(1))
             .outputChances(2500)
             .duration(32)
@@ -764,10 +766,28 @@ public class BioRecipes {
     private static void recipeIodineDust() {
         GTValues.RA.stdBuilder()
             .itemInputs(GregtechItemList.BrownAlgaeBiomass.get(36))
-            .itemOutputs(MaterialsElements.getInstance().IODINE.getDust(1))
+            .itemOutputs(MaterialsElements.getInstance().IODINE.getSmallDust(1))
             .fluidOutputs(Materials.SulfurDioxide.getGas(350))
             .duration(30 * SECONDS)
             .eut(TierEU.RECIPE_IV)
             .addTo(centrifugeRecipes);
+    }
+
+    private static void recipePlantBall() {
+        GTValues.RA.stdBuilder()
+            .itemInputs(GregtechItemList.GreenAlgaeBiomass.get(4))
+            .itemOutputs(GTUtility.copyAmount(1, Ic2Items.plantBall))
+            .duration(15 * SECONDS)
+            .eut(TierEU.ULV / 4)
+            .addTo(compressorRecipes);
+    }
+
+    private static void recipeAgar() {
+        GTValues.RA.stdBuilder()
+            .itemInputs(GregtechItemList.RedAlgaeBiomass.get(4))
+            .itemOutputs(getModItem(NewHorizonsCoreMod.ID, "GTNHBioItems", 1, 2))
+            .duration(30 * SECONDS)
+            .eut(TierEU.IV)
+            .addTo(compressorRecipes);
     }
 }
