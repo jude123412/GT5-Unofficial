@@ -32,6 +32,7 @@ public class GTPPFluids {
     public static Fluid Urea;
     public static Fluid LiquidResin;
     public static Fluid Butanol;
+    public static Fluid AlgalOil;
 
     // Milling
     public static Fluid SphaleriteFlotationFroth;
@@ -135,6 +136,8 @@ public class GTPPFluids {
             .generateFluidNoPrefix("liquidresin", "Liquid Resin", 200, new short[] { 59, 58, 56, 100 }, true);
 
         Butanol = FluidUtils.generateFluidNoPrefix("butanol", "Butanol", 200, new short[] { 159, 58, 56, 100 }, true);
+
+        AlgalOil = FluidUtils.generateFluidNoPrefix("algaloil", "Algal Oil", 200, new short[] { 180, 180, 0, 100 }, true);
 
         short[] aZincFrothRGB = Materials.Sphalerite.mRGBa;
         SphaleriteFlotationFroth = FluidUtils.generateFluidNoPrefix(
