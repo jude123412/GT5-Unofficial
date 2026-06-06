@@ -143,7 +143,8 @@ public class ItemRegistry {
         TileEntityHeatedWaterPump.class,
         "BWHeatedWaterPump");
     public static final Item PUMPPARTS = new SimpleSubItemClass("BWrawtube", "BWmotor");
-    public static final Item BIOITEMS = new SimpleSubItemClass("collagen", "gelatin", "agar").setCreativeTab(MainMod.BIO_TAB);
+    public static final Item BIOITEMS = new SimpleSubItemClass("collagen", "gelatin", "agar")
+        .setCreativeTab(MainMod.BIO_TAB);
 
     public static final Block bw_realglas = new BWBlocksGlass(
         "BW_GlasBlocks",

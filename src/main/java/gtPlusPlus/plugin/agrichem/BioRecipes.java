@@ -1,6 +1,5 @@
 package gtPlusPlus.plugin.agrichem;
 
-import static gregtech.api.enums.Mods.NewHorizonsCoreMod;
 import static gregtech.api.enums.Mods.Railcraft;
 import static gregtech.api.recipe.RecipeMaps.assemblerRecipes;
 import static gregtech.api.recipe.RecipeMaps.blastFurnaceRecipes;
@@ -27,8 +26,6 @@ import static gtPlusPlus.api.recipe.GTPPRecipeMaps.chemicalDehydratorRecipes;
 import static gtPlusPlus.api.recipe.GTPPRecipeMaps.chemicalPlantRecipes;
 import static gtPlusPlus.api.recipe.GTPPRecipeMaps.cokeOvenRecipes;
 
-import bartworks.common.loaders.ItemRegistry;
-import ic2.core.Ic2Fluid;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -37,6 +34,7 @@ import net.minecraftforge.fluids.FluidStack;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import bartworks.common.loaders.ItemRegistry;
 import goodgenerator.items.GGMaterial;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.Materials;
