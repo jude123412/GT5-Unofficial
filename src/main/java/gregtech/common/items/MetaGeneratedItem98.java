@@ -62,10 +62,10 @@ public class MetaGeneratedItem98 extends MetaGeneratedItem {
         LEAD_ZINC_SOLUTION(26, "leadzincsolution", CellType.REGULAR),
 
         // New Horizons Core Mod
-        UNKNOWN_NUTRIENT_AGAR(7, "unknownnutrientagar", CellType.REGULAR),
-        SEAWEED_BROTH(8, "seaweedbroth", CellType.REGULAR),
-        GELATIN_MIXTURE(32, "gelatinmixture", CellType.REGULAR),
-        MEAT_EXTRACT(33, "meatextract", CellType.REGULAR),
+        UNKNOWN_NUTRIENT_AGAR(7, "unknown nutrient agar", CellType.REGULAR),
+        SEAWEED_BROTH(8, "seaweed broth", CellType.REGULAR),
+        GELATIN_MIXTURE(32, "gelatin mixture", CellType.REGULAR),
+        MEAT_EXTRACT(33, "meat extract", CellType.REGULAR),
         SUPER_HEAVY_RADOX(28, "superheavyradox", CellType.REGULAR),
         HEAVY_RADOX(29, "heavyradox", CellType.REGULAR),
         CRACKED_RADOX(30, "crackedradox", CellType.REGULAR),

@@ -14,7 +14,6 @@ import static gregtech.api.recipe.RecipeMaps.fluidExtractionRecipes;
 import static gregtech.api.recipe.RecipeMaps.latheRecipes;
 import static gregtech.api.recipe.RecipeMaps.maceratorRecipes;
 import static gregtech.api.recipe.RecipeMaps.multiblockChemicalReactorRecipes;
-import static gregtech.api.util.GTModHandler.getModItem;
 import static gregtech.api.util.GTRecipeBuilder.INGOTS;
 import static gregtech.api.util.GTRecipeBuilder.MINUTES;
 import static gregtech.api.util.GTRecipeBuilder.SECONDS;
@@ -28,6 +27,8 @@ import static gtPlusPlus.api.recipe.GTPPRecipeMaps.chemicalDehydratorRecipes;
 import static gtPlusPlus.api.recipe.GTPPRecipeMaps.chemicalPlantRecipes;
 import static gtPlusPlus.api.recipe.GTPPRecipeMaps.cokeOvenRecipes;
 
+import bartworks.common.loaders.ItemRegistry;
+import ic2.core.Ic2Fluid;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -88,7 +89,7 @@ public class BioRecipes {
         recipeAlgalOil();
         recipeIodineDust();
         recipePlantBall();
-        if (NewHorizonsCoreMod.isModLoaded()) recipeAgar();
+        recipeAgar();
     }
 
     private static void registerFuels() {
@@ -787,7 +788,8 @@ public class BioRecipes {
     private static void recipeAgar() {
         GTValues.RA.stdBuilder()
             .itemInputs(GregtechItemList.RedAlgaeBiomass.get(4))
-            .itemOutputs(getModItem(NewHorizonsCoreMod.ID, "GTNHBioItems", 1, 2))
+            .itemOutputs(new ItemStack(ItemRegistry.BIOITEMS, 1, 2))
+            .fluidInputs(GTModHandler.getHotWater(1_000))
             .duration(30 * SECONDS)
             .eut(TierEU.HV)
             .addTo(chemicalBathRecipes);

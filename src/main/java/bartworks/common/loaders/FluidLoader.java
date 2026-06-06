@@ -63,10 +63,16 @@ public class FluidLoader {
         fulvicAcid = createAndRegisterFluid("Fulvic Acid", new Color(20, 20, 20));
         heatedfulvicAcid = createAndRegisterFluid("Heated Fulvic Acid", new Color(40, 20, 20), 720);
         Kerogen = createAndRegisterFluid("Kerogen", new Color(85, 85, 85));
-        BioLabFluidMaterials = new Fluid[] { createAndRegisterFluid("FluorecentdDNA", new Color(125, 50, 170)),
+        BioLabFluidMaterials = new Fluid[] {
+            createAndRegisterFluid("FluorecentdDNA", new Color(125, 50, 170)),
             createAndRegisterFluid("EnzymesSollution", new Color(240, 200, 125)),
             createAndRegisterFluid("Penicillin", new Color(255, 255, 255)),
-            createAndRegisterFluid("Polymerase", new Color(110, 180, 110)) };
+            createAndRegisterFluid("Polymerase", new Color(110, 180, 110)),
+            createAndRegisterFluid("Gelatin Mixture", new Color(255, 255, 125), 300),
+            createAndRegisterFluid("Meat Extract", new Color(160, 70, 50), 300),
+            createAndRegisterFluid("Unknown Nutrient Agar", new Color(175, 133, 0), 300),
+            createAndRegisterFluid("Seaweed Broth", new Color(60, 200, 0), 300)
+        };
 
         BioLabFluidCells = new ItemStack[BioLabFluidMaterials.length];
 

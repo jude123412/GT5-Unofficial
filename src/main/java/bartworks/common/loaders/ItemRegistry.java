@@ -143,6 +143,7 @@ public class ItemRegistry {
         TileEntityHeatedWaterPump.class,
         "BWHeatedWaterPump");
     public static final Item PUMPPARTS = new SimpleSubItemClass("BWrawtube", "BWmotor");
+    public static final Item BIOITEMS = new SimpleSubItemClass("collagen", "gelatin", "agar").setCreativeTab(MainMod.BIO_TAB);
 
     public static final Block bw_realglas = new BWBlocksGlass(
         "BW_GlasBlocks",
@@ -239,6 +240,7 @@ public class ItemRegistry {
         GameRegistry.registerBlock(ItemRegistry.PUMPBLOCK, BWItemBlocks.class, "BWHeatedWaterPumpBlock");
         GameRegistry.registerItem(ItemRegistry.PUMPPARTS, "BWPumpParts");
         GameRegistry.registerItem(ItemRegistry.WINDMETER, "BW_SimpleWindMeter");
+        GameRegistry.registerItem(ItemRegistry.BIOITEMS, "BWBioItems");
 
         // GT2 stuff
         GameRegistry.registerBlock(ItemRegistry.BW_BLOCKS[0], BWItemBlocks.class, "BW_ItemBlocks");
