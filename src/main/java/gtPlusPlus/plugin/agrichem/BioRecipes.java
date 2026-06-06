@@ -88,6 +88,7 @@ public class BioRecipes {
         recipeIodineDust();
         recipePlantBall();
         recipeAgar();
+        recipeAlgalBioDiesel();
     }
 
     private static void registerFuels() {
@@ -779,7 +780,7 @@ public class BioRecipes {
             .itemInputs(GregtechItemList.GreenAlgaeBiomass.get(4))
             .itemOutputs(GTUtility.copyAmount(1, Ic2Items.plantBall))
             .duration(15 * SECONDS)
-            .eut(TierEU.ULV / 4)
+            .eut(TierEU.RECIPE_ULV / 4)
             .addTo(compressorRecipes);
     }
 
@@ -787,9 +788,38 @@ public class BioRecipes {
         GTValues.RA.stdBuilder()
             .itemInputs(GregtechItemList.RedAlgaeBiomass.get(4))
             .itemOutputs(new ItemStack(ItemRegistry.BIOITEMS, 1, 2))
-            .fluidInputs(GTModHandler.getHotWater(1_000))
+            .fluidInputs(GTModHandler.getHotWater(1000))
             .duration(30 * SECONDS)
-            .eut(TierEU.HV)
+            .eut(TierEU.RECIPE_HV)
             .addTo(chemicalBathRecipes);
+    }
+
+    private static void recipeAlgalBioDiesel() {
+        GTValues.RA.stdBuilder()
+            .itemInputs(Materials.SodiumHydroxide.getDustTiny(1))
+            .fluidInputs(new FluidStack(GTPPFluids.AlgalOil, 6000), Materials.Ethanol.getFluid(1000))
+            .fluidOutputs(Materials.BioDiesel.getFluid(6000), Materials.Glycerol.getFluid(1000))
+            .duration(30 * SECONDS)
+            .eut(TierEU.RECIPE_MV / 2)
+            .metadata(CHEMPLANT_CASING_TIER, 4)
+            .addTo(chemicalPlantRecipes);
+
+        GTValues.RA.stdBuilder()
+            .itemInputs(Materials.SodiumHydroxide.getDustTiny(1))
+            .fluidInputs(new FluidStack(GTPPFluids.AlgalOil, 6000), Materials.Methanol.getFluid(1000))
+            .fluidOutputs(Materials.BioDiesel.getFluid(6000), Materials.Glycerol.getFluid(1000))
+            .duration(30 * SECONDS)
+            .eut(TierEU.RECIPE_MV / 2)
+            .metadata(CHEMPLANT_CASING_TIER, 4)
+            .addTo(chemicalPlantRecipes);
+
+        GTValues.RA.stdBuilder()
+            .itemInputs(Materials.SodiumHydroxide.getDustTiny(1))
+            .fluidInputs(new FluidStack(GTPPFluids.AlgalOil, 6000), new FluidStack(GTPPFluids.Butanol, 500))
+            .fluidOutputs(Materials.BioDiesel.getFluid(6000), Materials.Glycerol.getFluid(500))
+            .duration(30 * SECONDS)
+            .eut(TierEU.RECIPE_MV / 2)
+            .metadata(CHEMPLANT_CASING_TIER, 4)
+            .addTo(chemicalPlantRecipes);
     }
 }
