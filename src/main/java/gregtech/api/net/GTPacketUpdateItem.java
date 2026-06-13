@@ -11,7 +11,8 @@ import com.google.common.io.ByteArrayDataInput;
 
 import cpw.mods.fml.common.network.ByteBufUtils;
 import gregtech.api.interfaces.INetworkUpdatableItem;
-import gregtech.api.util.ISerializableObject;
+import gregtech.api.util.GTByteBuffer;
+import gregtech.crossmod.backhand.Backhand;
 import io.netty.buffer.ByteBuf;
 
 /**
@@ -50,15 +51,17 @@ public class GTPacketUpdateItem extends GTPacket {
 
     @Override
     public GTPacket decode(ByteArrayDataInput aData) {
-        return new GTPacketUpdateItem(ISerializableObject.readCompoundTagFromGreggyByteBuf(aData));
+        return new GTPacketUpdateItem(GTByteBuffer.readCompoundTagFromGreggyByteBuf(aData));
     }
 
     @Override
     public void process(IBlockAccess aWorld) {
         if (mPlayer == null) return;
         ItemStack stack = mPlayer.inventory.getCurrentItem();
-        if (stack != null && stack.getItem() instanceof INetworkUpdatableItem) {
+        if (stack == null || !(stack.getItem() instanceof INetworkUpdatableItem))
+            stack = Backhand.getOffhandItem(mPlayer);
+        if (stack != null && stack.getItem() instanceof INetworkUpdatableItem)
             ((INetworkUpdatableItem) stack.getItem()).receive(stack, mPlayer, tag);
-        }
+
     }
 }

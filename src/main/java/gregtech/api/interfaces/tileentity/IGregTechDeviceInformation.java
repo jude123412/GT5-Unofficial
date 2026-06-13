@@ -1,7 +1,10 @@
 package gregtech.api.interfaces.tileentity;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+
+import gregtech.api.enums.GTValues;
 
 /**
  * You are allowed to include this File in your Download, as i will not change it.
@@ -24,8 +27,10 @@ public interface IGregTechDeviceInformation {
      * @return an Array of Information Strings.
      */
     default String[] getInfoData() {
-        return new String[] {};
+        return GTValues.emptyStringArray;
     }
+
+    default void getExtraInfoData(List<String> info) {}
 
     /**
      * Returns a map of key-value pairs containing device information.

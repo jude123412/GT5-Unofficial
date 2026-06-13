@@ -117,10 +117,30 @@ public final class CheckRecipeResultRegistry {
     public static final CheckRecipeResult NO_SEE_SKY = SimpleCheckRecipeResult.ofFailure("no_see_sky");
 
     /**
+     * Etching Array Missing Energy and/or Wrong Particle
+     */
+    public static final CheckRecipeResult WRONG_PARTICLE = SimpleCheckRecipeResult.ofFailure("gtnhlanth.wrongparticle");
+
+    public static final CheckRecipeResult LOW_ENERGY = SimpleCheckRecipeResult.ofFailure("gtnhlanth.toolowenergy");
+
+    /**
+     * Board Module has no fluid stored
+     */
+    public static final CheckRecipeResult NO_IMMERSION_FLUID = SimpleCheckRecipeResult.ofFailure("no_immersion_fluid");
+
+    /**
      * Machine is waiting for the main controller to start the cycle.
      */
     @Nonnull
     public static final CheckRecipeResult CYCLE_IDLE = SimpleCheckRecipeResult.ofSuccess("cycle_idle");
+
+    @Nonnull
+    public static final CheckRecipeResult NAC_OPTICAL_MISSING_WATER = SimpleCheckRecipeResult
+        .ofFailure("nac.missing_water");
+
+    @Nonnull
+    public static final CheckRecipeResult NAC_WAITING_FOR_POWER = SimpleCheckRecipeResult
+        .ofFailure("nac.waiting_for_power");
 
     /**
      * Cannot process recipe because the machine cannot handle required EUt.
@@ -128,6 +148,14 @@ public final class CheckRecipeResultRegistry {
     @Nonnull
     public static CheckRecipeResult insufficientPower(long required) {
         return new ResultInsufficientPower(required);
+    }
+
+    /**
+     * Cannot process recipe because the machine cannot handle required EUt.
+     */
+    @Nonnull
+    public static CheckRecipeResult insufficientVoltage(long required) {
+        return new ResultInsufficientVoltage(required);
     }
 
     /**
@@ -159,13 +187,21 @@ public final class CheckRecipeResultRegistry {
         return new ResultInsufficientStartupPowerBigInt(required);
     }
 
+    @Nonnull
+    public static CheckRecipeResult noValidOutputColor(byte color) {
+        return new ResultNoValidOutputColor(color);
+    }
+
     static {
         register(new SimpleCheckRecipeResult(false, "", false));
         register(new ResultInsufficientPower(0));
+        register(new ResultInsufficientVoltage(0));
         register(new ResultInsufficientHeat(0));
         register(new ResultInsufficientMachineTier(0));
         register(new ResultInsufficientStartupPower(0));
         register(new ResultInsufficientStartupPowerBigInt(BigInteger.ZERO));
         register(new ResultMissingItem());
+        register(new ResultMissingApiaryFlowers());
+        register(new ResultNoValidOutputColor((byte) 0));
     }
 }

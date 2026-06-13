@@ -1,10 +1,15 @@
 package gregtech.common.tileentities.machines.multi;
 
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.*;
+import static gregtech.api.enums.HatchElement.Energy;
+import static gregtech.api.enums.HatchElement.InputBus;
+import static gregtech.api.enums.HatchElement.Maintenance;
+import static gregtech.api.enums.HatchElement.OutputBus;
 import static gregtech.api.enums.Textures.BlockIcons.*;
-import static gregtech.api.util.GTStructureUtility.ofHatchAdder;
+import static gregtech.api.util.GTStructureUtility.buildHatchAdder;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -13,7 +18,9 @@ import net.minecraftforge.common.util.ForgeDirection;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.gtnewhorizon.structurelib.alignment.constructable.ISurvivalConstructable;
 import com.gtnewhorizon.structurelib.structure.IStructureDefinition;
+import com.gtnewhorizon.structurelib.structure.ISurvivalBuildEnvironment;
 import com.gtnewhorizon.structurelib.structure.StructureDefinition;
 
 import cpw.mods.fml.common.network.NetworkRegistry;
@@ -28,6 +35,8 @@ import gregtech.api.net.GTPacketNodeInfo;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.render.TextureFactory;
+import gregtech.api.structure.error.StructureError;
+import gregtech.api.structure.error.StructureErrorRegistry;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.api.util.OverclockCalculator;
@@ -43,7 +52,8 @@ import thaumcraft.common.lib.research.ResearchManager;
 import thaumcraft.common.lib.research.ResearchNoteData;
 import thaumcraft.common.tiles.TileNode;
 
-public class MTEResearchCompleter extends MTEEnhancedMultiBlockBase<MTEResearchCompleter> {
+public class MTEResearchCompleter extends MTEEnhancedMultiBlockBase<MTEResearchCompleter>
+    implements ISurvivalConstructable {
 
     private static final int CASING_INDEX = 184;
     private static final int MAX_LENGTH = 13;
@@ -76,10 +86,10 @@ public class MTEResearchCompleter extends MTEEnhancedMultiBlockBase<MTEResearchC
         .addElement(
             'c',
             ofChain( // Magical machine casing or hatch
-                ofHatchAdder(MTEResearchCompleter::addEnergyInputToMachineList, CASING_INDEX, 1),
-                ofHatchAdder(MTEResearchCompleter::addInputToMachineList, CASING_INDEX, 1),
-                ofHatchAdder(MTEResearchCompleter::addOutputToMachineList, CASING_INDEX, 1),
-                ofHatchAdder(MTEResearchCompleter::addMaintenanceToMachineList, CASING_INDEX, 1),
+                buildHatchAdder(MTEResearchCompleter.class).atLeast(InputBus, OutputBus, Energy, Maintenance)
+                    .hint(1)
+                    .casingIndex(CASING_INDEX)
+                    .build(),
                 onElementPass(MTEResearchCompleter::onCasingFound, ofBlock(GregTechAPI.sBlockCasings8, 8))))
         .addElement(
             'x',
@@ -226,11 +236,6 @@ public class MTEResearchCompleter extends MTEEnhancedMultiBlockBase<MTEResearchC
     }
 
     @Override
-    public boolean isCorrectMachinePart(ItemStack itemStack) {
-        return true;
-    }
-
-    @Override
     public @NotNull CheckRecipeResult checkProcessing() {
         ArrayList<ItemStack> tInputList = this.getStoredInputs();
 
@@ -277,37 +282,36 @@ public class MTEResearchCompleter extends MTEEnhancedMultiBlockBase<MTEResearchC
     }
 
     @Override
-    public boolean checkMachine(IGregTechTileEntity iGregTechTileEntity, ItemStack itemStack) {
+    public void checkMachine(IGregTechTileEntity iGregTechTileEntity, ItemStack itemStack,
+        List<StructureError> errors) {
         mLength = 1;
         mCasing = 0;
         endFound = false;
 
         // check front
-        if (!checkPiece(STRUCTURE_PIECE_FIRST, 1, 1, 0)) return false;
+        if (!checkPiece(STRUCTURE_PIECE_FIRST, 1, 1, 0, errors)) return;
 
         // check middle pieces
         while (!endFound && mLength++ < MAX_LENGTH) {
-            if (!checkPiece(STRUCTURE_PIECE_LATER, 1, 1, -(mLength - 1))) return false;
+            if (!checkPiece(STRUCTURE_PIECE_LATER, 1, 1, -(mLength - 1), errors)) return;
         }
 
-        return endFound && mLength >= 3
-            && checkPiece(STRUCTURE_PIECE_LAST, 0, 1, -(mLength - 1))
-            && mCasing >= mLength * 3;
-    }
+        if (!endFound) {
+            errors.add(StructureErrorRegistry.TOO_LONG);
+            return;
+        }
 
-    @Override
-    public int getMaxEfficiency(ItemStack itemStack) {
-        return 10000;
-    }
+        if (mLength < 3) {
+            errors.add(StructureErrorRegistry.TOO_SHORT_LENGTH);
+        }
 
-    @Override
-    public int getDamageToComponent(ItemStack itemStack) {
-        return 0;
-    }
+        if (!checkPiece(STRUCTURE_PIECE_LAST, 0, 1, -(mLength - 1), errors)) return;
 
-    @Override
-    public boolean explodesOnComponentBreak(ItemStack itemStack) {
-        return false;
+        checkCasingMin(errors, mCasing, mLength * 3);
+        checkHasEnergyHatch(errors);
+        checkHasInputBus(errors);
+        checkHasMaintenanceHatch(errors);
+        checkHasOutputBus(errors);
     }
 
     @Override
@@ -363,12 +367,12 @@ public class MTEResearchCompleter extends MTEEnhancedMultiBlockBase<MTEResearchC
             .addInfo("Place nodes in the center row")
             .beginVariableStructureBlock(3, 3, 3, 3, 3, MAX_LENGTH, true)
             .addController("Front center")
-            .addOtherStructurePart("Magical machine casing", "Top and bottom layers outside. 3 x L minimum")
-            .addOtherStructurePart("Warded glass", "Middle layer outside")
-            .addEnergyHatch("Any casing")
-            .addMaintenanceHatch("Any casing")
-            .addInputBus("Any casing")
-            .addOutputBus("Any casing")
+            .addOtherStructurePart("Magical Machine Casing", "Top and bottom layers outside. 3 x L minimum")
+            .addOtherStructurePart("Warded Glass", "Middle layer outside")
+            .addEnergyHatch("Any Casing")
+            .addMaintenanceHatch("Any Casing")
+            .addInputBus("Any Casing")
+            .addOutputBus("Any Casing")
             .toolTipFinisher();
         return tt;
     }
@@ -381,5 +385,44 @@ public class MTEResearchCompleter extends MTEEnhancedMultiBlockBase<MTEResearchC
             buildPiece(STRUCTURE_PIECE_LATER_HINT, stackSize, hintsOnly, 1, 1, -i);
         }
         buildPiece(STRUCTURE_PIECE_LAST, stackSize, hintsOnly, 0, 1, -(tTotalLength - 1));
+    }
+
+    @Override
+    public int survivalConstruct(ItemStack stackSize, int elementBudget, ISurvivalBuildEnvironment env) {
+        if (mMachine) return -1;
+        mLength = 0;
+        int built = survivalBuildPiece(STRUCTURE_PIECE_FIRST, stackSize, 1, 1, 0, elementBudget, env, false, true);
+        if (built >= 0) return built;
+        int tTotalLength = Math.min(MAX_LENGTH, stackSize.stackSize + 2);
+        for (int i = 1; i < tTotalLength; i++) {
+            mLength = i;
+            built = survivalBuildPiece(
+                STRUCTURE_PIECE_LATER_HINT,
+                stackSize,
+                1,
+                1,
+                -i,
+                elementBudget,
+                env,
+                false,
+                true);
+            if (built >= 0) return built;
+        }
+        mLength = tTotalLength;
+        return survivalBuildPiece(
+            STRUCTURE_PIECE_LAST,
+            stackSize,
+            0,
+            1,
+            -(tTotalLength - 1),
+            elementBudget,
+            env,
+            false,
+            true);
+    }
+
+    @Override
+    public boolean supportsSingleRecipeLocking() {
+        return false;
     }
 }

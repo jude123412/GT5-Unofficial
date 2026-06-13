@@ -17,12 +17,12 @@ import static gregtech.api.enums.Textures.BlockIcons.casingTexturePages;
 import static gregtech.api.util.GTStructureUtility.activeCoils;
 import static gregtech.api.util.GTStructureUtility.buildHatchAdder;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IChatComponent;
@@ -52,7 +52,8 @@ import gregtech.api.metatileentity.implementations.MTEEnhancedMultiBlockBase;
 import gregtech.api.recipe.RecipeMap;
 import gregtech.api.recipe.RecipeMaps;
 import gregtech.api.render.TextureFactory;
-import gregtech.api.util.GTUtility;
+import gregtech.api.structure.error.StructureError;
+import gregtech.api.structure.error.StructureErrors;
 import gregtech.api.util.MultiblockTooltipBuilder;
 
 public class MTELargeChemicalReactor extends MTEEnhancedMultiBlockBase<MTELargeChemicalReactor>
@@ -71,7 +72,7 @@ public class MTELargeChemicalReactor extends MTEEnhancedMultiBlockBase<MTELargeC
             buildHatchAdder(MTELargeChemicalReactor.class)
                 .atLeast(InputHatch, OutputHatch, InputBus, OutputBus, Maintenance, Energy)
                 .casingIndex(CASING_INDEX)
-                .dot(1)
+                .hint(1)
                 .buildAndChain(
                     onElementPass(MTELargeChemicalReactor::onCasingAdded, ofBlock(GregTechAPI.sBlockCasings8, 0))))
         .addElement(
@@ -79,7 +80,7 @@ public class MTELargeChemicalReactor extends MTEEnhancedMultiBlockBase<MTELargeC
             buildHatchAdder(MTELargeChemicalReactor.class)
                 .atLeast(InputHatch, OutputHatch, InputBus, OutputBus, Maintenance, Energy)
                 .casingIndex(CASING_INDEX)
-                .dot(1)
+                .hint(1)
                 .buildAndChain(
                     activeCoils(CoilStructureElement.INSTANCE),
                     onElementPass(MTELargeChemicalReactor::onCasingAdded, ofBlock(GregTechAPI.sBlockCasings8, 0))))
@@ -105,8 +106,8 @@ public class MTELargeChemicalReactor extends MTEEnhancedMultiBlockBase<MTELargeC
     public MultiblockTooltipBuilder createTooltip() {
         final MultiblockTooltipBuilder tt = new MultiblockTooltipBuilder();
         tt.addMachineType("Chemical Reactor, LCR")
-            .addInfo("Does not lose efficiency when overclocked")
             .addInfo("Accepts fluids instead of fluid cells")
+            .addPerfectOCInfo()
             .beginStructureBlock(3, 3, 3, false)
             .addController("Front center")
             .addCasingInfoRange("Chemically Inert Machine Casing", 8, 22, false)
@@ -115,12 +116,12 @@ public class MTELargeChemicalReactor extends MTEEnhancedMultiBlockBase<MTELargeC
                 StatCollector.translateToLocal("GT5U.tooltip.structure.heating_coil"),
                 "Adjacent to the PTFE Pipe Machine Casing",
                 1)
-            .addEnergyHatch("Any casing", 1, 2)
-            .addMaintenanceHatch("Any casing", 1, 2)
-            .addInputBus("Any casing", 1, 2)
-            .addInputHatch("Any casing", 1, 2)
-            .addOutputBus("Any casing", 1, 2)
-            .addOutputHatch("Any casing", 1, 2)
+            .addEnergyHatch("Any Casing", 1, 2)
+            .addMaintenanceHatch("Any Casing", 1, 2)
+            .addInputBus("Any Casing", 1, 2)
+            .addInputHatch("Any Casing", 1, 2)
+            .addOutputBus("Any Casing", 1, 2)
+            .addOutputHatch("Any Casing", 1, 2)
             .addStructureInfo("You can have multiple hatches/buses")
             .toolTipFinisher();
         return tt;
@@ -153,16 +154,6 @@ public class MTELargeChemicalReactor extends MTEEnhancedMultiBlockBase<MTELargeC
     }
 
     @Override
-    public boolean isCorrectMachinePart(ItemStack aStack) {
-        return true;
-    }
-
-    @Override
-    public boolean supportsSingleRecipeLocking() {
-        return true;
-    }
-
-    @Override
     public RecipeMap<?> getRecipeMap() {
         return RecipeMaps.multiblockChemicalReactorRecipes;
     }
@@ -182,28 +173,18 @@ public class MTELargeChemicalReactor extends MTEEnhancedMultiBlockBase<MTELargeC
     }
 
     @Override
-    public boolean checkMachine(IGregTechTileEntity aBaseMetaTileEntity, ItemStack aStack) {
+    public void checkMachine(IGregTechTileEntity aBaseMetaTileEntity, ItemStack aStack, List<StructureError> errors) {
         mCasingAmount = 0;
         mCoilAmount = 0;
-        return checkPiece(STRUCTURE_PIECE_MAIN, 1, 1, 0) && mCasingAmount >= 8
-            && mCoilAmount == 1
-            && !mEnergyHatches.isEmpty()
-            && mMaintenanceHatches.size() == 1;
-    }
-
-    @Override
-    public int getMaxEfficiency(ItemStack aStack) {
-        return 10000;
-    }
-
-    @Override
-    public int getDamageToComponent(ItemStack aStack) {
-        return 0;
-    }
-
-    @Override
-    public boolean explodesOnComponentBreak(ItemStack aStack) {
-        return false;
+        if (!checkPiece(STRUCTURE_PIECE_MAIN, 1, 1, 0, errors)) return;
+        checkCasingMin(errors, mCasingAmount, 8);
+        if (mCoilAmount != 1) {
+            errors.add(StructureErrors.of("GT5U.gui.text.structure_error.need_exactly_one_coil"));
+        }
+        checkHasEnergyHatch(errors);
+        checkHasMaintenanceHatch(errors);
+        checkHasAnyInput(errors);
+        checkHasAnyOutput(errors);
     }
 
     @Override
@@ -216,7 +197,7 @@ public class MTELargeChemicalReactor extends MTEEnhancedMultiBlockBase<MTELargeC
     public int survivalConstruct(ItemStack stackSize, int elementBudget, ISurvivalBuildEnvironment env) {
         if (mMachine) return -1;
         mCoilAmount = 0;
-        return survivialBuildPiece(STRUCTURE_PIECE_MAIN, stackSize, 1, 1, 0, elementBudget, env, false, true);
+        return survivalBuildPiece(STRUCTURE_PIECE_MAIN, stackSize, 1, 1, 0, elementBudget, env, false, true);
     }
 
     @Override
@@ -303,18 +284,6 @@ public class MTELargeChemicalReactor extends MTEEnhancedMultiBlockBase<MTELargeC
 
     @Override
     public boolean supportsBatchMode() {
-        return true;
-    }
-
-    @Override
-    public boolean onWireCutterRightClick(ForgeDirection side, ForgeDirection wrenchingSide, EntityPlayer aPlayer,
-        float aX, float aY, float aZ, ItemStack aTool) {
-        batchMode = !batchMode;
-        if (batchMode) {
-            GTUtility.sendChatToPlayer(aPlayer, StatCollector.translateToLocal("misc.BatchModeTextOn"));
-        } else {
-            GTUtility.sendChatToPlayer(aPlayer, StatCollector.translateToLocal("misc.BatchModeTextOff"));
-        }
         return true;
     }
 }

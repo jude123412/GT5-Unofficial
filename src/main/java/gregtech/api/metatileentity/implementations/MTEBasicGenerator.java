@@ -9,6 +9,11 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidContainerItem;
 import net.minecraftforge.fluids.IFluidHandler;
 
+import com.cleanroommc.modularui.factory.PosGuiData;
+import com.cleanroommc.modularui.screen.ModularPanel;
+import com.cleanroommc.modularui.screen.UISettings;
+import com.cleanroommc.modularui.value.sync.PanelSyncManager;
+
 import gregtech.api.enums.ItemList;
 import gregtech.api.enums.OrePrefixes;
 import gregtech.api.enums.Textures;
@@ -21,6 +26,7 @@ import gregtech.api.recipe.maps.FuelBackend;
 import gregtech.api.util.GTOreDictUnificator;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTUtility;
+import gregtech.common.gui.modularui.singleblock.base.MTEBasicGeneratorBaseGui;
 import gregtech.common.pollution.Pollution;
 
 public abstract class MTEBasicGenerator extends MTEBasicTank implements RecipeMapWorkable {
@@ -69,7 +75,8 @@ public abstract class MTEBasicGenerator extends MTEBasicTank implements RecipeMa
     public String[] getDescription() {
         String[] desc = new String[mDescriptionArray.length + 1];
         System.arraycopy(mDescriptionArray, 0, desc, 0, mDescriptionArray.length);
-        desc[mDescriptionArray.length] = "Fuel Efficiency: " + getEfficiency() + "%";
+        desc[mDescriptionArray.length] = "Fuel Efficiency: " + addFormattedString(String.valueOf(getEfficiency()))
+            + "%%";
         return desc;
     }
 
@@ -136,11 +143,6 @@ public abstract class MTEBasicGenerator extends MTEBasicTank implements RecipeMa
 
     @Override
     public boolean isOutputFacing(ForgeDirection side) {
-        return true;
-    }
-
-    @Override
-    public boolean isAccessAllowed(EntityPlayer aPlayer) {
         return true;
     }
 
@@ -255,9 +257,6 @@ public abstract class MTEBasicGenerator extends MTEBasicTank implements RecipeMa
 
     public abstract int getPollution();
 
-    @Override
-    public abstract RecipeMap<?> getRecipeMap();
-
     public abstract int getEfficiency();
 
     public int consumedFluidPerOperation(FluidStack aLiquid) {
@@ -315,4 +314,8 @@ public abstract class MTEBasicGenerator extends MTEBasicTank implements RecipeMa
         return 16000;
     }
 
+    @Override
+    public ModularPanel buildUI(PosGuiData guiData, PanelSyncManager syncManager, UISettings uiSettings) {
+        return new MTEBasicGeneratorBaseGui<>(this).build(guiData, syncManager, uiSettings);
+    }
 }

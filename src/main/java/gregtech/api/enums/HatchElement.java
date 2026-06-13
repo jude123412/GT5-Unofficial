@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+
 import gregtech.api.interfaces.IHatchElement;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.metatileentity.implementations.MTEHatchDynamo;
@@ -16,67 +18,86 @@ import gregtech.api.metatileentity.implementations.MTEHatchOutput;
 import gregtech.api.metatileentity.implementations.MTEHatchOutputBus;
 import gregtech.api.metatileentity.implementations.MTEMultiBlockBase;
 import gregtech.api.util.ExoticEnergyInputHelper;
+import gregtech.api.util.GTUtility;
 import gregtech.api.util.IGTHatchAdder;
+import gregtech.common.tileentities.machines.multi.purification.MTEHatchLensHousing;
+import gtPlusPlus.xmod.gregtech.api.metatileentity.implementations.MTEHatchSteamBusInput;
+import gtPlusPlus.xmod.gregtech.api.metatileentity.implementations.MTEHatchSteamBusOutput;
+import gtnhlanth.common.hatch.MTEBusInputFocus;
+import gtnhlanth.common.hatch.MTEHatchInputBeamline;
+import gtnhlanth.common.hatch.MTEHatchOutputBeamline;
+import tectech.thing.metaTileEntity.hatch.MTEHatchDynamoTunnel;
 
 public enum HatchElement implements IHatchElement<MTEMultiBlockBase> {
 
-    Muffler(MTEMultiBlockBase::addMufflerToMachineList, MTEHatchMuffler.class) {
+    Muffler("GT5U.MBTT.MufflerHatch", MTEMultiBlockBase::addMufflerToMachineList, MTEHatchMuffler.class) {
 
         @Override
         public long count(MTEMultiBlockBase t) {
             return t.mMufflerHatches.size();
         }
     },
-    Maintenance(MTEMultiBlockBase::addMaintenanceToMachineList, MTEHatchMaintenance.class) {
+    Maintenance("GT5U.MBTT.MaintenanceHatch", MTEMultiBlockBase::addMaintenanceToMachineList,
+        MTEHatchMaintenance.class) {
 
         @Override
         public long count(MTEMultiBlockBase t) {
             return t.mMaintenanceHatches.size();
         }
     },
-    InputHatch(MTEMultiBlockBase::addInputHatchToMachineList, MTEHatchInput.class) {
+    InputHatch("GT5U.MBTT.InputHatch", MTEMultiBlockBase::addInputHatchToMachineList, MTEHatchInput.class) {
 
         @Override
         public long count(MTEMultiBlockBase t) {
             return t.mInputHatches.size();
         }
     },
-    InputBus(MTEMultiBlockBase::addInputBusToMachineList, MTEHatchInputBus.class) {
+    InputBus("GT5U.MBTT.InputBus", MTEMultiBlockBase::addInputBusToMachineList, MTEHatchInputBus.class) {
 
         @Override
         public long count(MTEMultiBlockBase t) {
-            return t.mInputBusses.size();
+            return t.mInputBusses.size() + t.mDualInputHatches.size();
+        }
+
+        @Override
+        public List<Class<? extends IMetaTileEntity>> mteBlacklist() {
+            return ImmutableList.of(MTEHatchLensHousing.class, MTEHatchSteamBusInput.class);
         }
     },
-    OutputHatch(MTEMultiBlockBase::addOutputHatchToMachineList, MTEHatchOutput.class) {
+    OutputHatch("GT5U.MBTT.OutputHatch", MTEMultiBlockBase::addOutputHatchToMachineList, MTEHatchOutput.class) {
 
         @Override
         public long count(MTEMultiBlockBase t) {
             return t.mOutputHatches.size();
         }
     },
-    OutputBus(MTEMultiBlockBase::addOutputBusToMachineList, MTEHatchOutputBus.class) {
+    OutputBus("GT5U.MBTT.OutputBus", MTEMultiBlockBase::addOutputBusToMachineList, MTEHatchOutputBus.class) {
 
         @Override
         public long count(MTEMultiBlockBase t) {
             return t.mOutputBusses.size();
         }
+
+        @Override
+        public List<Class<? extends IMetaTileEntity>> mteBlacklist() {
+            return ImmutableList.of(MTEHatchSteamBusOutput.class);
+        }
     },
-    Energy(MTEMultiBlockBase::addEnergyInputToMachineList, MTEHatchEnergy.class) {
+    Energy("GT5U.MBTT.EnergyHatch", MTEMultiBlockBase::addEnergyInputToMachineList, MTEHatchEnergy.class) {
 
         @Override
         public long count(MTEMultiBlockBase t) {
             return t.mEnergyHatches.size();
         }
     },
-    Dynamo(MTEMultiBlockBase::addDynamoToMachineList, MTEHatchDynamo.class) {
+    Dynamo("GT5U.MBTT.DynamoHatch", MTEMultiBlockBase::addDynamoToMachineList, MTEHatchDynamo.class) {
 
         @Override
         public long count(MTEMultiBlockBase t) {
             return t.mDynamoHatches.size();
         }
     },
-    ExoticEnergy(MTEMultiBlockBase::addExoticEnergyInputToMachineList) {
+    ExoticEnergy("GT5U.MBTT.ExoticEnergyHatch", MTEMultiBlockBase::addExoticEnergyInputToMachineList) {
 
         @Override
         public List<? extends Class<? extends IMetaTileEntity>> mteClasses() {
@@ -89,20 +110,76 @@ public enum HatchElement implements IHatchElement<MTEMultiBlockBase> {
                 .size();
         }
     },
-    MultiAmpEnergy(MTEMultiBlockBase::addMultiAmpEnergyInputToMachineList) {
+    MultiAmpEnergy("GT5U.MBTT.MultiampEnergyHatch", MTEMultiBlockBase::addMultiAmpEnergyInputToMachineList) {
 
         @Override
         public long count(MTEMultiBlockBase t) {
             return t.getExoticEnergyHatches()
                 .size();
         }
+    },
+    ExoticDynamo("GT5U.MBTT.ExoticEnergyDynamo", MTEMultiBlockBase::addExoticDynamoToMachineList) {
+
+        @Override
+        public long count(MTEMultiBlockBase t) {
+            return t.getExoticDynamoHatches()
+                .size();
+        }
+    },
+    CryotheumHatch("GT5U.MBTT.CryotheumHatch", MTEMultiBlockBase::addCryotheumHatchToMachineList) {
+
+        @Override
+        public long count(MTEMultiBlockBase t) {
+            return t.getCryotheumHatches()
+                .size();
+        }
+    },
+    LaserSource("GT5U.MBTT.LaserSourceHatch", MTEMultiBlockBase::addLaserSourceToMachineList,
+        MTEHatchDynamoTunnel.class) {
+
+        @Override
+        public long count(MTEMultiBlockBase t) {
+            return t.getExoticDynamoHatches()
+                .stream()
+                .filter(MTEHatchDynamoTunnel.class::isInstance)
+                .count();
+        }
+    },
+    BeamlineInput("GT5U.MBTT.BeamlineInputHatch", MTEMultiBlockBase::addBeamlineInputToMachineList,
+        MTEHatchInputBeamline.class) {
+
+        @Override
+        public long count(MTEMultiBlockBase t) {
+            return t.getBeamlineInputHatches()
+                .size();
+        }
+    },
+    BeamlineOutput("GT5U.MBTT.BeamlineOutputHatch", MTEMultiBlockBase::addBeamlineOutputToMachineList,
+        MTEHatchOutputBeamline.class) {
+
+        @Override
+        public long count(MTEMultiBlockBase t) {
+            return t.getBeamlineOutputHatches()
+                .size();
+        }
+    },
+    FocusInput("GT5U.MBTT.FocusInputBus", MTEMultiBlockBase::addFocusInputToMachineList, MTEBusInputFocus.class) {
+
+        @Override
+        public long count(MTEMultiBlockBase t) {
+            return t.getFocusInputBuses()
+                .size();
+        }
     };
 
+    private final String name;
     private final List<Class<? extends IMetaTileEntity>> mteClasses;
     private final IGTHatchAdder<MTEMultiBlockBase> adder;
+    private static final HatchElement[] elements = HatchElement.values();
 
     @SafeVarargs
-    HatchElement(IGTHatchAdder<MTEMultiBlockBase> adder, Class<? extends IMetaTileEntity>... mteClasses) {
+    HatchElement(String name, IGTHatchAdder<MTEMultiBlockBase> adder, Class<? extends IMetaTileEntity>... mteClasses) {
+        this.name = name;
         this.mteClasses = Collections.unmodifiableList(Arrays.asList(mteClasses));
         this.adder = adder;
     }
@@ -112,7 +189,22 @@ public enum HatchElement implements IHatchElement<MTEMultiBlockBase> {
         return mteClasses;
     }
 
+    @Override
+    public String getDisplayName() {
+        return GTUtility.translate(name);
+    }
+
+    @Override
+    public String getDescriptionLangKey() {
+        return name;
+    }
+
+    @Override
     public IGTHatchAdder<? super MTEMultiBlockBase> adder() {
         return adder;
+    }
+
+    public static HatchElement fromOrdinal(int ord) {
+        return elements[ord];
     }
 }

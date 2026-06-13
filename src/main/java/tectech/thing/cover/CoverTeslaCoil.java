@@ -3,67 +3,62 @@ package tectech.thing.cover;
 import static ic2.api.info.Info.DMG_ELECTRIC;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import gregtech.api.covers.CoverContext;
 import gregtech.api.hazards.HazardProtection;
 import gregtech.api.interfaces.tileentity.ICoverable;
-import gregtech.api.util.ISerializableObject;
-import gregtech.common.covers.CoverBehavior;
+import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.common.covers.Cover;
 import tectech.mechanics.tesla.ITeslaConnectable;
 import tectech.mechanics.tesla.TeslaCoverConnection;
 
-public class CoverTeslaCoil extends CoverBehavior {
+public class CoverTeslaCoil extends Cover {
 
     public CoverTeslaCoil(CoverContext context) {
-        super(context);
+        super(context, null);
     }
 
     @Override
-    public ISerializableObject.LegacyCoverData doCoverThings(byte aInputRedstone, long aTimer) {
+    public void doCoverThings(byte aInputRedstone, long aTimer) {
         ICoverable coverable = coveredTile.get();
-        if (coverable == null) {
-            return coverData;
-        }
         // Only do stuff if we're on top and have power
-        if (coverSide == ForgeDirection.UP || coverable.getEUCapacity() > 0) {
+        if (coverable != null && coverSide == ForgeDirection.UP || coverable.getEUCapacity() > 0) {
             // Makes sure we're on the list
             ITeslaConnectable.TeslaUtil.teslaSimpleNodeSetAdd(
                 new TeslaCoverConnection(
                     coverable.getIGregTechTileEntityOffset(0, 0, 0),
                     getTeslaReceptionCapability()));
         }
-        return coverData;
     }
 
     @Override
     public void onCoverUnload() {
         ICoverable coverable = coveredTile.get();
-        if (coverable != null && !coverable.isClientSide()) {
-            ITeslaConnectable.TeslaUtil.teslaSimpleNodeSetRemove(
-                new TeslaCoverConnection(
-                    coverable.getIGregTechTileEntityOffset(0, 0, 0),
-                    getTeslaReceptionCapability()));
+        if (coverable instanceof IGregTechTileEntity IGT && !coverable.isClientSide()) {
+            ITeslaConnectable.TeslaUtil
+                .teslaSimpleNodeSetRemove(new TeslaCoverConnection(IGT, getTeslaReceptionCapability()));
         }
     }
 
     @Override
     public void onCoverRemoval() {
         ICoverable coverable = coveredTile.get();
-        if (coverable != null) ITeslaConnectable.TeslaUtil.teslaSimpleNodeSetRemove(
-            new TeslaCoverConnection(coverable.getIGregTechTileEntityOffset(0, 0, 0), getTeslaReceptionCapability()));
+        if (coverable instanceof IGregTechTileEntity IGT) ITeslaConnectable.TeslaUtil
+            .teslaSimpleNodeSetRemove(new TeslaCoverConnection(IGT, getTeslaReceptionCapability()));
     }
 
     @Override
     public void onBaseTEDestroyed() {
         ICoverable coverable = coveredTile.get();
-        if (coverable != null) ITeslaConnectable.TeslaUtil.teslaSimpleNodeSetRemove(
-            new TeslaCoverConnection(coverable.getIGregTechTileEntityOffset(0, 0, 0), getTeslaReceptionCapability()));
+        if (coverable instanceof IGregTechTileEntity IGT) ITeslaConnectable.TeslaUtil
+            .teslaSimpleNodeSetRemove(new TeslaCoverConnection(IGT, getTeslaReceptionCapability()));
     }
 
     @Override
     public String getDescription() {
-        return "Do not attempt to use screwdriver!"; // TODO Translation support
+        return StatCollector.translateToLocal("gt.interact.desc.ban_screwdriver");
     }
 
     @Override
@@ -72,14 +67,12 @@ public class CoverTeslaCoil extends CoverBehavior {
     }
 
     @Override
-    public ISerializableObject.LegacyCoverData onCoverScrewdriverClick(EntityPlayer aPlayer, float aX, float aY,
-        float aZ) {
+    public void onCoverScrewdriverClick(EntityPlayer aPlayer, float aX, float aY, float aZ) {
         ICoverable coverable = coveredTile.get();
         // Shock a non-hazmat player if they dare stuff a screwdriver into one of these
         if (coverable != null && coverable.getStoredEU() > 0 && !HazardProtection.isWearingFullElectroHazmat(aPlayer)) {
             aPlayer.attackEntityFrom(DMG_ELECTRIC, 20);
         }
-        return coverData;
     }
 
     @Override

@@ -8,29 +8,50 @@ import static gregtech.api.util.GTRecipeBuilder.handleRecipeCollision;
 import static gregtech.api.util.GTUtility.areStacksEqualOrNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.Set;
+import java.util.Spliterators;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.SetMultimap;
 
-import gregtech.api.GregTechAPI;
 import gregtech.api.objects.GTItemStack;
+import gregtech.api.recipe.lookup.GTFluidLookupIngredient;
+import gregtech.api.recipe.lookup.GTItemDataLookupIngredient;
+import gregtech.api.recipe.lookup.GTItemStackLookupIngredient;
+import gregtech.api.recipe.lookup.GTOreDictLookupIngredient;
+import gregtech.api.recipe.lookup.GTRecipeLookup;
+import gregtech.api.recipe.lookup.GTRecipeLookupBuilder;
+import gregtech.api.recipe.lookup.GTRecipeLookupIngredient;
 import gregtech.api.util.GTOreDictUnificator;
 import gregtech.api.util.GTRecipe;
 import gregtech.api.util.GTRecipeBuilder;
@@ -47,21 +68,34 @@ import gregtech.api.util.MethodsReturnNonnullByDefault;
 @MethodsReturnNonnullByDefault
 public class RecipeMapBackend {
 
+    private static final Logger LOGGER = LogManager.getLogger("GregTech GTNH");
+
     private RecipeMap<?> recipeMap;
 
     /**
-     * Recipe index based on items.
+     * Contains-only recipe index based on items. Default recipe lookup uses {@link #recipeLookup}.
      */
-    private final SetMultimap<GTItemStack, GTRecipe> itemIndex = LinkedHashMultimap.create();
+    private final SetMultimap<GTItemStack, GTRecipe> itemContainsIndex = LinkedHashMultimap.create();
     /**
-     * Recipe index based on fluids.
+     * Contains-only recipe index based on fluids. Default recipe lookup uses {@link #recipeLookup}.
      */
-    private final SetMultimap<String, GTRecipe> fluidIndex = LinkedHashMultimap.create();
+    private final SetMultimap<String, GTRecipe> fluidContainsIndex = LinkedHashMultimap.create();
 
     /**
      * All the recipes belonging to this backend, indexed by recipe category.
      */
     private final Map<RecipeCategory, Collection<GTRecipe>> recipesByCategory = new HashMap<>();
+
+    /** Size of the cache map below. */
+    public static final int CACHE_MAP_SIZE = 256;
+
+    /** Cached recipes, by commutative hash of all inputs. */
+    private final GTRecipe[] cacheMap = new GTRecipe[CACHE_MAP_SIZE];
+
+    private GTRecipeLookup recipeLookup = new GTRecipeLookup();
+    private GTRecipeLookupBuilder.LookupBuildState recipeLookupState = GTRecipeLookupBuilder.newLookupState();
+
+    private boolean recipeLookupDirty;
 
     /**
      * All the properties specific to this backend.
@@ -70,7 +104,6 @@ public class RecipeMapBackend {
 
     public RecipeMapBackend(RecipeMapBackendPropertiesBuilder propertiesBuilder) {
         this.properties = propertiesBuilder.build();
-        GregTechAPI.itemStackMultiMaps.add(itemIndex);
     }
 
     void setRecipeMap(RecipeMap<?> recipeMap) {
@@ -85,8 +118,8 @@ public class RecipeMapBackend {
     }
 
     /**
-     * @return All the recipes belonging to this backend. Returned collection is immutable,
-     *         use {@link #compileRecipe} to add / {@link #removeRecipes} to remove.
+     * @return All the recipes belonging to this backend. Returned collection is immutable, use {@link #compileRecipe}
+     *         to add / {@link #removeRecipes} to remove.
      */
     @Unmodifiable
     public Collection<GTRecipe> getAllRecipes() {
@@ -96,7 +129,7 @@ public class RecipeMapBackend {
     /**
      * @return Raw recipe list
      */
-    private Collection<GTRecipe> allRecipes() {
+    Collection<GTRecipe> allRecipes() {
         return recipesByCategory.values()
             .stream()
             .flatMap(Collection::stream)
@@ -128,32 +161,58 @@ public class RecipeMapBackend {
         if (recipe.getRecipeCategory() == null) {
             recipe.setRecipeCategory(recipeMap.getDefaultRecipeCategory());
         }
+
         recipesByCategory.computeIfAbsent(recipe.getRecipeCategory(), v -> new ArrayList<>())
             .add(recipe);
-        for (FluidStack fluid : recipe.mFluidInputs) {
-            if (fluid == null) continue;
-            fluidIndex.put(
-                fluid.getFluid()
-                    .getName(),
-                recipe);
-        }
-        return addToItemMap(recipe);
+
+        GTRecipe result = addToItemMap(recipe);
+        addRecipeToLookup(recipe);
+        return result;
     }
 
     /**
      * Adds the supplied recipe to the item cache.
      */
     protected GTRecipe addToItemMap(GTRecipe recipe) {
-        for (ItemStack item : recipe.mInputs) {
-            if (item == null) continue;
-            itemIndex.put(new GTItemStack(item), recipe);
+        if (recipe.mFluidInputs != null) {
+            for (FluidStack fluid : recipe.mFluidInputs) {
+                if (fluid == null) continue;
+                fluidContainsIndex.put(
+                    fluid.getFluid()
+                        .getName(),
+                    recipe);
+            }
         }
+
+        if (recipe.mInputs != null) {
+            for (ItemStack item : recipe.mInputs) {
+                if (item == null) continue;
+                itemContainsIndex.put(new GTItemStack(item), recipe);
+            }
+        }
+
         if (recipe instanceof GTRecipe.GTRecipe_WithAlt recipeWithAlt) {
-            for (ItemStack[] itemStacks : recipeWithAlt.mOreDictAlt) {
-                if (itemStacks == null) continue;
-                for (ItemStack item : itemStacks) {
-                    if (item == null) continue;
-                    itemIndex.put(new GTItemStack(item), recipe);
+
+            if (recipeWithAlt.mOreDictAlt != null) {
+                for (ItemStack[] itemStacks : recipeWithAlt.mOreDictAlt) {
+                    if (itemStacks == null) continue;
+                    for (ItemStack item : itemStacks) {
+                        if (item == null) continue;
+                        itemContainsIndex.put(new GTItemStack(item), recipe);
+                    }
+                }
+            }
+
+            if (recipeWithAlt.mAltFluidInputs != null) {
+                for (FluidStack[] fluidStacks : recipeWithAlt.mAltFluidInputs) {
+                    if (fluidStacks == null) continue;
+                    for (FluidStack fluid : fluidStacks) {
+                        if (fluid == null) continue;
+                        fluidContainsIndex.put(
+                            fluid.getFluid()
+                                .getName(),
+                            recipe);
+                    }
                 }
             }
         }
@@ -232,14 +291,11 @@ public class RecipeMapBackend {
         for (Collection<GTRecipe> recipes : recipesByCategory.values()) {
             recipes.removeAll(recipesToRemove);
         }
-        for (GTItemStack key : new HashMap<>(itemIndex.asMap()).keySet()) {
-            itemIndex.get(key)
-                .removeAll(recipesToRemove);
-        }
-        for (String key : new HashMap<>(fluidIndex.asMap()).keySet()) {
-            fluidIndex.get(key)
-                .removeAll(recipesToRemove);
-        }
+        recipesByCategory.entrySet()
+            .removeIf(
+                entry -> entry.getValue()
+                    .isEmpty());
+        rebuildLookupStructures(false);
     }
 
     /**
@@ -254,6 +310,7 @@ public class RecipeMapBackend {
      */
     public void clearRecipes() {
         recipesByCategory.clear();
+        clearLookupStructures();
     }
 
     // endregion
@@ -262,26 +319,73 @@ public class RecipeMapBackend {
      * Re-unificates all the items present in recipes. Also reflects recipe removals.
      */
     public void reInit() {
-        itemIndex.clear();
+        rebuildLookupStructures(true);
+    }
+
+    private void clearLookupStructures() {
+        itemContainsIndex.clear();
+        fluidContainsIndex.clear();
+        Arrays.fill(cacheMap, null);
+        recipeLookup = new GTRecipeLookup();
+        recipeLookupState = GTRecipeLookupBuilder.newLookupState();
+        recipeLookupDirty = false;
+    }
+
+    private void rebuildLookupStructures(boolean reUnificate) {
+        itemContainsIndex.clear();
+        fluidContainsIndex.clear();
+        Arrays.fill(cacheMap, null);
+
+        GTRecipeLookupBuilder lookupBuilder = new GTRecipeLookupBuilder();
         for (GTRecipe recipe : allRecipes()) {
-            GTOreDictUnificator.setStackArray(true, true, recipe.mInputs);
-            GTOreDictUnificator.setStackArray(true, true, recipe.mOutputs);
+            if (reUnificate) {
+                GTOreDictUnificator.setStackArray(true, true, recipe.mInputs);
+                GTOreDictUnificator.setStackArray(true, true, recipe.mOutputs);
+            }
             addToItemMap(recipe);
+            lookupBuilder.add(recipe);
         }
+        GTRecipeLookupBuilder.BuildResult result = lookupBuilder.buildMutableWithState();
+        recipeLookup = result.lookup;
+        recipeLookupState = result.state;
+        recipeLookupDirty = false;
+    }
+
+    void ensureLookupCurrent() {
+        if (!recipeLookupDirty) {
+            return;
+        }
+
+        GTRecipeLookupBuilder lookupBuilder = new GTRecipeLookupBuilder();
+        for (GTRecipe recipe : allRecipes()) {
+            lookupBuilder.add(recipe);
+        }
+        GTRecipeLookupBuilder.BuildResult result = lookupBuilder.buildMutableWithState();
+        recipeLookup = result.lookup;
+        recipeLookupState = result.state;
+        recipeLookupDirty = false;
+    }
+
+    private void addRecipeToLookup(GTRecipe recipe) {
+        if (recipeLookupDirty) {
+            ensureLookupCurrent();
+        }
+        GTRecipeLookupBuilder.addToLookup(recipeLookup, recipeLookupState, recipe);
     }
 
     /**
      * @return If supplied item is a valid input for any of the recipes
      */
     public boolean containsInput(ItemStack item) {
-        return itemIndex.containsKey(new GTItemStack(item)) || itemIndex.containsKey(new GTItemStack(item, true));
+        return itemContainsIndex.containsKey(new GTItemStack(item))
+            || itemContainsIndex.containsKey(new GTItemStack(item, true));
     }
 
     /**
      * @return If supplied fluid is a valid input for any of the recipes
      */
     public boolean containsInput(Fluid fluid) {
-        return fluidIndex.containsKey(fluid.getName());
+        return fluidContainsIndex.containsKey(fluid.getName());
     }
 
     // region find recipe
@@ -308,7 +412,7 @@ public class RecipeMapBackend {
     /**
      * @return Whether to use {@link #overwriteFindRecipe} for finding recipe.
      */
-    protected boolean doesOverwriteFindRecipe() {
+    public boolean doesOverwriteFindRecipe() {
         return false;
     }
 
@@ -334,24 +438,35 @@ public class RecipeMapBackend {
      *
      * @param rawItems            Item inputs.
      * @param fluids              Fluid inputs.
-     * @param specialSlot         Content of the special slot. Normal recipemaps don't need this, but some do.
-     *                            Set {@link RecipeMapBuilder#specialSlotSensitive} to make it actually functional.
+     * @param specialSlot         Content of the special slot. Normal recipemaps don't need this, but some do. Set
+     *                            {@link RecipeMapBuilder#specialSlotSensitive} to make it actually functional.
      *                            Alternatively overriding {@link #filterFindRecipe} will also work.
      * @param cachedRecipe        If this is not null, this method tests it before all other recipes.
      * @param notUnificated       If this is set to true, item inputs will be unificated.
-     * @param dontCheckStackSizes If this is set to true, this method won't check item count and fluid amount
-     *                            for the matched recipe.
+     * @param dontCheckStackSizes If this is set to true, this method won't check item count and fluid amount for the
+     *                            matched recipe.
      * @param forCollisionCheck   If this method is called to check collision with already registered recipes.
      * @return Stream of matches recipes.
      */
-    Stream<GTRecipe> matchRecipeStream(ItemStack[] rawItems, FluidStack[] fluids, @Nullable ItemStack specialSlot,
-        @Nullable GTRecipe cachedRecipe, boolean notUnificated, boolean dontCheckStackSizes,
-        boolean forCollisionCheck) {
+    Stream<GTRecipe> matchRecipeStream(@Nullable ItemStack @NotNull [] rawItems,
+        @Nullable FluidStack @NotNull [] fluids, @Nullable ItemStack specialSlot, @Nullable GTRecipe cachedRecipe,
+        boolean notUnificated, boolean dontCheckStackSizes, boolean forCollisionCheck) {
+        RecipeMapBackendProfiler.RecipeLookupProfile profile = RecipeMapBackendProfiler.RecipeLookupProfile
+            .start(recipeMap, forCollisionCheck);
+        long setupStart = profile == null ? 0L : System.nanoTime();
         if (doesOverwriteFindRecipe()) {
+            if (profile != null) {
+                profile.recordOverwrite();
+                profile.addSetupNanos(System.nanoTime() - setupStart);
+            }
             return GTStreamUtil.ofNullable(overwriteFindRecipe(rawItems, fluids, specialSlot, cachedRecipe));
         }
 
         if (recipesByCategory.isEmpty()) {
+            if (profile != null) {
+                profile.recordEmptyMapReject();
+                profile.addSetupNanos(System.nanoTime() - setupStart);
+            }
             return Stream.empty();
         }
 
@@ -365,6 +480,10 @@ public class RecipeMapBackend {
                 int count = 0;
                 for (FluidStack fluid : fluids) if (fluid != null) count++;
                 if (count < properties.minFluidInputs) {
+                    if (profile != null) {
+                        profile.recordMinInputReject();
+                        profile.addSetupNanos(System.nanoTime() - setupStart);
+                    }
                     return Stream.empty();
                 }
             }
@@ -372,6 +491,10 @@ public class RecipeMapBackend {
                 int count = 0;
                 for (ItemStack item : rawItems) if (item != null) count++;
                 if (count < properties.minItemInputs) {
+                    if (profile != null) {
+                        profile.recordMinInputReject();
+                        profile.addSetupNanos(System.nanoTime() - setupStart);
+                    }
                     return Stream.empty();
                 }
             }
@@ -380,44 +503,192 @@ public class RecipeMapBackend {
         ItemStack[] items;
         // Unification happens here in case the item input isn't already unificated.
         if (notUnificated) {
-            items = GTOreDictUnificator.getStackArray(true, (Object[]) rawItems);
+            if (profile == null) {
+                items = GTOreDictUnificator.getStackArray(true, (Object[]) rawItems);
+            } else {
+                long unificationStart = System.nanoTime();
+                items = GTOreDictUnificator.getStackArray(true, (Object[]) rawItems);
+                profile.addUnificationNanos(System.nanoTime() - unificationStart);
+            }
         } else {
             items = rawItems;
         }
 
-        return Stream.<Stream<GTRecipe>>of(
-            // Check the recipe which has been used last time in order to not have to search for it again, if possible.
-            GTStreamUtil.ofNullable(cachedRecipe)
-                .filter(recipe -> recipe.mCanBeBuffered)
-                .filter(recipe -> filterFindRecipe(recipe, items, fluids, specialSlot, dontCheckStackSizes))
-                .map(recipe -> modifyFoundRecipe(recipe, items, fluids, specialSlot))
-                .filter(Objects::nonNull),
-            // Now look for the recipes inside the item index, but only when the recipes actually can have items inputs.
-            GTStreamUtil.ofConditional(!itemIndex.isEmpty(), items)
-                .filter(Objects::nonNull)
-                .flatMap(item -> Stream.of(new GTItemStack(item), new GTItemStack(item, true)))
-                .map(itemIndex::get)
-                .flatMap(Collection::stream)
-                .filter(recipe -> filterFindRecipe(recipe, items, fluids, specialSlot, dontCheckStackSizes))
-                .map(recipe -> modifyFoundRecipe(recipe, items, fluids, specialSlot))
-                .filter(Objects::nonNull),
-            // If the minimum amount of items required for the recipes is 0, then it could match to fluid-only recipes,
-            // so check fluid index too.
-            GTStreamUtil.ofConditional(properties.minItemInputs == 0, fluids)
-                .filter(Objects::nonNull)
-                .map(
-                    fluidStack -> fluidIndex.get(
-                        fluidStack.getFluid()
-                            .getName()))
-                .flatMap(Collection::stream)
-                .filter(recipe -> filterFindRecipe(recipe, items, fluids, specialSlot, dontCheckStackSizes))
-                .map(recipe -> modifyFoundRecipe(recipe, items, fluids, specialSlot))
-                .filter(Objects::nonNull),
-            // Lastly, find fallback.
-            forCollisionCheck ? Stream.empty()
-                : GTStreamUtil.ofSupplier(() -> findFallback(items, fluids, specialSlot))
-                    .filter(Objects::nonNull))
-            .flatMap(Function.identity());
+        if (profile == null) {
+            ensureLookupCurrent();
+        } else {
+            long ensureStart = System.nanoTime();
+            ensureLookupCurrent();
+            profile.addEnsureLookupNanos(System.nanoTime() - ensureStart);
+        }
+
+        if (forCollisionCheck) {
+            Stream<GTRecipe> stream = collisionCandidateStream(
+                items,
+                fluids,
+                specialSlot,
+                dontCheckStackSizes,
+                profile);
+            if (profile != null) {
+                profile.addSetupNanos(System.nanoTime() - setupStart);
+            }
+            return stream;
+        }
+
+        // The trie is the only default recipe candidate lookup path. The item/fluid indexes are containsInput-only.
+        Stream<GTRecipe> cachedRecipeCandidates = GTStreamUtil.ofNullable(cachedRecipe)
+            .filter(recipe -> recipe.mCanBeBuffered);
+        if (profile != null) {
+            cachedRecipeCandidates = cachedRecipeCandidates.peek(recipe -> profile.recordCachedRecipeCandidate());
+        }
+
+        Stream<GTRecipe> cacheMapCandidates = GTStreamUtil.ofSupplier(() -> {
+            if (profile != null) {
+                profile.recordCacheMapProbe();
+            }
+            return cacheMap[(hash(items, fluids)) % CACHE_MAP_SIZE];
+        })
+            .filter(Objects::nonNull);
+        if (profile != null) {
+            cacheMapCandidates = cacheMapCandidates.peek(recipe -> profile.recordCacheMapCandidate());
+        }
+        final Stream<GTRecipe> cachedRecipeCandidateStream = cachedRecipeCandidates;
+        final Stream<GTRecipe> cacheMapCandidateStream = cacheMapCandidates;
+
+        AtomicBoolean matchedBeforeFallback = new AtomicBoolean(false);
+        Stream<GTRecipe> candidates = Stream
+            .<Supplier<Stream<GTRecipe>>>of(() -> cachedRecipeCandidateStream, () -> cacheMapCandidateStream, () -> {
+                Stream<GTRecipe> trieCandidates = lookupCandidateStream(items, fluids, profile);
+                if (profile != null) {
+                    trieCandidates = trieCandidates.peek(recipe -> profile.recordTrieCandidate());
+                }
+                return trieCandidates;
+            })
+            .flatMap(Supplier::get)
+            .filter(distinctByIdentity())
+            .filter(
+                recipe -> profiledFilterFindRecipe(recipe, items, fluids, specialSlot, dontCheckStackSizes, profile))
+            .map(recipe -> profiledModifyFoundRecipe(recipe, items, fluids, specialSlot, profile))
+            .filter(Objects::nonNull);
+        if (profile != null) {
+            candidates = candidates.peek(recipe -> profile.recordMatchedCandidate());
+        }
+        candidates = candidates.peek(recipe -> matchedBeforeFallback.set(true));
+
+        Stream<GTRecipe> dynamicFallback = GTStreamUtil.ofSupplier(() -> {
+            if (matchedBeforeFallback.get()) {
+                return null;
+            }
+            if (profile != null) {
+                profile.recordFallbackProbe();
+            }
+            GTRecipe fallback = findFallback(items, fluids, specialSlot);
+            if (profile != null && fallback != null) {
+                profile.recordFallbackHit();
+            }
+            return fallback;
+        })
+            .filter(Objects::nonNull);
+        dynamicFallback = dynamicFallback.peek(recipe -> matchedBeforeFallback.set(true));
+
+        Stream<GTRecipe> stream = Stream.concat(candidates, dynamicFallback);
+        if (profile != null) {
+            profile.addSetupNanos(System.nanoTime() - setupStart);
+        }
+        return stream;
+    }
+
+    public static boolean shouldValidateLookup() {
+        return RecipeLookupValidator.shouldValidateLookup();
+    }
+
+    private Stream<GTRecipe> collisionCandidateStream(@Nullable ItemStack @NotNull [] items,
+        @Nullable FluidStack @NotNull [] fluids, @Nullable ItemStack specialSlot, boolean dontCheckStackSizes,
+        @Nullable RecipeMapBackendProfiler.RecipeLookupProfile profile) {
+        Stream<GTRecipe> candidates = lookupCandidateStream(items, fluids, profile);
+        if (profile != null) {
+            candidates = candidates.peek(recipe -> profile.recordTrieCandidate());
+        }
+        return candidates
+            .filter(
+                recipe -> profiledFilterFindRecipe(recipe, items, fluids, specialSlot, dontCheckStackSizes, profile))
+            .map(recipe -> profiledModifyFoundRecipe(recipe, items, fluids, specialSlot, profile))
+            .filter(Objects::nonNull);
+    }
+
+    private Stream<GTRecipe> lookupCandidateStream(@Nullable ItemStack @NotNull [] items,
+        @Nullable FluidStack @NotNull [] fluids, @Nullable RecipeMapBackendProfiler.RecipeLookupProfile profile) {
+        if (profile == null) {
+            return lookupCandidateStream(items, fluids);
+        }
+        profile.recordTrieLookupSetup();
+        long start = System.nanoTime();
+        Stream<GTRecipe> stream = lookupCandidateStream(items, fluids);
+        profile.addTrieLookupSetupNanos(System.nanoTime() - start);
+        return stream;
+    }
+
+    protected Stream<GTRecipe> lookupCandidateStream(@Nullable ItemStack @NotNull [] items,
+        @Nullable FluidStack @NotNull [] fluids) {
+        List<GTRecipeLookupIngredient> ingredients = new ArrayList<>();
+        Consumer<GTRecipeLookupIngredient> adder = ingredient -> addLookupIngredient(ingredients, ingredient);
+
+        for (ItemStack item : items) {
+            if (item == null) continue;
+
+            GTItemStackLookupIngredient.fromRuntime(adder, item);
+            GTItemDataLookupIngredient.fromRuntime(adder, item);
+            GTOreDictLookupIngredient.fromRuntime(adder, item);
+        }
+
+        for (FluidStack fluid : fluids) {
+            if (fluid == null || fluid.getFluid() == null) continue;
+
+            GTFluidLookupIngredient.fromRuntime(adder, fluid);
+        }
+
+        if (ingredients.isEmpty()) {
+            return Stream.empty();
+        }
+
+        Iterator<GTRecipe> iterator = recipeLookup.iterator(ingredients);
+        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, 0), false);
+    }
+
+    private static void addLookupIngredient(List<GTRecipeLookupIngredient> group, GTRecipeLookupIngredient ingredient) {
+        if (!group.contains(ingredient)) {
+            group.add(ingredient);
+        }
+    }
+
+    static Predicate<GTRecipe> distinctByIdentity() {
+        Set<GTRecipe> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+        return seen::add;
+    }
+
+    protected void cache(@Nullable ItemStack @NotNull [] items, @Nullable FluidStack @NotNull [] fluids,
+        @NotNull GTRecipe recipe) {
+        cacheMap[hash(items, fluids) % CACHE_MAP_SIZE] = recipe;
+    }
+
+    @SuppressWarnings("ForLoopReplaceableByForEach")
+    protected int hash(@Nullable ItemStack @NotNull [] items, @Nullable FluidStack @NotNull [] fluids) {
+        int hash = 0;
+        for (int i = 0; i < items.length; i++) {
+            ItemStack stack = items[i];
+            if (stack == null) continue;
+            Item item = stack.getItem();
+            assert item != null;
+            hash ^= item.hashCode();
+            if (item.getHasSubtypes()) hash += Items.feather.getDamage(stack);
+        }
+        for (int i = 0; i < fluids.length; i++) {
+            FluidStack stack = fluids[i];
+            if (stack == null) continue;
+            Fluid fluid = stack.getFluid();
+            hash ^= fluid.hashCode();
+        }
+        return hash;
     }
 
     /**
@@ -427,14 +698,39 @@ public class RecipeMapBackend {
      * <p>
      * Note that this won't be called if {@link #doesOverwriteFindRecipe} is true.
      */
-    protected boolean filterFindRecipe(GTRecipe recipe, ItemStack[] items, FluidStack[] fluids,
-        @Nullable ItemStack specialSlot, boolean dontCheckStackSizes) {
+    protected boolean filterFindRecipe(@NotNull GTRecipe recipe, @Nullable ItemStack @NotNull [] items,
+        @Nullable FluidStack @NotNull [] fluids, @Nullable ItemStack specialSlot, boolean dontCheckStackSizes) {
         if (recipe.mEnabled && !recipe.mFakeRecipe
             && recipe.isRecipeInputEqual(false, dontCheckStackSizes, fluids, items)) {
             return !properties.specialSlotSensitive
                 || areStacksEqualOrNull((ItemStack) recipe.mSpecialItems, specialSlot);
         }
         return false;
+    }
+
+    private boolean profiledFilterFindRecipe(@NotNull GTRecipe recipe, @Nullable ItemStack @NotNull [] items,
+        @Nullable FluidStack @NotNull [] fluids, @Nullable ItemStack specialSlot, boolean dontCheckStackSizes,
+        @Nullable RecipeMapBackendProfiler.RecipeLookupProfile profile) {
+        if (profile == null) {
+            return filterFindRecipe(recipe, items, fluids, specialSlot, dontCheckStackSizes);
+        }
+        long start = System.nanoTime();
+        boolean result = filterFindRecipe(recipe, items, fluids, specialSlot, dontCheckStackSizes);
+        profile.addFilterNanos(System.nanoTime() - start, result);
+        return result;
+    }
+
+    @Nullable
+    private GTRecipe profiledModifyFoundRecipe(@NotNull GTRecipe recipe, @Nullable ItemStack @NotNull [] items,
+        @Nullable FluidStack @NotNull [] fluids, @Nullable ItemStack specialSlot,
+        @Nullable RecipeMapBackendProfiler.RecipeLookupProfile profile) {
+        if (profile == null) {
+            return modifyFoundRecipe(recipe, items, fluids, specialSlot);
+        }
+        long start = System.nanoTime();
+        GTRecipe result = modifyFoundRecipe(recipe, items, fluids, specialSlot);
+        profile.addModifyNanos(System.nanoTime() - start, result != null);
+        return result;
     }
 
     // endregion

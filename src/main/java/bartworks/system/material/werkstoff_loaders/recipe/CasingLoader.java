@@ -39,7 +39,7 @@ public class CasingLoader implements IWerkstoffRunnable {
         if (werkstoff == BWGTMaterialReference.Wood /* || werkstoff == BW_GT_MaterialReference.WoodSealed */) {
             addCasingRecipes(werkstoff, plank);
         } else {
-            if (!werkstoff.hasGenerationFeature(blockCasing) || !werkstoff.doesOreDictedItemExists(plate)
+            if (!werkstoff.hasItemType(blockCasing) || !werkstoff.doesOreDictedItemExists(plate)
                 || !werkstoff.doesOreDictedItemExists(screw)
                 || !werkstoff.doesOreDictedItemExists(gearGtSmall)
                 || !werkstoff.doesOreDictedItemExists(gearGt)
@@ -52,6 +52,7 @@ public class CasingLoader implements IWerkstoffRunnable {
     private static void addCasingRecipes(Werkstoff werkstoff, OrePrefixes reboltedCasingsOuterStuff) {
         GTModHandler.addCraftingRecipe(
             werkstoff.get(blockCasing),
+            GTModHandler.RecipeBits.BUFFERED,
             new Object[] { "PSP", "PGP", "PSP", 'P', werkstoff.get(plate), 'S', werkstoff.get(screw), 'G',
                 werkstoff.get(gearGtSmall) });
 
@@ -64,6 +65,7 @@ public class CasingLoader implements IWerkstoffRunnable {
 
         GTModHandler.addCraftingRecipe(
             werkstoff.get(blockCasingAdvanced),
+            GTModHandler.RecipeBits.BUFFERED,
             new Object[] { "PSP", "PGP", "PSP", 'P', werkstoff.get(reboltedCasingsOuterStuff), 'S',
                 werkstoff.get(screw), 'G', werkstoff.get(gearGt) });
 

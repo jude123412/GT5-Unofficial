@@ -4,7 +4,6 @@ import gregtech.api.GregTechAPI;
 import gregtech.api.covers.CoverContext;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.tileentity.ICoverable;
-import gregtech.api.util.ISerializableObject.LegacyCoverData;
 
 public class CoverRedstoneReceiverExternal extends CoverRedstoneWirelessBase {
 
@@ -12,22 +11,21 @@ public class CoverRedstoneReceiverExternal extends CoverRedstoneWirelessBase {
         super(context, coverTexture);
     }
 
+    @Override
     public boolean isRedstoneSensitive(long aTimer) {
         return false;
     }
 
     @Override
-    public LegacyCoverData doCoverThings(byte aInputRedstone, long aTimer) {
+    public void doCoverThings(byte aInputRedstone, long aTimer) {
         ICoverable coverable = coveredTile.get();
         if (coverable == null) {
-            return coverData;
+            return;
         }
-        int coverDataValue = coverData.get();
         coverable.setOutputRedstoneSignal(
             coverSide,
-            GregTechAPI.sWirelessRedstone.get(coverDataValue) == null ? 0
-                : GregTechAPI.sWirelessRedstone.get(coverDataValue));
-        return coverData;
+            GregTechAPI.sWirelessRedstone.get(getMapFrequency()) == null ? 0
+                : GregTechAPI.sWirelessRedstone.get(getMapFrequency()));
     }
 
     @Override

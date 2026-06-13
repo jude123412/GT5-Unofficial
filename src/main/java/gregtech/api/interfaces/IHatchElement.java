@@ -1,12 +1,15 @@
 package gregtech.api.interfaces;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiPredicate;
+import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
 
 import net.minecraft.block.Block;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.util.ForgeDirection;
 
 import com.google.common.collect.ImmutableList;
@@ -14,6 +17,7 @@ import com.gtnewhorizon.structurelib.structure.IStructureElement;
 
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
+import gregtech.api.util.GTLanguageManager;
 import gregtech.api.util.GTStructureUtility;
 import gregtech.api.util.IGTHatchAdder;
 
@@ -24,6 +28,19 @@ public interface IHatchElement<T> {
     IGTHatchAdder<? super T> adder();
 
     String name();
+
+    default String getDisplayName() {
+        GTLanguageManager.addStringLocalization("hatch_type_" + name().toLowerCase(), name());
+        return StatCollector.translateToLocal("hatch_type_" + name().toLowerCase());
+    }
+
+    default String getDescriptionLangKey() {
+        return "hatch_type_" + name().toLowerCase();
+    }
+
+    default List<String> getDescriptionLangKeys() {
+        return Collections.singletonList(getDescriptionLangKey());
+    }
 
     long count(T t);
 
@@ -40,65 +57,85 @@ public interface IHatchElement<T> {
 
     default <T2 extends T> IHatchElement<T2> withMteClasses(List<Class<? extends IMetaTileEntity>> aClasses) {
         if (aClasses == null) throw new IllegalArgumentException();
-        return new HatchElement<>(aClasses, null, null, null, this);
+        return new HatchElement<>(aClasses, null, null, null, null, this);
     }
 
     default <T2 extends T> IHatchElement<T2> withAdder(IGTHatchAdder<T2> aAdder) {
         if (aAdder == null) throw new IllegalArgumentException();
-        return new HatchElement<>(null, aAdder, null, null, this);
+        return new HatchElement<>(null, aAdder, null, null, null, this);
     }
 
     default IHatchElement<T> withName(String aName) {
         if (aName == null) throw new IllegalArgumentException();
-        return new HatchElement<>(null, null, aName, null, this);
+        return new HatchElement<>(null, null, aName, null, null, this);
+    }
+
+    default IHatchElement<T> withDisplayName(String aDisplayName) {
+        if (aDisplayName == null) throw new IllegalArgumentException();
+        return new HatchElement<>(null, null, null, aDisplayName, null, this);
     }
 
     default <T2 extends T> IHatchElement<T2> withCount(ToLongFunction<T2> aCount) {
         if (aCount == null) throw new IllegalArgumentException();
-        return new HatchElement<>(null, null, null, aCount, this);
+        return new HatchElement<>(null, null, null, null, aCount, this);
     }
 
-    default <T2 extends T> IStructureElement<T2> newAny(int aCasingIndex, int aDot) {
-        if (aCasingIndex < 0 || aDot < 0) throw new IllegalArgumentException();
+    default <T2 extends T> IStructureElement<T2> newAny(int aCasingIndex, int aHintNumber) {
+        if (aCasingIndex < 0 || aHintNumber < 0) throw new IllegalArgumentException();
         return GTStructureUtility.<T2>buildHatchAdder()
             .anyOf(this)
             .casingIndex(aCasingIndex)
-            .dot(aDot)
+            .hint(aHintNumber)
             .continueIfSuccess()
             .exclusive()
             .build();
     }
 
-    default <T2 extends T> IStructureElement<T2> newAnyOrCasing(int aCasingIndex, int aDot, Block casingBlock,
-        int casingMeta) {
-        if (aCasingIndex < 0 || aDot < 0) throw new IllegalArgumentException();
+    default <T2 extends T> IStructureElement<T2> newAnyWithDescription(int aCasingIndex, int aHintNumber,
+        Supplier<String> description) {
+        if (aCasingIndex < 0 || aHintNumber < 0) throw new IllegalArgumentException();
         return GTStructureUtility.<T2>buildHatchAdder()
             .anyOf(this)
             .casingIndex(aCasingIndex)
-            .dot(aDot)
+            .hint(aHintNumber)
+            .description(description)
+            .cacheHint(() -> StatCollector.translateToLocal(description.get()))
+            .continueIfSuccess()
+            .exclusive()
+            .build();
+    }
+
+    default <T2 extends T> IStructureElement<T2> newAnyOrCasing(int aCasingIndex, int aHintNumber, Block casingBlock,
+        int casingMeta) {
+        if (aCasingIndex < 0 || aHintNumber < 0) throw new IllegalArgumentException();
+        return GTStructureUtility.<T2>buildHatchAdder()
+            .anyOf(this)
+            .casingIndex(aCasingIndex)
+            .hint(aHintNumber)
             .continueIfSuccess()
             .buildAndChain(com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock(casingBlock, casingMeta));
     }
 
-    default <T2 extends T> IStructureElement<T2> newAny(int aCasingIndex, int aDot, ForgeDirection... allowedFacings) {
-        if (aCasingIndex < 0 || aDot < 0) throw new IllegalArgumentException();
+    default <T2 extends T> IStructureElement<T2> newAny(int aCasingIndex, int aHintNumber,
+        ForgeDirection... allowedFacings) {
+        if (aCasingIndex < 0 || aHintNumber < 0) throw new IllegalArgumentException();
         return GTStructureUtility.<T2>buildHatchAdder()
             .anyOf(this)
             .casingIndex(aCasingIndex)
-            .dot(aDot)
+            .hint(aHintNumber)
             .continueIfSuccess()
             .allowOnly(allowedFacings)
             .exclusive()
             .build();
     }
 
-    default <T2 extends T> IStructureElement<T2> newAny(int aCasingIndex, int aDot,
+    default <T2 extends T> IStructureElement<T2> newAny(int aCasingIndex, int aHintNumber,
         BiPredicate<? super T2, ? super IGregTechTileEntity> aShouldSkip) {
-        if (aCasingIndex < 0 || aDot < 0 || aShouldSkip == null) throw new IllegalArgumentException();
+        if (aCasingIndex < 0 || aHintNumber < 0 || aShouldSkip == null) throw new IllegalArgumentException();
         return GTStructureUtility.<T2>buildHatchAdder()
             .anyOf(this)
             .casingIndex(aCasingIndex)
-            .dot(aDot)
+            .hint(aHintNumber)
             .shouldSkip(aShouldSkip)
             .continueIfSuccess()
             .build();
@@ -107,13 +144,22 @@ public interface IHatchElement<T> {
     default <T2 extends T> IHatchElement<T2> or(IHatchElement<? super T2> fallback) {
         return new HatchElementEither<>(this, fallback);
     }
+
+    /**
+     * Allows Specific exclusion of this HatchElement's subclasses in the NEI projection
+     * Override with the '.class' call of the subclasses to omit for that HatchElement
+     * Works with the general use {@link gregtech.api.util.HatchElementBuilder#atLeast(java.util.Map)} method
+     */
+    default List<Class<? extends IMetaTileEntity>> mteBlacklist() {
+        return ImmutableList.of();
+    }
 }
 
 class HatchElementEither<T> implements IHatchElement<T> {
 
     private final IHatchElement<? super T> first, second;
     private ImmutableList<? extends Class<? extends IMetaTileEntity>> mMteClasses;
-    private String name;
+    private String name, displayName;
 
     HatchElementEither(IHatchElement<? super T> first, IHatchElement<? super T> second) {
         this.first = first;
@@ -144,6 +190,19 @@ class HatchElementEither<T> implements IHatchElement<T> {
     }
 
     @Override
+    public String getDisplayName() {
+        if (displayName == null) displayName = first.getDisplayName() + " or " + second.getDisplayName();
+        return displayName;
+    }
+
+    @Override
+    public List<String> getDescriptionLangKeys() {
+        List<String> result = new ArrayList<>(first.getDescriptionLangKeys());
+        result.addAll(second.getDescriptionLangKeys());
+        return result;
+    }
+
+    @Override
     public long count(T t) {
         return first.count(t) + second.count(t);
     }
@@ -153,15 +212,16 @@ class HatchElement<T> implements IHatchElement<T> {
 
     private final List<Class<? extends IMetaTileEntity>> mClasses;
     private final IGTHatchAdder<? super T> mAdder;
-    private final String mName;
+    private final String mName, mDisplayName;
     private final IHatchElement<? super T> mBacking;
     private final ToLongFunction<? super T> mCount;
 
     public HatchElement(List<Class<? extends IMetaTileEntity>> aMteClasses, IGTHatchAdder<? super T> aAdder,
-        String aName, ToLongFunction<? super T> aCount, IHatchElement<? super T> aBacking) {
+        String aName, String aDisplayName, ToLongFunction<? super T> aCount, IHatchElement<? super T> aBacking) {
         this.mClasses = aMteClasses;
         this.mAdder = aAdder;
         this.mName = aName;
+        this.mDisplayName = aDisplayName;
         this.mCount = aCount;
         this.mBacking = aBacking;
     }
@@ -182,6 +242,16 @@ class HatchElement<T> implements IHatchElement<T> {
     }
 
     @Override
+    public String getDisplayName() {
+        return mDisplayName == null ? mBacking.getDisplayName() : mDisplayName;
+    }
+
+    @Override
+    public List<String> getDescriptionLangKeys() {
+        return mBacking.getDescriptionLangKeys();
+    }
+
+    @Override
     public long count(T t) {
         return mCount == null ? mBacking.count(t) : mCount.applyAsLong(t);
     }
@@ -189,24 +259,30 @@ class HatchElement<T> implements IHatchElement<T> {
     @Override
     public <T2 extends T> IHatchElement<T2> withMteClasses(List<Class<? extends IMetaTileEntity>> aClasses) {
         if (aClasses == null) throw new IllegalArgumentException();
-        return new HatchElement<>(aClasses, mAdder, mName, mCount, mBacking);
+        return new HatchElement<>(aClasses, mAdder, mName, mDisplayName, mCount, mBacking);
     }
 
     @Override
     public <T2 extends T> IHatchElement<T2> withAdder(IGTHatchAdder<T2> aAdder) {
         if (aAdder == null) throw new IllegalArgumentException();
-        return new HatchElement<>(mClasses, aAdder, mName, mCount, mBacking);
+        return new HatchElement<>(mClasses, aAdder, mName, mDisplayName, mCount, mBacking);
     }
 
     @Override
     public IHatchElement<T> withName(String aName) {
         if (aName == null) throw new IllegalArgumentException();
-        return new HatchElement<>(mClasses, mAdder, aName, mCount, mBacking);
+        return new HatchElement<>(mClasses, mAdder, aName, mDisplayName, mCount, mBacking);
+    }
+
+    @Override
+    public IHatchElement<T> withDisplayName(String aDisplayName) {
+        if (aDisplayName == null) throw new IllegalArgumentException();
+        return new HatchElement<>(mClasses, mAdder, mName, aDisplayName, mCount, mBacking);
     }
 
     @Override
     public <T2 extends T> IHatchElement<T2> withCount(ToLongFunction<T2> aCount) {
         if (aCount == null) throw new IllegalArgumentException();
-        return new HatchElement<>(mClasses, mAdder, mName, aCount, mBacking);
+        return new HatchElement<>(mClasses, mAdder, mName, mDisplayName, aCount, mBacking);
     }
 }

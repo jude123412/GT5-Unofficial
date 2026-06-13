@@ -2,11 +2,11 @@ package tectech.loader.thing;
 
 import net.minecraft.item.ItemStack;
 
+import gregtech.api.covers.CoverPlacer;
 import gregtech.api.covers.CoverRegistry;
 import gregtech.api.enums.Textures;
 import gregtech.api.interfaces.IIconContainer;
 import gregtech.api.render.TextureFactory;
-import gregtech.common.covers.CoverPowerPassUpgradePlacer;
 import tectech.TecTech;
 import tectech.thing.cover.CoverEnderFluidLink;
 import tectech.thing.cover.CoverPowerPassUpgrade;
@@ -18,14 +18,12 @@ import tectech.thing.item.ItemTeslaCoilCover;
 
 public class CoverLoader implements Runnable {
 
+    @Override
     public void run() {
-        final IIconContainer TESLA_OVERLAY = new Textures.BlockIcons.CustomIcon("iconsets/TESLA_OVERLAY");
-        final IIconContainer TESLA_OVERLAY_ULTIMATE = new Textures.BlockIcons.CustomIcon(
-            "iconsets/TESLA_OVERLAY_ULTIMATE");
-        final IIconContainer ENDERFLUIDLINK_OVERLAY = new Textures.BlockIcons.CustomIcon(
-            "iconsets/ENDERFLUIDLINK_OVERLAY");
-        final IIconContainer POWERPASSUPGRADE_OVERLAY = new Textures.BlockIcons.CustomIcon(
-            "iconsets/POWERPASSUPGRADE_OVERLAY");
+        final IIconContainer TESLA_OVERLAY = Textures.BlockIcons.custom("iconsets/TESLA_OVERLAY");
+        final IIconContainer TESLA_OVERLAY_ULTIMATE = Textures.BlockIcons.custom("iconsets/TESLA_OVERLAY_ULTIMATE");
+        final IIconContainer ENDERFLUIDLINK_OVERLAY = Textures.BlockIcons.custom("iconsets/ENDERFLUIDLINK_OVERLAY");
+        final IIconContainer POWERPASSUPGRADE_OVERLAY = Textures.BlockIcons.custom("iconsets/POWERPASSUPGRADE_OVERLAY");
 
         CoverRegistry.registerCover(
             new ItemStack(ItemTeslaCoilCover.INSTANCE, 1, 0),
@@ -38,12 +36,14 @@ public class CoverLoader implements Runnable {
         CoverRegistry.registerCover(
             new ItemStack(ItemEnderFluidLinkCover.INSTANCE, 1, 0),
             TextureFactory.of(ENDERFLUIDLINK_OVERLAY),
-            CoverEnderFluidLink::new);
+            context -> new CoverEnderFluidLink(context, TextureFactory.of(ENDERFLUIDLINK_OVERLAY)));
         CoverRegistry.registerCover(
             new ItemStack(ItemPowerPassUpgradeCover.INSTANCE, 1, 0),
             TextureFactory.of(POWERPASSUPGRADE_OVERLAY),
             CoverPowerPassUpgrade::new,
-            new CoverPowerPassUpgradePlacer());
+            CoverPlacer.builder()
+                .onlyPlaceIf(CoverPowerPassUpgrade::isCoverPlaceable)
+                .build());
         TecTech.LOGGER.info("Cover functionality registered");
     }
 }
