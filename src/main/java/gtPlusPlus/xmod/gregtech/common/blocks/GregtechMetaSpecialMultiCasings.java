@@ -2,7 +2,6 @@ package gtPlusPlus.xmod.gregtech.common.blocks;
 
 import java.util.List;
 
-import gregtech.common.tileentities.machines.multi.MTELargeTurbineSteam;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
