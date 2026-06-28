@@ -529,7 +529,14 @@ public enum SmallOres {
         .heightRange(5, 115)
         .amount(4)
         .ore(Materials.CertusQuartzCharged)
-        .enableInDim(Horus));
+        .enableInDim(Horus)),
+
+    Indium(new SmallOreBuilder().name("ore.small.indium")
+        .heightRange(10, 30)
+        .amount(4)
+        .ore(Materials.Indium)
+        .enableInDim(Miranda, Proteus, Pluto)
+    );
     // spotless : on
 
     public final SmallOreBuilder smallOreBuilder;
