@@ -378,9 +378,10 @@ public class MTEExtremeEntityCrusher extends KubaTechGTMultiBlockBase<MTEExtreme
             .addInfo("When linked, mobs will start to buffer and die very slowly, providing blood to the linked altar")
             .addSeparator()
             .addInfo("You can disable mob animation with a soldering iron")
+            .addInfo("You can enable batch mode with wire cutters.")
             .addInfo(
-                "You can enable batch mode with wire cutters. Providing " + EnumChatFormatting.BLUE
-                    + " 16x Time, Output, Weapon Damage")
+                EnumChatFormatting.BLUE
+                    + "Batch mode runs 16x recipes for 16x time, 16x weapon damage and 16x drop rolls.")
             .addGlassEnergyLimitInfo()
             .beginStructureBlock(5, 7, 5, true)
             .addController("Front bottom center")
