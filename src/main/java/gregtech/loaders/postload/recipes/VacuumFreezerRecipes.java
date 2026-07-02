@@ -322,6 +322,20 @@ public class VacuumFreezerRecipes implements Runnable {
                 .addTo(vacuumFreezerRecipes);
 
             GTValues.RA.stdBuilder()
+                .itemInputs(GTOreDictUnificator.get(OrePrefixes.cellPlasma, Materials.Lutetium, 1L))
+                .itemOutputs(GTOreDictUnificator.get(OrePrefixes.cellMolten, Materials.Lutetium, 1L))
+                .duration(1 * SECONDS)
+                .eut(TierEU.RECIPE_LuV)
+                .addTo(vacuumFreezerRecipes);
+
+            GTValues.RA.stdBuilder()
+                .fluidInputs(Materials.Lutetium.getPlasma(1 * INGOTS))
+                .fluidOutputs(Materials.Lutetium.getMolten(1 * INGOTS))
+                .duration(1 * SECONDS)
+                .eut(TierEU.RECIPE_ZPM)
+                .addTo(vacuumFreezerRecipes);
+
+            GTValues.RA.stdBuilder()
                 .fluidInputs(Materials.Boron.getPlasma(1 * INGOTS))
                 .fluidOutputs(Materials.Boron.getMolten(1 * INGOTS))
                 .duration(1 * SECONDS)
