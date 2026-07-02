@@ -10780,9 +10780,14 @@ public class MaterialsInit {
     private static Materials loadMalachite() {
         return new MaterialBuilder().setName("Malachite")
             .setDefaultLocalName("Malachite")
-            .setIconSet(TextureSet.SET_DULL)
+            .setIconSet(
+                TextureSet.SET_DULL.withCustomTextures(
+                    "malachite",
+                    MaterialIconRegistry.IconType.ORE,
+                    MaterialIconRegistry.IconType.ORE_SMALL,
+                    MaterialIconRegistry.IconType.ORE_RAW))
             .setColor(Dyes.dyeGreen)
-            .setARGB(0x00055f05)
+            .setARGB(0x001DEAB3)
             .setMiningLevel(1)
             .addDustItems()
             .addOreItems()
