@@ -123,7 +123,7 @@ public class FusionReactorRecipes implements Runnable {
 
         GTValues.RA.stdBuilder()
             .fluidInputs(
-                MaterialsElements.getInstance().BROMINE.getFluidStack(1_000),
+                MaterialsElements.getInstance().BROMINE.getFluidStack(1 * INGOTS),
                 Materials.Beryllium.getMolten(4 * INGOTS))
             .fluidOutputs(Materials.Lutetium.getPlasma(1 * INGOTS))
             .duration(6 * SECONDS)
