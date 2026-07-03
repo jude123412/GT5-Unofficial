@@ -9368,7 +9368,11 @@ public class MaterialsInit {
     private static Materials loadTanzanite() {
         return new MaterialBuilder().setName("Tanzanite")
             .setDefaultLocalName("Tanzanite")
-            .setIconSet(TextureSet.SET_GEM_VERTICAL)
+            .setIconSet(TextureSet.SET_GEM_VERTICAL.withCustomTextures(
+                "tanzanite",
+                MaterialIconRegistry.IconType.ORE,
+                MaterialIconRegistry.IconType.ORE_SMALL,
+                MaterialIconRegistry.IconType.ORE_RAW))
             .setColor(Dyes.dyePurple)
             .setARGB(0x7f4000c8)
             .setTool(256, 2, 7.0f)
