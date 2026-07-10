@@ -83,8 +83,9 @@ public class VoidMinerUtility {
                         return;
                     }
 
-                    float appliedWeight = stones.size() == 1 ? weight : (i == 0) ? weight * 0.8F : (weight * 0.2F) / (totalWeight - 1);
-                    
+                    float appliedWeight = stones.size() == 1 ? weight
+                        : (i == 0) ? weight * 0.8F : (weight * 0.2F) / (totalWeight - 1);
+
                     addDrop(stack, appliedWeight);
                 }
             }
