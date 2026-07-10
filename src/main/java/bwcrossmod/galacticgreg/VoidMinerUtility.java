@@ -26,7 +26,6 @@ import gregtech.GTMod;
 import gregtech.api.enums.Materials;
 import gregtech.api.enums.StoneType;
 import gregtech.api.interfaces.IOreMaterial;
-import gregtech.api.interfaces.IStoneType;
 import gregtech.api.objects.DiscreteDistribution;
 import gregtech.api.util.GTUtility;
 import gregtech.common.WorldgenGTOreLayer;
@@ -68,22 +67,24 @@ public class VoidMinerUtility {
          *
          * @param material the material
          * @param weight   the non normalised weight
-         * @param stone    the stone types
+         * @param stones   the stone types
          */
-        public void addDrop(IOreMaterial material, List<StoneType> stone, float weight) {
+        public void addDrop(IOreMaterial material, List<StoneType> stones, float weight) {
             try (OreInfo<IOreMaterial> info = OreInfo.getNewInfo()) {
                 info.material = material;
 
-                for (IStoneType stones : stone) {
-                    info.stoneType = stones;
-                    ItemStack stack = OreManager.getStack(info, 1);
+                int types = stones.size();
+                for (int i = 0; i < types; i++) {
+                    info.stoneType = stones.get(i);
 
+                    ItemStack stack = OreManager.getStack(info, 1);
                     if (stack == null) {
                         GTMod.GT_FML_LOGGER.error("Could not add ore " + material + " to void miner drop map!");
                         return;
                     }
 
-                    addDrop(stack, weight);
+                    float appliedWeight = (i == 0) ? weight : weight / (totalWeight - 1);
+                    addDrop(stack, appliedWeight);
                 }
             }
         }

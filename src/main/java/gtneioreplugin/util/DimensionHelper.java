@@ -89,14 +89,23 @@ public class DimensionHelper {
     public static final List<String> ALL_TRIMMED_NAMES = new ArrayList<>();
     public static final List<String> ALL_DISPLAYED_NAMES = new ArrayList<>();
 
+    public static final List<StoneType> overworldStones = ImmutableList.of(
+        StoneType.Stone,
+        StoneType.BlackGranite,
+        StoneType.RedGranite,
+        StoneType.Marble,
+        StoneType.Basalt,
+        StoneType.Tuff,
+        StoneType.Deepslate);
+
     static {
         // first 2 letters if one word else 1 letter of every word, except
         // capital letter in
         // name, then 1rst + capital Moon = Mo, BarnardC = BC, EndAsteroid = EA
         // Non GC dimensions in progression order instead of alphabetical
-        register("Overworld", OW, "Overworld", "Ow", T0, ImmutableList.of(StoneType.Stone));
+        register("Overworld", OW, "Overworld", "Ow", T0, overworldStones);
         register("Nether", NETHER, "Nether", "Ne", T0, ImmutableList.of(StoneType.Netherrack));
-        register("Twilight", TWILIGHT_FOREST, "Twilight", "TF", T0, ImmutableList.of(StoneType.Stone));
+        register("Twilight", TWILIGHT_FOREST, "Twilight", "TF", T0, overworldStones);
         register("The End", THE_END, "The End", "ED", T0, ImmutableList.of(StoneType.Endstone));
         register("EndAsteroid", ENDASTEROID, "EndAsteroid", "EA", T0, ImmutableList.of(StoneType.Endstone));
         register("dimensionDarkWorld", EVERGLADES, "dimensionDarkWorld", "Eg", T0, ImmutableList.of(StoneType.Stone));
@@ -146,7 +155,7 @@ public class DimensionHelper {
         register("GalaxySpace_Pluto", PLUTO, "Pluto", "Pl", T7, ImmutableList.of(StoneType.Pluto));
 
         // T8
-        register("GalaxySpace_BarnardC", BARNARDC, "BarnardC", "BC", T8, ImmutableList.of(StoneType.Stone));
+        register("GalaxySpace_BarnardC", BARNARDC, "BarnardC", "BC", T8, overworldStones);
         register("GalaxySpace_BarnardE", BARNARDE, "BarnardE", "BE", T8, ImmutableList.of(StoneType.BarnardaE));
         register("GalaxySpace_BarnardF", BARNARDF, "BarnardF", "BF", T8, ImmutableList.of(StoneType.BarnardaF));
         register("GalaxySpace_CentauriA", CENTAURIBB, "CentauriA", "CB", T8, ImmutableList.of(StoneType.AlphaCentauri));
@@ -164,7 +173,7 @@ public class DimensionHelper {
             "MB",
             T9,
             ImmutableList.of(StoneType.Asteroid));
-        register("GalacticraftAmunRa_Neper", NEPER, "Neper", "Np", T9, ImmutableList.of(StoneType.Stone));
+        register("GalacticraftAmunRa_Neper", NEPER, "Neper", "Np", T9, overworldStones);
         register(
             "GalacticraftAmunRa_Seth",
             SETH,
