@@ -266,6 +266,13 @@ public enum IDMetaItem03 {
     MetaMaterial_FieldManipulator3(333),
     MetaMaterial_FieldManipulator4(334),
 
+    ExoticMatterProcessingUnit(335),
+    ExoticMatterWafer(336),
+    ExoticMatterLogicArrayWafer(337),
+    ExoticMatterProcessingModuleWafer(338),
+    ExoticMatterLogicArray(339),
+    ExoticMatterProcessingModule(340),
+
     Circuit_Silicon_Ingot6(721),
     Circuit_Silicon_Wafer6(722),
     Circuit_Silicon_Wafer7(723),
