@@ -2001,12 +2001,14 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFi
             addItemWithLocalizationKeys(
                 ExoticMatterLogicArray.ID,
                 "gt.item.circuit.chip.emla.name",
-                "gt.item.circuit.chip.emla.tooltip"));
+                "gt.item.circuit.chip.emla.tooltip",
+                "chipEMLA"));
         ItemList.ExoticMatterProcessingModule.set(
             addItemWithLocalizationKeys(
                 ExoticMatterProcessingModule.ID,
                 "gt.item.circuit.chip.empm.name",
-                "gt.item.circuit.chip.empm.tooltip"));
+                "gt.item.circuit.chip.empm.tooltip",
+                "chipEMPM"));
 
         registerMetaMaterials();
 
