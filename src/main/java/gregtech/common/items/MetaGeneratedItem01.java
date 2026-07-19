@@ -767,8 +767,16 @@ public class MetaGeneratedItem01 extends MetaGeneratedItemX32 implements IItemFi
             .set(addItemWithLocalizationKeys(Firebrick.ID, "gt.item.firebrick.name", "gt.item.firebrick.tooltip"));
         GTOreDictUnificator.addItemDataFromInputs(ItemList.Firebrick.get(1), Materials.Fireclay.getDust(1));
 
-        ItemList.EnrichedUraniumNuclearFuel.set(addItemWithLocalizationKeys(EnrichedUraniumNuclearFuel.ID, "gt.item.nuclear_fuel.uranium.name", "gt.item.nuclear_fuel.uranium.tooltip"));
-        ItemList.MoxNuclearFuel.set(addItemWithLocalizationKeys(MoxNuclearFuel.ID, "gt.item.nuclear_fuel.mox.name", "gt.item.nuclear_fuel.mox.tooltip"));
+        ItemList.EnrichedUraniumNuclearFuel.set(
+            addItemWithLocalizationKeys(
+                EnrichedUraniumNuclearFuel.ID,
+                "gt.item.nuclear_fuel.uranium.name",
+                "gt.item.nuclear_fuel.uranium.tooltip"));
+        ItemList.MoxNuclearFuel.set(
+            addItemWithLocalizationKeys(
+                MoxNuclearFuel.ID,
+                "gt.item.nuclear_fuel.mox.name",
+                "gt.item.nuclear_fuel.mox.tooltip"));
 
         ItemList.Shape_Empty.set(
             addItemWithLocalizationKeys(
