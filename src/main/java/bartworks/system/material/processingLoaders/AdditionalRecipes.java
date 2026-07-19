@@ -321,6 +321,7 @@ public class AdditionalRecipes {
                 Materials.Thorium.getDust(1),
                 WerkstoffLoader.Thorium232.get(dust))
             .outputChances(7000, 1300, 700, 600, 300, 100)
+            .circuit(1)
             .duration(20 * SECONDS)
             .eut((int) TierEU.RECIPE_IV)
             .addTo(sifterRecipes);

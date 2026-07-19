@@ -464,7 +464,7 @@ public final class RecipeMaps {
             .minInputs(2, 0)
             .build();
     public static final RecipeMap<RecipeMapBackend> sifterRecipes = RecipeMapBuilder.of("gt.recipe.sifter")
-        .maxIO(1, 9, 1, 1)
+        .maxIO(2, 9, 1, 1)
         .progressBar(GTUITextures.PROGRESSBAR_SIFT, ProgressBar.Direction.DOWN)
         .progressBarMUI2(GTGuiTextures.PROGRESSBAR_SIFT, ProgressWidget.Direction.DOWN)
         .build();

@@ -584,6 +584,7 @@ public class RecipeLoaderNuclear {
                 MaterialsElements.getInstance().HAFNIUM.getDust(1),
                 MaterialsElements.getInstance().HAFNIUM.getDust(1))
             .outputChances(50_00, 2_78, 10_00, 10_00, 3_00, 3_00)
+            .circuit(2)
             .duration(30 * SECONDS)
             .eut(TierEU.RECIPE_HV)
             .addTo(sifterRecipes);
@@ -598,6 +599,7 @@ public class RecipeLoaderNuclear {
                 WerkstoffLoader.Zirconium.get(OrePrefixes.dust, 1),
                 WerkstoffLoader.Zirconium.get(OrePrefixes.dust, 1))
             .outputChances(100_00, 5_56, 15_00, 10_00, 5_00, 5_00)
+            .circuit(2)
             .duration(30 * SECONDS)
             .eut(TierEU.RECIPE_HV)
             .addTo(sifterRecipes);
@@ -612,6 +614,7 @@ public class RecipeLoaderNuclear {
                 WerkstoffLoader.Zirconium.get(OrePrefixes.dust, 1),
                 WerkstoffLoader.Zirconium.get(OrePrefixes.dust, 1))
             .outputChances(100_00, 5_56, 15_00, 10_00, 5_00, 5_00)
+            .circuit(2)
             .duration(30 * SECONDS)
             .eut(TierEU.RECIPE_HV)
             .addTo(sifterRecipes);
@@ -627,6 +630,7 @@ public class RecipeLoaderNuclear {
                 GregtechItemList.Radium226Dust.get(1),
                 GregtechItemList.Radium226Dust.get(1))
             .outputChances(100_00, 5_00, 3_00, 2_00, 1_00, 1_00)
+            .circuit(2)
             .duration(30 * SECONDS)
             .eut(TierEU.RECIPE_HV)
             .addTo(sifterRecipes);
@@ -641,6 +645,7 @@ public class RecipeLoaderNuclear {
                 GregtechItemList.Radium226Dust.get(1),
                 GregtechItemList.Radium226Dust.get(1))
             .outputChances(100_00, 5_56, 10_00, 5_00, 5_00, 5_00)
+            .circuit(2)
             .duration(30 * SECONDS)
             .eut(TierEU.RECIPE_HV)
             .addTo(sifterRecipes);
@@ -655,6 +660,7 @@ public class RecipeLoaderNuclear {
                 GregtechItemList.Radium226Dust.get(1),
                 GregtechItemList.Radium226Dust.get(1))
             .outputChances(100_00, 5_56, 5_00, 2_50, 2_50, 2_50)
+            .circuit(2)
             .duration(30 * SECONDS)
             .eut(TierEU.RECIPE_HV)
             .addTo(sifterRecipes);
@@ -669,6 +675,7 @@ public class RecipeLoaderNuclear {
                 GregtechItemList.Radium226Dust.get(1),
                 GregtechItemList.Radium226Dust.get(1))
             .outputChances(100_00, 5_56, 5_00, 2_50, 2_50, 2_50)
+            .circuit(2)
             .duration(30 * SECONDS)
             .eut(TierEU.RECIPE_HV)
             .addTo(sifterRecipes);

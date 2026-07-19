@@ -93,6 +93,7 @@ public class ProcessingCrushedOre implements gregtech.api.interfaces.IOreRecipeR
                             GTOreDictUnificator.get(OrePrefixes.gemChipped, aMaterial, tGem, 1L),
                             GTOreDictUnificator.get(OrePrefixes.dust, aMaterial, tGem, 1L))
                         .outputChances(300, 1200, 4500, 1400, 2800, 3500)
+                        .circuit(1)
                         .duration(40 * SECONDS)
                         .eut(TierEU.RECIPE_LV / 2)
                         .addTo(sifterRecipes);
@@ -106,6 +107,7 @@ public class ProcessingCrushedOre implements gregtech.api.interfaces.IOreRecipeR
                             GTOreDictUnificator.get(OrePrefixes.gemChipped, aMaterial, tGem, 1L),
                             GTOreDictUnificator.get(OrePrefixes.dust, aMaterial, tGem, 1L))
                         .outputChances(100, 400, 1500, 2000, 4000, 5000)
+                        .circuit(1)
                         .duration(40 * SECONDS)
                         .eut(TierEU.RECIPE_LV / 2)
                         .addTo(sifterRecipes);

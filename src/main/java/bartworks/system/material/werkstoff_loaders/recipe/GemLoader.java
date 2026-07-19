@@ -80,6 +80,7 @@ public class GemLoader implements IWerkstoffRunnable {
                         werkstoff.get(gemChipped),
                         werkstoff.get(dust))
                     .outputChances(200, 1000, 2500, 2000, 4000, 5000)
+                    .circuit(1)
                     .duration(40 * SECONDS)
                     .eut(BWUtil.calculateRecipeEU(werkstoff, (int) (TierEU.RECIPE_LV / 2)))
                     .addTo(sifterRecipes);

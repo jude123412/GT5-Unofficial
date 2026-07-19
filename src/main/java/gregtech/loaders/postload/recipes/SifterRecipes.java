@@ -45,6 +45,7 @@ public class SifterRecipes implements Runnable {
                 new ItemStack(Items.coal, 1, 0),
                 GTOreDictUnificator.get(OrePrefixes.dust, Materials.Coal, 1L))
             .outputChances(10000, 9000, 8000, 7000, 6000, 5000)
+            .circuit(1)
             .duration(30 * SECONDS)
             .eut(TierEU.RECIPE_LV / 2)
             .addTo(sifterRecipes);
