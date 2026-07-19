@@ -176,7 +176,9 @@ public class FissionFuelLoader implements Runnable {
 
             // Uranium
             GTValues.RA.stdBuilder()
-                .itemInputs(GTOreDictUnificator.get(OrePrefixes.gem, Materials.Uranium, 6), GTOreDictUnificator.get(OrePrefixes.nugget, Materials.Uranium235, 3))
+                .itemInputs(
+                    GTOreDictUnificator.get(OrePrefixes.gem, Materials.Uranium, 6),
+                    GTOreDictUnificator.get(OrePrefixes.nugget, Materials.Uranium235, 3))
                 .itemOutputs(ItemList.EnrichedUraniumNuclearFuel.get(1))
                 .fluidInputs(GTModHandler.getIC2Coolant(1_000))
                 .duration(20 * SECONDS)
@@ -287,7 +289,9 @@ public class FissionFuelLoader implements Runnable {
 
             // MOX
             GTValues.RA.stdBuilder()
-                .itemInputs(GTOreDictUnificator.get(OrePrefixes.gem, Materials.Uranium, 6), GTOreDictUnificator.get(OrePrefixes.gem, Materials.Plutonium, 3))
+                .itemInputs(
+                    GTOreDictUnificator.get(OrePrefixes.gem, Materials.Uranium, 6),
+                    GTOreDictUnificator.get(OrePrefixes.gem, Materials.Plutonium, 3))
                 .itemOutputs(ItemList.MoxNuclearFuel.get(1))
                 .fluidInputs(GTModHandler.getIC2Coolant(1_000))
                 .duration(20 * SECONDS)
