@@ -236,6 +236,7 @@ import static gregtech.common.items.IDMetaItem01.Energy_Cluster;
 import static gregtech.common.items.IDMetaItem01.Energy_Lapotronic_Orb;
 import static gregtech.common.items.IDMetaItem01.Energy_Lapotronic_orb_2;
 import static gregtech.common.items.IDMetaItem01.Energy_Module;
+import static gregtech.common.items.IDMetaItem01.EnrichedUraniumNuclearFuel;
 import static gregtech.common.items.IDMetaItem01.Field_Generator_EV;
 import static gregtech.common.items.IDMetaItem01.Field_Generator_HV;
 import static gregtech.common.items.IDMetaItem01.Field_Generator_IV;
@@ -286,6 +287,7 @@ import static gregtech.common.items.IDMetaItem01.Large_Fluid_Cell_Steel;
 import static gregtech.common.items.IDMetaItem01.Large_Fluid_Cell_Titanium;
 import static gregtech.common.items.IDMetaItem01.Large_Fluid_Cell_TungstenSteel;
 import static gregtech.common.items.IDMetaItem01.McGuffium_239;
+import static gregtech.common.items.IDMetaItem01.MoxNuclearFuel;
 import static gregtech.common.items.IDMetaItem01.NC_SensorKit;
 import static gregtech.common.items.IDMetaItem01.NaquadriaSupersolid;
 import static gregtech.common.items.IDMetaItem01.Paper_Magic_Empty;
@@ -764,6 +766,9 @@ public class MetaGeneratedItem01 extends MetaGeneratedItemX32 implements IItemFi
         ItemList.Firebrick
             .set(addItemWithLocalizationKeys(Firebrick.ID, "gt.item.firebrick.name", "gt.item.firebrick.tooltip"));
         GTOreDictUnificator.addItemDataFromInputs(ItemList.Firebrick.get(1), Materials.Fireclay.getDust(1));
+
+        ItemList.EnrichedUraniumNuclearFuel.set(addItemWithLocalizationKeys(EnrichedUraniumNuclearFuel.ID, "gt.item.nuclear_fuel.uranium.name", "gt.item.nuclear_fuel.uranium.tooltip"));
+        ItemList.MoxNuclearFuel.set(addItemWithLocalizationKeys(MoxNuclearFuel.ID, "gt.item.nuclear_fuel.mox.name", "gt.item.nuclear_fuel.mox.tooltip"));
 
         ItemList.Shape_Empty.set(
             addItemWithLocalizationKeys(

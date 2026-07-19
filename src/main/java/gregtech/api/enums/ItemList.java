@@ -873,6 +873,9 @@ public enum ItemList implements IItemContainer {
     Firebrick,
     Casing_Firebricks,
 
+    EnrichedUraniumNuclearFuel,
+    MoxNuclearFuel,
+
     Automation_Filter_ULV,
     Automation_Filter_LV,
     Automation_Filter_MV,

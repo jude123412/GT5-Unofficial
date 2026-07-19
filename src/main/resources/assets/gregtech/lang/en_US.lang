@@ -4261,6 +4261,12 @@ gt.item.compressed_fireclay.tooltip=Brick-shaped
 gt.item.firebrick.name=Firebrick
 gt.item.firebrick.tooltip=Heat resistant
 
+## Nuclear Fuel
+gt.item.nuclear_fuel.uranium.name=Enriched Uranium Nuclear Fuel
+gt.item.nuclear_fuel.uranium.tooltip=Standard Nuclear Fuel
+gt.item.nuclear_fuel.mox.name=MOX Nuclear Fuel
+gt.item.nuclear_fuel.mox.tooltip=More Heat = More Power
+
 ## Shape
 gt.item.shape_empty.name=Empty Shape Plate
 gt.item.shape_empty.tooltip=Raw Plate to make Molds and Extruder Shapes

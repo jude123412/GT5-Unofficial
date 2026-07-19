@@ -66,6 +66,10 @@ public enum IDMetaItem01 {
     T4Sawblade(105),
     Compressed_Fireclay(110),
     Firebrick(111),
+
+    EnrichedUraniumNuclearFuel(112),
+    MoxNuclearFuel(113),
+
     ZPM5(145),
     ZPM6(146),
     ItemFilter_Export(270),
