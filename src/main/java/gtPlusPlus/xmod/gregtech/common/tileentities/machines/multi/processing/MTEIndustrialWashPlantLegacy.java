@@ -66,7 +66,6 @@ import gregtech.api.util.GTUtility;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.common.gui.modularui.multiblock.base.MTEMultiBlockBaseGui;
 import gregtech.common.pollution.PollutionConfig;
-import gtPlusPlus.api.recipe.GTPPRecipeMaps;
 import gtPlusPlus.core.block.ModBlocks;
 import gtPlusPlus.xmod.gregtech.api.metatileentity.implementations.base.GTPPMultiBlockBase;
 import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
@@ -116,7 +115,7 @@ public class MTEIndustrialWashPlantLegacy extends GTPPMultiBlockBase<MTEIndustri
             .addPollutionAmount(getPollutionPerSecond(null))
             .beginStructureBlock(5, 3, 7, true)
             .addController("Front center")
-            .addCasingInfoMin("Wash Plant Casings", 40, false)
+            .addCasingInfoMin("Wash Plant Casing", 40, false)
             .addInputBus("Any Casing", 1)
             .addOutputBus("Any Casing", 1)
             .addInputHatch("Any Casing", 1)
@@ -145,7 +144,7 @@ public class MTEIndustrialWashPlantLegacy extends GTPPMultiBlockBase<MTEIndustri
                         .casingIndex(getCasingTextureIndex())
                         .hint(1)
                         .buildAndChain(onElementPass(x -> ++x.mCasing, ofBlock(getCasingBlock(), getCasingMeta()))))
-                .addElement('w', ofChain(isAir(), ofAnyWater(true)))
+                .addElement('w', ofChain(ofAnyWater(true), isAir()))
                 .build();
         }
         return STRUCTURE_DEFINITION;
@@ -208,7 +207,7 @@ public class MTEIndustrialWashPlantLegacy extends GTPPMultiBlockBase<MTEIndustri
                 return RecipeMaps.oreWasherRecipes;
             }
             case MACHINEMODE_SIMPLEWASH -> {
-                return GTPPRecipeMaps.simpleWasherRecipes;
+                return RecipeMaps.simpleWasherRecipes;
             }
             default -> {
                 return RecipeMaps.chemicalBathRecipes;
@@ -220,7 +219,7 @@ public class MTEIndustrialWashPlantLegacy extends GTPPMultiBlockBase<MTEIndustri
     @Override
     public Collection<RecipeMap<?>> getAvailableRecipeMaps() {
         return Arrays
-            .asList(RecipeMaps.oreWasherRecipes, GTPPRecipeMaps.simpleWasherRecipes, RecipeMaps.chemicalBathRecipes);
+            .asList(RecipeMaps.oreWasherRecipes, RecipeMaps.simpleWasherRecipes, RecipeMaps.chemicalBathRecipes);
     }
 
     @Override

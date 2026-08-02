@@ -28,10 +28,10 @@ import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.logic.ProcessingLogic;
 import gregtech.api.recipe.RecipeMap;
+import gregtech.api.recipe.RecipeMaps;
 import gregtech.api.structure.error.StructureError;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.common.pollution.PollutionConfig;
-import gtPlusPlus.api.recipe.GTPPRecipeMaps;
 import gtPlusPlus.core.block.ModBlocks;
 import gtPlusPlus.xmod.gregtech.api.metatileentity.implementations.base.GTPPMultiBlockBase;
 import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
@@ -72,7 +72,7 @@ public class MTEIndustrialMolecularTransformerLegacy extends GTPPMultiBlockBase<
             .beginStructureBlock(7, 7, 7, false)
             .addController("Top center")
             .addCasingInfoMin("Robust Tungstensteel Machine Casing", 40, false)
-            .addCasingInfoMin("TPV-Alloy Coils", 16, false)
+            .addCasingInfoMin("TPV-Alloy Coil", 16, false)
             .addCasingInfoMin("Molecular Containment Casing", 52, false)
             .addCasingInfoMin("High Voltage Current Capacitor", 32, false)
             .addCasingInfoMin("Particle Containment Casing", 4, false)
@@ -213,7 +213,7 @@ public class MTEIndustrialMolecularTransformerLegacy extends GTPPMultiBlockBase<
 
     @Override
     public RecipeMap<?> getRecipeMap() {
-        return GTPPRecipeMaps.molecularTransformerRecipes;
+        return RecipeMaps.molecularTransformerRecipes;
     }
 
     @Override

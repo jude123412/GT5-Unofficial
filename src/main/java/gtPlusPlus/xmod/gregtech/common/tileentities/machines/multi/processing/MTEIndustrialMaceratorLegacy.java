@@ -114,13 +114,13 @@ public class MTEIndustrialMaceratorLegacy extends GTPPMultiBlockBase<MTEIndustri
             .addPollutionAmount(getPollutionPerSecond(null))
             .beginStructureBlock(3, 6, 3, true)
             .addController("Front bottom center")
-            .addCasingInfoMin("Maceration Stack Casings (After upgrade)", 26, false)
-            .addCasingInfoMin("Stable Titanium Casings (Before upgrade)", 26, false)
-            .addInputBus("Any casing", 1)
-            .addOutputBus("Any casing", 1)
-            .addEnergyHatch("Any casing", 1)
-            .addMaintenanceHatch("Any casing", 1)
-            .addMufflerHatch("Any casing", 1)
+            .addCasingInfoMin("Maceration Stack Casing (After upgrade)", 26, false)
+            .addCasingInfoMin("Stable Titanium Casing (Before upgrade)", 26, false)
+            .addInputBus("Any Casing", 1)
+            .addOutputBus("Any Casing", 1)
+            .addEnergyHatch("Any Casing", 1)
+            .addMaintenanceHatch("Any Casing", 1)
+            .addMufflerHatch("Any Casing", 1)
             .toolTipFinisher();
         return tt;
     }
@@ -266,6 +266,11 @@ public class MTEIndustrialMaceratorLegacy extends GTPPMultiBlockBase<MTEIndustri
     @Override
     public int getRecipeCatalystPriority() {
         return -10;
+    }
+
+    @Override
+    public boolean needsClientTick() {
+        return true;
     }
 
     @Override

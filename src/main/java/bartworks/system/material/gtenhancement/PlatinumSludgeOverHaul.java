@@ -73,6 +73,7 @@ import static gregtech.api.enums.OrePrefixes.dustTiny;
 import static gregtech.api.enums.OrePrefixes.ingot;
 import static gregtech.api.enums.OrePrefixes.nugget;
 import static gregtech.api.enums.OrePrefixes.rawOre;
+import static gregtech.api.recipe.RecipeMaps.alloyBlastSmelterRecipes;
 import static gregtech.api.recipe.RecipeMaps.blastFurnaceRecipes;
 import static gregtech.api.recipe.RecipeMaps.centrifugeRecipes;
 import static gregtech.api.recipe.RecipeMaps.chemicalReactorRecipes;
@@ -84,9 +85,11 @@ import static gregtech.api.recipe.RecipeMaps.fusionRecipes;
 import static gregtech.api.recipe.RecipeMaps.mixerRecipes;
 import static gregtech.api.recipe.RecipeMaps.multiblockChemicalReactorRecipes;
 import static gregtech.api.recipe.RecipeMaps.packagerRecipes;
+import static gregtech.api.recipe.RecipeMaps.quantumForceTransformerRecipes;
 import static gregtech.api.recipe.RecipeMaps.replicatorRecipes;
 import static gregtech.api.recipe.RecipeMaps.sifterRecipes;
 import static gregtech.api.recipe.RecipeMaps.unpackagerRecipes;
+import static gregtech.api.recipe.RecipeMaps.vacuumFurnaceRecipes;
 import static gregtech.api.util.GTRecipeBuilder.HALF_INGOTS;
 import static gregtech.api.util.GTRecipeBuilder.INGOTS;
 import static gregtech.api.util.GTRecipeBuilder.MINUTES;
@@ -94,11 +97,7 @@ import static gregtech.api.util.GTRecipeBuilder.SECONDS;
 import static gregtech.api.util.GTRecipeBuilder.TICKS;
 import static gregtech.api.util.GTRecipeConstants.COIL_HEAT;
 import static gregtech.api.util.GTRecipeConstants.UniversalChemical;
-import static gtPlusPlus.api.recipe.GTPPRecipeMaps.alloyBlastSmelterRecipes;
-import static gtPlusPlus.api.recipe.GTPPRecipeMaps.quantumForceTransformerRecipes;
-import static gtPlusPlus.api.recipe.GTPPRecipeMaps.vacuumFurnaceRecipes;
 import static gtPlusPlus.core.material.MaterialsAlloy.HELICOPTER;
-import static gtPlusPlus.core.material.MaterialsElements.STANDALONE.WHITE_METAL;
 import static kubatech.loaders.HTGRLoader.HTGRRecipes;
 import static tectech.recipe.TecTechRecipeMaps.eyeOfHarmonyRecipes;
 
@@ -1176,10 +1175,6 @@ public class PlatinumSludgeOverHaul {
             return true;
         }
         if (item == HTGRItem.BURNED_TRISO) {
-            return true;
-        }
-        if (item == WHITE_METAL.getDust(1)
-            .getItem()) {
             return true;
         }
         if (Railcraft.isModLoaded()) {

@@ -3,6 +3,7 @@ package gregtech.common.gui.modularui.hatch;
 import static gregtech.api.metatileentity.BaseTileEntity.TOOLTIP_DELAY;
 
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.StatCollector;
 
 import com.cleanroommc.modularui.api.IPanelHandler;
 import com.cleanroommc.modularui.api.drawable.IKey;
@@ -20,7 +21,6 @@ import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
 import gregtech.api.metatileentity.implementations.MTEHatchInputBusCompressed;
 import gregtech.api.modularui2.GTGuiTextures;
 import gregtech.api.modularui2.common.CommonButtons;
-import gregtech.api.util.GTUtility;
 import gregtech.common.gui.modularui.hatch.base.MTEHatchBaseGui;
 import gregtech.common.gui.modularui.synchandler.NBTSerializableSyncHandler;
 import gregtech.common.gui.modularui.util.AEItemSlot;
@@ -43,12 +43,11 @@ public class MTEHatchInputBusCompressedGui extends MTEHatchBaseGui<MTEHatchInput
 
     @Override
     protected Flow createBottomLeftCornerFlow(ModularPanel panel, PanelSyncManager syncManager) {
-        BooleanSyncValue stackSync = new BooleanSyncValue(
-            () -> !machine.disableSort,
-            val -> machine.disableSort = !val);
+        BooleanSyncValue stackSync = new BooleanSyncValue(() -> !machine.disableSort, val -> machine.disableSort = !val)
+            .allowC2S();
         BooleanSyncValue insertionSync = new BooleanSyncValue(
             () -> !machine.disableLimited,
-            val -> machine.disableLimited = !val);
+            val -> machine.disableLimited = !val).allowC2S();
 
         return super.createBottomLeftCornerFlow(panel, syncManager)
             .child(
@@ -79,14 +78,13 @@ public class MTEHatchInputBusCompressedGui extends MTEHatchBaseGui<MTEHatchInput
                 }
                 return true;
             })
-            .addTooltipLine(GTUtility.translate("GT5U.gui.button.compressed_bus_settings"))
+            .addTooltipLine(StatCollector.translateToLocal("GT5U.gui.button.compressed_bus_settings"))
             .tooltipShowUpTimer(TOOLTIP_DELAY);
     }
 
     private ModularPanel createSettingsPanel(PanelSyncManager syncManager, ModularPanel parent) {
-        LongSyncValue capacitySyncer = new LongSyncValue(
-            machine::getStackLimitOverride,
-            machine::setStackLimitOverride);
+        LongSyncValue capacitySyncer = new LongSyncValue(machine::getStackLimitOverride, machine::setStackLimitOverride)
+            .allowC2S();
 
         // spotless:off
         return new ModularPanel("busSettings")
@@ -106,9 +104,9 @@ public class MTEHatchInputBusCompressedGui extends MTEHatchBaseGui<MTEHatchInput
                         .asWidget()
                         .marginRight(4))
                     .child(new TextFieldWidget()
-                        .setNumbersLong(() -> 1L, () -> machine.stackCapacity)
+                        .numbersLong(() -> 1L, () -> machine.stackCapacity)
                         .value(capacitySyncer)
-                        .setScrollValues(1d, 4d, 64d))));
+                        .scrollValues(1d, 64d, 4d, 16d))));
         // spotless:on
     }
 

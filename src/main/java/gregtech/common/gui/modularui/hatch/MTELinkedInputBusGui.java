@@ -1,5 +1,7 @@
 package gregtech.common.gui.modularui.hatch;
 
+import net.minecraft.util.StatCollector;
+
 import com.cleanroommc.modularui.api.drawable.IKey;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.value.sync.BooleanSyncValue;
@@ -12,7 +14,6 @@ import com.cleanroommc.modularui.widgets.textfield.TextFieldWidget;
 
 import ggfab.mte.MTELinkedInputBus;
 import gregtech.api.modularui2.GTGuiTextures;
-import gregtech.api.util.GTUtility;
 import gregtech.common.gui.modularui.hatch.base.MTEHatchBaseGui;
 import gregtech.common.gui.modularui.synchandler.NBTSerializableSyncHandler;
 import gregtech.common.modularui2.widget.builder.ItemSlotGridBuilder;
@@ -28,8 +29,8 @@ public class MTELinkedInputBusGui extends MTEHatchBaseGui<MTELinkedInputBus> {
 
     @Override
     protected ParentWidget<?> createContentSection(ModularPanel panel, PanelSyncManager syncManager) {
-        StringSyncValue channelSyncer = new StringSyncValue(machine::getChannel, machine::setChannel);
-        BooleanSyncValue isPrivateSyncer = new BooleanSyncValue(machine::isPrivate, machine::setPrivate);
+        StringSyncValue channelSyncer = new StringSyncValue(machine::getChannel, machine::setChannel).allowC2S();
+        BooleanSyncValue isPrivateSyncer = new BooleanSyncValue(machine::isPrivate, machine::setPrivate).allowC2S();
 
         Flow mainColumn = Flow.column()
             .coverChildren()
@@ -48,7 +49,7 @@ public class MTELinkedInputBusGui extends MTEHatchBaseGui<MTELinkedInputBus> {
         inputRow.child(
             new TextFieldWidget().value(channelSyncer)
                 .width(60)
-                .addTooltipLine(GTUtility.translate("ggfab.tooltip.linked_input_bus.change_freq_warn")));
+                .addTooltipLine(StatCollector.translateToLocal("ggfab.tooltip.linked_input_bus.change_freq_warn")));
 
         // private label
         inputRow.child(
@@ -60,7 +61,7 @@ public class MTELinkedInputBusGui extends MTEHatchBaseGui<MTELinkedInputBus> {
             new ToggleButton().value(isPrivateSyncer)
                 .overlay(true, GTGuiTextures.OVERLAY_BUTTON_CHECKMARK)
                 .overlay(false, GTGuiTextures.OVERLAY_BUTTON_CROSS)
-                .addTooltipLine(GTUtility.translate("ggfab.tooltip.linked_input_bus.private")));
+                .addTooltipLine(StatCollector.translateToLocal("ggfab.tooltip.linked_input_bus.private")));
 
         mainColumn.child(inputRow);
 
@@ -68,7 +69,7 @@ public class MTELinkedInputBusGui extends MTEHatchBaseGui<MTELinkedInputBus> {
         mainColumn.child(
             new ItemSlotGridBuilder(machine.getHandler(), syncManager).size(SLOT_PER_ROW, SLOT_ROW)
                 .filter(
-                    $ -> !channelSyncer.getStringValue()
+                    _ -> !channelSyncer.getStringValue()
                         .isEmpty())
                 .build());
 

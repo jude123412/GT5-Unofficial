@@ -32,10 +32,10 @@ import gregtech.api.logic.ProcessingLogic;
 import gregtech.api.metatileentity.MetaTileEntity;
 import gregtech.api.metatileentity.implementations.MTEHatchOutputBus;
 import gregtech.api.recipe.RecipeMap;
+import gregtech.api.recipe.RecipeMaps;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.structure.error.StructureError;
 import gregtech.api.util.MultiblockTooltipBuilder;
-import gtPlusPlus.api.recipe.GTPPRecipeMaps;
 import gtPlusPlus.core.block.ModBlocks;
 import gtPlusPlus.core.item.chemistry.IonParticles;
 import gtPlusPlus.core.util.math.MathUtils;
@@ -158,17 +158,18 @@ public class MTECyclotron extends GTPPMultiBlockBase<MTECyclotron> implements IS
             .addSeparator()
             .addInfo("Similar structure to the Fusion Reactor")
             .addInfo("Any external casing can be a hatch/bus, unlike Fusion")
-            .addInfo("Cyclotron Machine Casings around Cyclotron Coil Blocks")
+            .addInfo("Cyclotron Machine Casing around Cyclotron Coil Block")
             .addSeparator()
             .addInfo("§4DEPRECATED")
             .addPollutionAmount(getPollutionPerSecond(null))
-            .addCasingInfoMin("Cyclotron Machine Casings", 40, false)
+            .addCasingInfoMin("Cyclotron Machine Casing", 40, false)
             .addCasingInfoMin("Cyclotron Coil", 32, false)
             .addInputBus("Any Casing", 1)
             .addOutputBus("Any Casing", 1)
             .addInputHatch("Any Casing", 1)
             .addOutputHatch("Any Casing", 1)
             .addEnergyHatch("Any Casing", 1)
+            .addMaintenanceHatch("Any Casing", 1)
             .toolTipFinisher();
         return tt;
     }
@@ -216,7 +217,7 @@ public class MTECyclotron extends GTPPMultiBlockBase<MTECyclotron> implements IS
 
     @Override
     public RecipeMap<?> getRecipeMap() {
-        return GTPPRecipeMaps.cyclotronRecipes;
+        return RecipeMaps.cyclotronRecipes;
     }
 
     @Override

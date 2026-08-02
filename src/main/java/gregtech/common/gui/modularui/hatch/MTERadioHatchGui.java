@@ -41,6 +41,19 @@ public class MTERadioHatchGui extends MTEHatchBaseGui<MTERadioHatch> {
         super(base);
     }
 
+    private int tickTimer = 0;
+    private int lastSoundTick = 0;
+
+    private void onTick(PosGuiData data) {
+        if (!data.isClient()) return;
+        tickTimer++;
+        if (machine.sievert <= 0 || baseMetaTileEntity.isMuffled()) return;
+        if (tickTimer > lastSoundTick + 5) {
+            lastSoundTick = tickTimer;
+            machine.startSoundLoop((byte) 1, data.getX(), data.getY(), data.getZ());
+        }
+    }
+
     // credit to purebluez
     @Override
     public ModularPanel build(PosGuiData data, PanelSyncManager syncManager, UISettings uiSettings) {
@@ -60,12 +73,12 @@ public class MTERadioHatchGui extends MTEHatchBaseGui<MTERadioHatch> {
             c -> machine.setColorForGuiAtIndex((short) c, 2));
         IntSyncValue coverageSyncer = new IntSyncValue(
             machine::getCoverage,
-            value -> machine.setCoverage((short) value));
+            value -> machine.setCoverage((short) value)).allowC2S();
         LongSyncValue timeSyncHandler = new LongSyncValue(machine::getTimer, machine::setTimer);
         LongSyncValue decayTimeSyncHandler = new LongSyncValue(machine::getDecayTime, machine::setDecayTime);
         BooleanSyncValue mufflerSyncer = new BooleanSyncValue(
             baseMetaTileEntity::isMuffled,
-            baseMetaTileEntity::setMuffler);
+            baseMetaTileEntity::setMuffler).allowC2S();
 
         syncManager.syncValue("decayTime", decayTimeSyncHandler);
         syncManager.syncValue("timer", timeSyncHandler);
@@ -151,6 +164,7 @@ public class MTERadioHatchGui extends MTEHatchBaseGui<MTERadioHatch> {
                 GTGuiTextures.PICTURE_BARTWORKS_LOGO_STANDARD.asWidget()
                     .pos(10, 53)
                     .size(47, 21))
+            .onUpdateListener(modularPanel -> this.onTick(data))
             .bindPlayerInventory();
     }
 
@@ -177,8 +191,9 @@ public class MTERadioHatchGui extends MTEHatchBaseGui<MTERadioHatch> {
                     .pos(16, 29)
                     .size(51, 50))
             .child(
-                new TextFieldWidget().setNumbers(0, 100)
-                    .value(new StringSyncValue(coverageSyncer::getStringValue, coverageSyncer::setStringValue))
+                new TextFieldWidget().numbersInt(0, 100)
+                    .value(
+                        new StringSyncValue(coverageSyncer::getStringValue, coverageSyncer::setStringValue).allowC2S())
                     .setTextColor(com.cleanroommc.modularui.utils.Color.WHITE.darker(1))
                     .setTextAlignment(Alignment.CenterLeft)
                     .pos(86, 27)

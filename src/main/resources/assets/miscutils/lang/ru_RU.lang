@@ -61,78 +61,6 @@ GTPP.core.GT_Tooltip=Добавлено: §2Alkalus §7- §c[GT++]
 GTPP.core.GT_Tooltip_Builder=§2Alkalus §7- §c[GT++]
 GTPP.core.GT_Tooltip_Radioactive=§7Внимание: §aРадиоактивно! §6Избегайте прямого контакта без средств защиты.
 
-# RecipeMaps
-gtpp.recipe.cokeoven=Коксовая печь
-gtpp.recipe.matterfab2=Генератор материи
-gtpp.recipe.rocketenginefuel=Топливо для ракетного двигателя
-gtpp.recipe.quantumforcesmelter=Квантовый силовой преобразователь
-gtpp.recipe.chemicaldehydrator=Дегидратор
-gtpp.recipe.vacfurnace=Вакуумная печь
-gtpp.recipe.alloyblastsmelter=Плавильная доменная печь
-gtpp.recipe.lftr=Жидкостный фтористо-ториевый реактор
-gtpp.recipe.lftr.sparging=Барботирование газа ЖФТР
-gtpp.recipe.nuclearsaltprocessingplant=Завод по переработке ядерной соли
-gtpp.recipe.oremill=Измельчение
-gtpp.recipe.fissionfuel=Переработка ядерного топлива
-gtpp.recipe.coldtrap=Холодная ловушка
-gtpp.recipe.reactorprocessingunit=Реакторное процессорное устройство
-gtpp.recipe.simplewasher=Простая мойка пыли
-gtpp.recipe.moleculartransformer=Молекулярный преобразователь
-gtpp.recipe.fluidchemicaleactor=Химический завод
-gtpp.recipe.RTGgenerators=RTG
-gtpp.recipe.thermalgeneratorfuel=Тепловой бойлер
-gtpp.recipe.solartower=Солнечная башня
-gtpp.recipe.cyclotron=КОМЕТА - Компактный циклотрон
-gtpp.recipe.fishpond=Чжухай - Рыбный порт
-gtpp.recipe.cryogenicfreezer=Криогенный морозильник
-gtpp.recipe.multicentrifuge=Мультиблоковая центрифуга
-gtpp.recipe.multielectro=Мультиблоковый электролизер
-gtpp.recipe.multimixer=Мультиблоковый миксер
-gtpp.recipe.multidehydrator=Мультиблоковый дегидратор
-gtpp.recipe.semifluidgeneratorfuels=Топливо полужидкостного генератора
-gtpp.recipe.flotationcell=Флотационная камера
-gtpp.recipe.treefarm=Симулятор роста деревьев
-
-# Recipe categories
-gtpp.recipe.category.abs_non_alloy_recipes=Рецепты ABS без сплавов
-
-# NEI
-gtpp.nei.lftr.power=Power: %s EU/t per Dynamo
-gtpp.nei.lftr.dynamo=Dynamo: %s EU
-gtpp.nei.lftr.total=Всего: %s EU
-gtpp.nei.milling.not_consumed=Не всегда расходуется в процессе работы
-gtpp.nei.chemplant.tier.1=Бронза
-gtpp.nei.chemplant.tier.2=Сталь
-gtpp.nei.chemplant.tier.3=Алюминий
-gtpp.nei.chemplant.tier.4=Нержавеющая сталь
-gtpp.nei.chemplant.tier.5=Титан
-gtpp.nei.chemplant.tier.6=Вольфрамовая сталь
-gtpp.nei.chemplant.tier.7=Лаурений
-gtpp.nei.chemplant.tier.8=Ботмий
-gtpp.nei.rtg.days=Стоимость топлива: %s Minecraft дней
-gtpp.nei.solar_tower.1=Solar Heater rings boost tier
-gtpp.nei.solar_tower.2=R1:T1, R2:T2, R3:T4, R4:T8, R5:T16
-gtpp.nei.solar_tower.3=Input Amount = 1000 x T
-gtpp.nei.tgs.1=Саженец не расходуется.
-gtpp.nei.tgs.2=Если указан %s,
-gtpp.nei.tgs.3=Вместо этого выращивают саженцы.
-gtpp.nei.tgs.sapling=Выводится, если указан %s
-
-gtpp.nei.tgs.tooltip.sapling=Поместите в слот контроллера механизма
-gtpp.nei.tgs.tooltip.saw=Поместите в входной люк для сбора брёвен
-gtpp.nei.tgs.tooltip.needsSaw=Для сбора урожая требуется пила
-gtpp.nei.tgs.tooltip.cutter=Поместите в входной люк для сбора саженцев
-gtpp.nei.tgs.tooltip.needsCutter=Для сбора урожая требуется секатор
-gtpp.nei.tgs.tooltip.shears=Поместите в входной люк для сбора листвы
-gtpp.nei.tgs.tooltip.needsShears=Для сбора урожая требуется ножницы
-gtpp.nei.tgs.tooltip.knife=Поместите в входной люк для сбора фруктов
-gtpp.nei.tgs.tooltip.needsKnife=Для сбора урожая требуется нож
-gtpp.nei.tgs.tooltip.multiplier=Выходной множитель:
-gtpp.nei.tgs.info-1=Производительность дополнительно повышается
-gtpp.nei.tgs.info-2=за счет тира механизма
-gtpp.nei.tgs.info-3=и типа инструмента
-
-
 # Thermal Foundation Stuff
 item.MiscUtils.bucket.bucketPyrotheum.name=Ведро пылающего пиротеума
 item.MiscUtils.bucket.bucketCryotheum.name=Ведро ледяного криотеума
@@ -2214,8 +2142,6 @@ block.Uranium232.standard.name=Блок урана-232
 block.Uranium233.standard.name=Блок урана-233
 block.WatertightSteel.frame.name=Каркас из водостойкой стали
 block.WatertightSteel.standard.name=Блок водостойкой стали
-block.WhiteMetal.frame.name=Каркас из белого металла
-block.WhiteMetal.standard.name=Блок белого металла
 block.Zeron100.frame.name=Каркас из зерона-100
 block.Zeron100.standard.name=Блок зерона-100
 block.ZirconiumCarbide.frame.name=Каркас из карбида циркония
@@ -3172,24 +3098,6 @@ item.itemCellBlackMetal.name=Капсула чёрного металла
 tile.Block of Black Metal.name=Блок чёрного металла
 tile.Black Metal Frame Box.name=Каркас из чёрного металла
 
-item.itemIngotWhiteMetal.name=Слиток белого металла
-item.itemHotIngotWhiteMetal.name=Раскалённый слиток белого металла
-item.itemDustWhiteMetal.name=Пыль белого металла
-item.itemDustTinyWhiteMetal.name=Крошечная кучка пыли белого металла
-item.itemDustSmallWhiteMetal.name=Маленькая кучка пыли белого металла
-item.itemNuggetWhiteMetal.name=Самородок белого металла
-item.itemPlateWhiteMetal.name=Пластина из белого металла
-item.itemPlateDoubleWhiteMetal.name=2x Пластина из белого металла
-item.itemBoltWhiteMetal.name=Болт из белого металла
-item.itemRodWhiteMetal.name=Стержень из белого металла
-item.itemRodLongWhiteMetal.name=Длинный стержень из белого металла
-item.itemRingWhiteMetal.name=Кольцо из белого металла
-item.itemScrewWhiteMetal.name=Винт из белого металла
-item.itemRotorWhiteMetal.name=Ротор из белого металла
-item.itemGearWhiteMetal.name=Шестерня из белого металла
-item.itemCellWhiteMetal.name=Капсула белого металла
-tile.Block of White Metal.name=Блок белого металла
-tile.White Metal Frame Box.name=Каркас из белого металла
 
 # Added 29/04/2019
 tile.OreRunite.name=Рунитовая руда
@@ -3361,7 +3269,6 @@ item.itemFoilPikyonium64B.name=Фольга из пикония 64B
 item.itemFoilQuantum.name=Квантум фольга
 item.itemFoilRhugnor.name=Фольга из ругнора
 item.itemFoilTitansteel.name=Фольга из титановой стали
-item.itemFoilWhiteMetal.name=Фольга из белого металла
 
 item.itemGearDragonblood.name=Шестерня из драконьего металла
 item.itemGearRhugnor.name=Шестерня из ругнора
@@ -3426,7 +3333,6 @@ item.itemPlateDenseTriniumTitaniumAlloy.name=Плотная пластина и�
 item.itemPlateDenseTumbaga.name=Плотная тумбаговая пластина
 item.itemPlateDenseTungstenTitaniumCarbide.name=Плотная пластина из вольфрам-титананового карбида
 item.itemPlateDenseWatertightSteel.name=Плотная пластина из водостойкой стали
-item.itemPlateDenseWhiteMetal.name=Плотная пластина из белого металла
 item.itemPlateDenseZeron100.name=Плотная пластина из зерона-100
 item.itemPlateDenseZirconiumCarbide.name=Плотная пластина из карбида циркония
 
@@ -3455,7 +3361,6 @@ item.GTPP.BattPack.05.name.name=Портативный зарядник [IV]
 item.IndustrialDiamondExquisite.name=Совершенный промышленный алмаз
 
 item.itemSpringCelestialTungsten.name=Пружина из небесного вольфрама
-item.itemSpringWhiteMetal.name=Пружина из белого металла
 item.itemSpringNitinol60.name=Пружина из нитинола 60
 item.itemSpringWatertightSteel.name=Пружина из водостойкой стали
 item.itemSpringEglinSteel.name=Пружина из эглиновой стали
@@ -3466,7 +3371,6 @@ item.itemSmallSpringStaballoy.name=Маленькая стабаллой пру�
 item.itemSmallSpringBlackSteel.name=Маленькая пружина из чёрной стали
 item.itemSmallSpringBlackTitanium.name=Маленькая пружина из чёрного титана
 
-item.itemFineWireWhiteMetal.name=Тонкая проволока из белого металла
 item.itemFineWirePalladium.name=Тонкая палладиевая проволока
 item.itemFineWireZirconium.name=Тонкая циркониевая проволока
 item.itemFineWireGrisium.name=Тонкая гризиевая проволока
@@ -3490,7 +3394,6 @@ item.itemHeavyPlateRhugnor.name=Плотная пластина из ругно�
 item.itemHeavyPlateAdvancedNitinol.name=Плотная пластина из улучшенного нитинола
 item.itemHeavyPlateAstralTitanium.name=Плотная пластина из астрального титана
 item.itemHeavyPlateCelestialTungsten.name=Плотная пластина из небесного вольфрама
-item.itemHeavyPlateWhiteMetal.name=Плотная пластина из белого металла
 item.itemHeavyPlateBlackMetal.name=Плотная пластина из чёрного металла
 item.itemHeavyPlateAncientGranite.name=Плотная пластина из древнего гранита
 
@@ -3503,7 +3406,6 @@ item.itemCellSeleniumDioxide.name=Капсула диоксида селена
 item.itemCellSeleniousAcid.name=Капсула селенистой кислоты
 
 # Added 15/8/19
-gtpp.nei.decayables=Decayables Chest
 entity.batKing.name=Король летучих мышей
 item.itemCellCarbyne.name=Капсула карбина
 item.itemCellHydrogenCyanide.name=Капсула с синильной кислотой
@@ -3915,7 +3817,7 @@ item.BasicGenericChemItem.14.name=Твёрдо-кислотный катализ
 item.BasicGenericChemItem.15.name=Infinite Mutation Catalyst
 
 # Added 23/10/22
-miscutils.machines.QFTFluidMode=Квантовый силовой преобразователь - Режим вывода жидкости
+miscutils.machines.QFTFluidMode=Квантовый силовой преобразователь - Режим вывода жидкости: %s
 
 # Added 16/11/22
 item.BasicGenericChemItem.16.name=Катализатор платиновой группы

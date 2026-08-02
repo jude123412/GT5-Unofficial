@@ -31,6 +31,7 @@ import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.logic.ProcessingLogic;
 import gregtech.api.recipe.RecipeMap;
+import gregtech.api.recipe.RecipeMaps;
 import gregtech.api.structure.error.StructureError;
 import gregtech.api.structure.error.StructureErrorRegistry;
 import gregtech.api.util.GTUtility;
@@ -38,7 +39,6 @@ import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.api.util.tooltip.TooltipHelper;
 import gregtech.api.util.tooltip.TooltipTier;
 import gregtech.common.pollution.PollutionConfig;
-import gtPlusPlus.api.recipe.GTPPRecipeMaps;
 import gtPlusPlus.core.block.ModBlocks;
 import gtPlusPlus.xmod.gregtech.api.metatileentity.implementations.base.GTPPMultiBlockBase;
 import gtPlusPlus.xmod.gregtech.common.blocks.textures.TexturesGtBlock;
@@ -76,14 +76,14 @@ public class MTEIndustrialCokeOvenLegacy extends GTPPMultiBlockBase<MTEIndustria
         tt.addMachineType(getMachineType())
             .addStructureDeprecatedLine()
             .addInfo("Processes Logs and Coal into Charcoal and Coal Coke.")
-            .addInfo(TooltipHelper.parallelText(18) + " Parallels with Heat Resistant Casings")
-            .addInfo(TooltipHelper.parallelText(30) + " Parallels with Heat Proof Casings")
+            .addInfo(TooltipHelper.parallelText(18) + " Parallels with Heat Resistant Casing")
+            .addInfo(TooltipHelper.parallelText(30) + " Parallels with Heat Proof Casing")
             .addDynamicEuEffInfo(0.04f, TooltipTier.VOLTAGE)
             .addPollutionAmount(getPollutionPerSecond(null))
             .beginStructureBlock(3, 3, 3, true)
             .addController("Front bottom center")
-            .addCasingInfoMin("Structural Coke Oven Casings", 8, false)
-            .addCasingInfoExactly("Heat Resistant/Proof Coke Oven Casings", 8, false)
+            .addCasingInfoMin("Structural Coke Oven Casing", 8, false)
+            .addCasingInfoExactly("Heat Resistant/Proof Coke Oven Casing", 8, false)
             .addInputBus("Any Structural Coke Oven Casing", 1)
             .addOutputBus("Any Structural Coke Oven Casing", 1)
             .addInputHatch("Any Structural Coke Oven Casing", 1)
@@ -200,7 +200,7 @@ public class MTEIndustrialCokeOvenLegacy extends GTPPMultiBlockBase<MTEIndustria
 
     @Override
     public RecipeMap<?> getRecipeMap() {
-        return GTPPRecipeMaps.cokeOvenRecipes;
+        return RecipeMaps.industrialCokeOvenRecipes;
     }
 
     @Override

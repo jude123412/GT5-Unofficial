@@ -20,6 +20,7 @@
 
 package kubatech.tileentity.gregtech.multiblock;
 
+import static com.gtnewhorizon.structurelib.structure.StructureUtility.isAir;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlock;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlockAnyMeta;
 import static com.gtnewhorizon.structurelib.structure.StructureUtility.ofBlocksMap;
@@ -38,6 +39,7 @@ import static gregtech.api.enums.Textures.BlockIcons.OVERLAY_FRONT_DISTILLATION_
 import static gregtech.api.util.GTStructureUtility.buildHatchAdder;
 import static gregtech.api.util.GTStructureUtility.chainAllGlasses;
 import static gregtech.api.util.GTStructureUtility.ofAnyWater;
+import static gregtech.api.util.GTStructureUtility.ofOreDictBlockMap;
 import static kubatech.api.utils.ItemUtils.readItemStackFromNBT;
 import static kubatech.api.utils.ItemUtils.writeItemStackToNBT;
 
@@ -47,15 +49,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.ForgeDirection;
@@ -84,6 +86,7 @@ import forestry.apiculture.blocks.BlockApicultureType;
 import forestry.apiculture.genetics.Bee;
 import forestry.plugins.PluginApiculture;
 import gregtech.api.GregTechAPI;
+import gregtech.api.casing.Casings;
 import gregtech.api.enums.GTAuthors;
 import gregtech.api.enums.GTValues;
 import gregtech.api.enums.SoundResource;
@@ -91,29 +94,34 @@ import gregtech.api.enums.Textures;
 import gregtech.api.enums.VoltageIndex;
 import gregtech.api.interfaces.ITexture;
 import gregtech.api.interfaces.metatileentity.IMetaTileEntity;
+import gregtech.api.interfaces.tileentity.ICasingTextureProvider;
+import gregtech.api.interfaces.tileentity.IGregTechDeviceInformation;
 import gregtech.api.interfaces.tileentity.IGregTechTileEntity;
 import gregtech.api.metatileentity.implementations.MTEHatchEnergy;
 import gregtech.api.recipe.check.CheckRecipeResult;
 import gregtech.api.recipe.check.CheckRecipeResultRegistry;
 import gregtech.api.recipe.check.ResultMissingApiaryFlowers;
 import gregtech.api.recipe.check.SimpleCheckRecipeResult;
-import gregtech.api.render.TextureFactory;
 import gregtech.api.structure.error.StructureError;
 import gregtech.api.structure.error.StructureErrors;
+import gregtech.api.util.GTStructureUtility;
 import gregtech.api.util.GTUtility;
 import gregtech.api.util.GTUtility.ItemId;
 import gregtech.api.util.MultiblockTooltipBuilder;
 import gregtech.common.gui.modularui.multiblock.base.MTEMultiBlockBaseGui;
+import gregtech.common.misc.GTStructureChannels;
 import kubatech.api.implementations.KubaTechGTMultiBlockBase;
 import kubatech.client.effect.MegaApiaryBeesRenderer;
 import kubatech.gui.modularui2.MTEMegaIndustrialApiaryGui;
 
+@IMetaTileEntity.SkipGenerateDescription
 public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaIndustrialApiary>
-    implements ISurvivalConstructable {
+    implements ISurvivalConstructable, ICasingTextureProvider {
 
     protected int glassTier = -1;
     protected int mCasing = 0;
     public int mMaxSlots = 0;
+    private boolean needsWaterFill = false;
 
     public int mPrimaryMode = MODE_PRIMARY_INPUT;
     public int mSecondaryMode = MODE_SECONDARY_NORMAL;
@@ -166,9 +174,7 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
             Arrays.stream(struct)
                 .map(
                     sa -> Arrays.stream(sa)
-                        .map(
-                            s -> s.replaceAll("W", " ")
-                                .replaceAll("F", " "))
+                        .map(s -> s.replace("F", " "))
                         .toArray(String[]::new))
                 .toArray(String[][]::new))
         .addShape(
@@ -187,33 +193,15 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
                 .casingIndex(CASING_INDEX)
                 .hint(1)
                 .buildAndChain(onElementPass(t -> t.mCasing++, ofBlock(GregTechAPI.sBlockCasings1, 10))))
-        .addElement(
-            'H',
-            ofBlocksMap(
-                Collections.singletonMap(
-                    Blocks.planks,
-                    IntStream.rangeClosed(0, 5)
-                        .boxed()
-                        .collect(Collectors.toList())),
-                Blocks.planks,
-                5))
-        .addElement(
-            'I',
-            ofBlocksMap(
-                Collections.singletonMap(
-                    Blocks.wooden_slab,
-                    IntStream.rangeClosed(0, 5)
-                        .boxed()
-                        .collect(Collectors.toList())),
-                Blocks.wooden_slab,
-                5))
+        .addElement('H', ofBlocksMap(ofOreDictBlockMap("plankWood"), Blocks.planks, 0))
+        .addElement('I', ofBlocksMap(ofOreDictBlockMap("slabWood"), Blocks.wooden_slab, 0))
         .addElement('J', ofBlock(PluginApiculture.blocks.apiculture, BlockApicultureType.APIARY.getMeta()))
         .addElement('K', ofBlock(PluginApiculture.blocks.alveary, BlockAlveary.Type.PLAIN.ordinal()))
         .addElement('L', ofBlock(PluginApiculture.blocks.alveary, BlockAlveary.Type.HYGRO.ordinal()))
         .addElement('N', ofBlock(PluginApiculture.blocks.alveary, BlockAlveary.Type.STABILIZER.ordinal()))
         .addElement('O', ofBlock(PluginApiculture.blocks.alveary, BlockAlveary.Type.HEATER.ordinal()))
         .addElement('P', ofBlock(PluginApiculture.blocks.alveary, BlockAlveary.Type.FAN.ordinal()))
-        .addElement('W', ofAnyWater())
+        .addElement('W', ofChain(ofAnyWater(false), isAir()))
         .addElement('F', new IStructureElementNoPlacement<>() {
 
             @Override
@@ -241,8 +229,18 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
     @Override
     public void onRemoval() {
         super.onRemoval();
-        if (getBaseMetaTileEntity().isServerSide())
-            tryOutputAll(mStorage, s -> Collections.singletonList(s.queenStack));
+        IGregTechTileEntity bmte = getBaseMetaTileEntity();
+        for (BeeSimulator s : mStorage) {
+            EntityItem item = new EntityItem(
+                bmte.getWorld(),
+                bmte.getXCoord(),
+                bmte.getYCoord(),
+                bmte.getZCoord(),
+                s.queenStack);
+            item.delayBeforeCanPickup = 10;
+            bmte.getWorld()
+                .spawnEntityInWorld(item);
+        }
     }
 
     /**
@@ -303,10 +301,14 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
      * @see #flowerCheckingMap
      */
     public void onStorageContentChanged(boolean ignoreFlowerCheck) {
-        flowerRequiredMap = mStorage.stream()
-            .collect(
-                Collectors.toMap(BeeSimulator::getFlowerType, BeeSimulator::getFlowerTypeDescription, (k1, k2) -> k1));
-        flowerRequiredMap.remove("");
+        flowerRequiredMap = new HashMap<>();
+        for (int i = 0, size = mStorage.size(); i < size; i++) {
+            BeeSimulator bee = mStorage.get(i);
+            String type = bee.getFlowerType();
+            if (!type.isEmpty()) {
+                flowerRequiredMap.putIfAbsent(type, bee.getFlowerTypeDescription());
+            }
+        }
 
         if (!ignoreFlowerCheck) {
             checkRequiredFlowers();
@@ -324,7 +326,7 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
         if (built == -1) {
             GTUtility.sendChatToPlayer(
                 env.getActor(),
-                EnumChatFormatting.GREEN + "Auto placing done ! Now go place the water and flowers yourself !");
+                EnumChatFormatting.GREEN + "Auto placing done! Now go place the flowers yourself !");
             return 0;
         }
         return built;
@@ -343,53 +345,55 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
     @Override
     protected MultiblockTooltipBuilder createTooltip() {
         MultiblockTooltipBuilder tt = new MultiblockTooltipBuilder();
-        tt.addMachineType("Mega Apiary, Mapiary")
-            .addInfo("The ideal home for your bees")
-            .addInfo("Use screwdriver to change primary mode (INPUT/OUTPUT/OPERATING)")
-            .addInfo("Use screwdriver + shift to change operation mode (NORMAL/SWARMER)")
-            .addSeparator()
-            .addInfo(EnumChatFormatting.GOLD + "Input Mode:")
-            .addInfo("- Does not take power")
-            .addInfo("- Put your queens in the input bus to put them in the internal buffer")
-            .addSeparator()
-            .addInfo(EnumChatFormatting.GOLD + "Output Mode:")
-            .addInfo("- Does not take power")
-            .addInfo("- Will give your bees back to output bus")
-            .addSeparator()
-            .addInfo(EnumChatFormatting.GOLD + "Operating Mode:")
-            .addInfo("- NORMAL:")
-            .addInfo("  - Processing time: 5 seconds")
-            .addInfo("  - Uses 1 " + voltageTooltipFormatted(6) + " amp per queen")
-            .addInfo("  - All bees are accelerated 64 times")
-            .addInfo("  - 8 production upgrades are applied")
-            .addInfo("  - Genetic Stabilizer upgrade applied")
-            .addInfo("  - Simulates perfect environment for your bees")
-            .addInfo("  - Additionally you can provide royal jelly to increase the outputs:")
-            .addInfo("    - 1 royal jelly grants 5% bonus per bee")
-            .addInfo("    - They will be consumed on each start of operation")
-            .addInfo("    - and be applied to that operation only")
-            .addInfo("    - Max bonus: 200%")
-            .addInfo("- SWARMER:")
-            .addInfo("  - You can only insert 1 queen")
-            .addInfo("  - It will slowly produce ignoble princesses")
-            .addInfo("  - Consumes 100 royal jelly per operation")
-            .addInfo("  - Base processing time: 1 minute")
-            .addInfo("  - Uses 1 amp " + voltageTooltipFormatted(5))
-            .addInfo("  - Can overclock")
-            .beginStructureBlock(15, 17, 15, false)
-            .addController("Front center")
-            .addCasingInfoMin("Bronze Plated Bricks", 190, false)
-            .addCasingInfoExactly("Any Tiered Glass", 121, false)
-            .addStructureInfo("The glass tier limits the Energy Input tier")
-            .addStructureInfo("Regular water and IC2 Distilled Water are accepted")
-            .addOtherStructurePart(
-                StatCollector.translateToLocal("kubatech.tooltip.structure.flowers"),
-                "On dirt/grass",
-                2)
-            .addInputBus("Any casing", 1)
-            .addOutputBus("Any casing", 1)
-            .addEnergyHatch(GTValues.VN[VoltageIndex.LuV] + "+, Any casing", 1)
-            .addMaintenanceHatch("Any casing", 1)
+        Map<String, Object> ttVars = new HashMap<>();
+        ttVars.put("voltageTier6", voltageTooltipFormatted(6));
+        ttVars.put("voltageTier5", voltageTooltipFormatted(5));
+        tt.addMachineType(StatCollector.translateToLocal("kubatech.multiblock.MegaIndustrialApiary.machine_type"))
+            .addMarkdown(new ResourceLocation("gregtech", "mega-apiary"), ttVars)
+            .addGlassEnergyLimitInfo()
+            .beginStructureBlock(15, 17, 15, true)
+            .addController(StatCollector.translateToLocal("gt.mbtt.structure.front_center_9th_layer"))
+            .addCasing(
+                "455",
+                StatCollector.translateToLocal("kubatech.multiblock.MegaIndustrialApiary.dirt_or_grass"),
+                false)
+            .addCasing("190-200", Casings.BronzePlatedBricks.getLocalizedName(), false)
+            .addCasing(
+                "185",
+                StatCollector.translateToLocal("kubatech.multiblock.MegaIndustrialApiary.wood_plank"),
+                false)
+            .addCasing("121", StatCollector.translateToLocal("gt.mbtt.structure.any_tiered_glass"), true)
+            .addCasing("34", StatCollector.translateToLocal("kubatech.multiblock.MegaIndustrialApiary.water"), false)
+            .addCasing(
+                "24",
+                StatCollector.translateToLocal("kubatech.multiblock.MegaIndustrialApiary.alveary_fan"),
+                false)
+            .addCasing(
+                "20",
+                StatCollector.translateToLocal("kubatech.multiblock.MegaIndustrialApiary.alveary_heater"),
+                false)
+            .addCasing(
+                "20",
+                StatCollector.translateToLocal("kubatech.multiblock.MegaIndustrialApiary.alveary_hygroregulator"),
+                false)
+            .addCasing("18", StatCollector.translateToLocal("kubatech.multiblock.MegaIndustrialApiary.alveary"), false)
+            .addCasing(
+                "12",
+                StatCollector.translateToLocal("kubatech.multiblock.MegaIndustrialApiary.alveary_stabiliser"),
+                false)
+            .addCasing("9", StatCollector.translateToLocal("kubatech.multiblock.MegaIndustrialApiary.apiary"), false)
+            .addCasing("9", StatCollector.translateToLocal("kubatech.multiblock.MegaIndustrialApiary.wood_slab"), false)
+            .addCasing("0+", StatCollector.translateToLocal("kubatech.multiblock.MegaIndustrialApiary.flower"), false)
+            .addEnergyHatch(
+                "1+",
+                StatCollector.translateToLocal("kubatech.multiblock.MegaIndustrialApiary.any_casing_luv"),
+                1)
+            .addMaintenanceHatch("1", StatCollector.translateToLocal("gt.mbtt.structure.any_casing"), 1)
+            .addInputBus("0+", StatCollector.translateToLocal("gt.mbtt.structure.any_casing"), 1)
+            .addOutputBus("1+", StatCollector.translateToLocal("gt.mbtt.structure.any_casing"), 1)
+            .addStructureInfo("")
+            .addStructureFooter(StatCollector.translateToLocal("kubatech.multiblock.MegaIndustrialApiary.footer"))
+            .addSubChannel(GTStructureChannels.BOROGLASS)
             .toolTipFinisher(GTAuthors.AuthorKuba, "Runakai");
         return tt;
     }
@@ -469,9 +473,20 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
     }
 
     @Override
+    public boolean needsClientTick() {
+        return true;
+    }
+
+    @Override
     public void onPostTick(IGregTechTileEntity aBaseMetaTileEntity, long aTick) {
         super.onPostTick(aBaseMetaTileEntity, aTick);
         if (aBaseMetaTileEntity.isServerSide()) {
+            if (needsWaterFill && aTick % 20 == 0) {
+                if (GTStructureUtility
+                    .fillStructureWithWater(aBaseMetaTileEntity, getExtendedFacing(), struct, 7, 8, 0, 'W')) {
+                    needsWaterFill = false;
+                }
+            }
             // TODO: Look for proper fix
             if (mUpdate < -550) mUpdate = 50;
         } else {
@@ -575,7 +590,7 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
                     this.mEfficiency = (10000 - (getIdealStatus() - getRepairStatus()) * 1000);
                     this.mEfficiencyIncrease = 10000;
                     this.mMaxProgresstime = 100;
-                    this.mOutputItems = stacks.toArray(new ItemStack[0]);
+                    this.mOutputItems = mergeOutputStacks(stacks);
                 } else { // SWARMER mode
                     if (!depleteInput(PluginApiculture.items.royalJelly.getItemStack(64))
                         || !depleteInput(PluginApiculture.items.royalJelly.getItemStack(36))) {
@@ -597,20 +612,35 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
         return CheckRecipeResultRegistry.NO_RECIPE;
     }
 
+    private static ItemStack[] mergeOutputStacks(List<ItemStack> stacks) {
+        HashMap<ItemId, Integer> countMap = new HashMap<>();
+        HashMap<ItemId, ItemStack> stackMap = new HashMap<>();
+        for (ItemStack stack : stacks) {
+            ItemId id = ItemId.createNoCopyWithStackSize(stack);
+            countMap.merge(id, stack.stackSize, Integer::sum);
+            stackMap.putIfAbsent(id, stack);
+        }
+        ItemStack[] result = new ItemStack[countMap.size()];
+        int i = 0;
+        for (Map.Entry<ItemId, Integer> entry : countMap.entrySet()) {
+            ItemStack merged = stackMap.get(entry.getKey())
+                .copy();
+            merged.stackSize = entry.getValue();
+            result[i++] = merged;
+        }
+        return result;
+    }
+
     @Override
     public String[] getInfoData() {
         ArrayList<String> info = new ArrayList<>(Arrays.asList(super.getInfoData()));
         info.add(
-            StatCollector.translateToLocal("kubatech.infodata.running_mode") + " "
-                + EnumChatFormatting.GOLD
-                + (mPrimaryMode == 0 ? StatCollector.translateToLocal("kubatech.infodata.mia.running_mode.input")
-                    : (mPrimaryMode == 1 ? StatCollector.translateToLocal("kubatech.infodata.mia.running_mode.output")
-                        : (mSecondaryMode == 0
-                            ? StatCollector.translateToLocal("kubatech.infodata.mia.running_mode.operating.normal")
-                            : StatCollector
-                                .translateToLocal("kubatech.infodata.mia.running_mode.operating.swarmer")))));
+            mPrimaryMode == 0 ? "kubatech.infodata.mia.running_mode.input"
+                : (mPrimaryMode == 1 ? "kubatech.infodata.mia.running_mode.output"
+                    : (mSecondaryMode == 0 ? "kubatech.infodata.mia.running_mode.operating.normal"
+                        : "kubatech.infodata.mia.running_mode.operating.swarmer")));
         info.add(
-            StatCollector.translateToLocalFormatted(
+            IGregTechDeviceInformation.encode(
                 "kubatech.infodata.mia.running_mode.bee_storage",
                 "" + EnumChatFormatting.GOLD + mStorage.size() + EnumChatFormatting.RESET,
                 (mStorage.size() > mMaxSlots ? EnumChatFormatting.DARK_RED.toString()
@@ -649,20 +679,20 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
 
     @Override
     public void checkMachine(IGregTechTileEntity aBaseMetaTileEntity, ItemStack aStack, List<StructureError> errors) {
+        needsWaterFill = false;
         glassTier = -1;
         mCasing = 0;
-        if (!checkPiece(STRUCTURE_PIECE_MAIN, 7, 8, 0, errors)) return;
-        if (this.glassTier < VoltageIndex.UEV) {
-            for (MTEHatchEnergy hatchEnergy : this.mEnergyHatches) {
-                if (this.glassTier < hatchEnergy.mTier) {
-                    errors.add(StructureErrors.glassTierNotEnough(hatchEnergy.mTier));
-                    break;
-                }
+        if (!checkPiece(STRUCTURE_PIECE_MAIN, 7, 8, 0, errors)) {
+            needsWaterFill = GTStructureUtility
+                .hasWaterAtStructurePosition(aBaseMetaTileEntity, getExtendedFacing(), struct, 7, 8, 0, 'W');
+            return;
+        }
+        for (MTEHatchEnergy hatchEnergy : this.mEnergyHatches) {
+            if (this.glassTier < hatchEnergy.getTierForStructure()) {
+                errors.add(StructureErrors.glassTierNotEnough(hatchEnergy.mTier));
+                break;
             }
         }
-        checkHasMaintenanceHatch(errors);
-        checkHasEnergyHatch(errors);
-        checkHasOutputBus(errors);
         checkCasingMin(errors, this.mCasing, 190);
         for (MTEHatchEnergy hatchEnergy : this.mEnergyHatches) {
             if (hatchEnergy.mTier < VoltageIndex.LuV) {
@@ -670,8 +700,12 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
                 break;
             }
         }
+        checkHasEnergyHatch(errors);
+        checkHasMaintenanceHatch(errors);
+        checkHasOutputBus(errors);
         if (errors.isEmpty()) {
             updateMaxSlots();
+            needsWaterFill = true;
         }
         checkRequiredFlowers();
     }
@@ -697,35 +731,22 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
     }
 
     @Override
-    public ITexture[] getTexture(IGregTechTileEntity aBaseMetaTileEntity, ForgeDirection side, ForgeDirection facing,
-        int colorIndex, boolean aActive, boolean aRedstone) {
-        if (side == facing) {
-            if (aActive) return new ITexture[] { Textures.BlockIcons.getCasingTextureForId(CASING_INDEX),
-                TextureFactory.builder()
-                    .addIcon(OVERLAY_FRONT_DISTILLATION_TOWER_ACTIVE)
-                    .extFacing()
-                    .build(),
-                TextureFactory.builder()
-                    .addIcon(OVERLAY_FRONT_DISTILLATION_TOWER_ACTIVE_GLOW)
-                    .extFacing()
-                    .glow()
-                    .build() };
-            return new ITexture[] { Textures.BlockIcons.getCasingTextureForId(CASING_INDEX), TextureFactory.builder()
-                .addIcon(OVERLAY_FRONT_DISTILLATION_TOWER)
-                .extFacing()
-                .build(),
-                TextureFactory.builder()
-                    .addIcon(OVERLAY_FRONT_DISTILLATION_TOWER_GLOW)
-                    .extFacing()
-                    .glow()
-                    .build() };
-        }
-        return new ITexture[] { Textures.BlockIcons.getCasingTextureForId(CASING_INDEX) };
+    public ITexture[] getTexture(IGregTechTileEntity aBaseMetaTileEntity, ForgeDirection side, ForgeDirection aFacing,
+        int colorIndex, boolean aActive, boolean redstoneLevel) {
+        return Textures.BlockIcons.createTextureWithCasing(
+            this,
+            side,
+            aFacing,
+            aActive,
+            OVERLAY_FRONT_DISTILLATION_TOWER,
+            OVERLAY_FRONT_DISTILLATION_TOWER_GLOW,
+            OVERLAY_FRONT_DISTILLATION_TOWER_ACTIVE,
+            OVERLAY_FRONT_DISTILLATION_TOWER_ACTIVE_GLOW);
     }
 
     @Override
-    protected boolean useMui2() {
-        return true;
+    public ITexture getCasingTexture() {
+        return Textures.BlockIcons.getCasingTextureForId(CASING_INDEX);
     }
 
     @Override
@@ -746,6 +767,7 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
         float maxBeeCycles;
         String flowerType;
         String flowerTypeDescription;
+        public String speciesKey;
         private static IBeekeepingMode mode;
 
         public BeeSimulator(ItemStack queenStack, World world, float t) {
@@ -774,6 +796,11 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
                 .getDescription();
             IAlleleBeeSpecies primary = genome.getPrimary();
             beeSpeed = genome.getSpeed();
+            speciesKey = primary.getUID() + "\0"
+                + genome.getSecondary()
+                    .getUID()
+                + "\0"
+                + beeSpeed;
             genome.getPrimary()
                 .getProductChances()
                 .forEach((key, value) -> drops.add(new BeeDrop(key, value, beeSpeed, t)));
@@ -795,12 +822,18 @@ public class MTEMegaIndustrialApiary extends KubaTechGTMultiBlockBase<MTEMegaInd
                 specialDrops.add(new BeeDrop(tag.getCompoundTag("specialDrops" + i)));
             beeSpeed = tag.getFloat("beeSpeed");
             maxBeeCycles = tag.getFloat("maxBeeCycles");
+            IBee queen = beeRoot.getMember(this.queenStack);
+            IBeeGenome genome = queen.getGenome();
+            speciesKey = genome.getPrimary()
+                .getUID() + "\0"
+                + genome.getSecondary()
+                    .getUID()
+                + "\0"
+                + beeSpeed;
             if (tag.hasKey("flowerType") && tag.hasKey("flowerTypeDescription")) {
                 flowerType = tag.getString("flowerType");
                 flowerTypeDescription = tag.getString("flowerTypeDescription");
             } else {
-                IBee queen = beeRoot.getMember(this.queenStack);
-                IBeeGenome genome = queen.getGenome();
                 this.flowerType = genome.getFlowerProvider()
                     .getFlowerType();
                 this.flowerTypeDescription = genome.getFlowerProvider()

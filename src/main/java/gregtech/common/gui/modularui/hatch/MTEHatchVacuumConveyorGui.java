@@ -12,6 +12,7 @@ import java.util.List;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.StatCollector;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -20,7 +21,6 @@ import com.cleanroommc.modularui.api.widget.IWidget;
 import com.cleanroommc.modularui.drawable.DynamicDrawable;
 import com.cleanroommc.modularui.drawable.GuiTextures;
 import com.cleanroommc.modularui.drawable.ItemDrawable;
-import com.cleanroommc.modularui.drawable.UITexture;
 import com.cleanroommc.modularui.screen.ModularPanel;
 import com.cleanroommc.modularui.utils.Alignment;
 import com.cleanroommc.modularui.utils.Color;
@@ -49,7 +49,6 @@ import appeng.items.storage.ItemBasicStorageCell;
 import appeng.util.item.AEItemStack;
 import cpw.mods.fml.relauncher.Side;
 import gregtech.api.modularui2.GTGuiTextures;
-import gregtech.api.util.GTUtility;
 import gregtech.api.util.StringUtils;
 import gregtech.common.gui.modularui.hatch.base.MTEHatchBaseGui;
 import gregtech.common.tileentities.machines.multi.nanochip.hatches.MTEHatchVacuumConveyor;
@@ -86,7 +85,7 @@ public class MTEHatchVacuumConveyorGui extends MTEHatchBaseGui<MTEHatchVacuumCon
     @Override
     public void registerSyncValues(PanelSyncManager syncManager) {
         super.registerSyncValues(syncManager);
-        GenericSyncValue<CircuitComponentPacket> contentsSyncHandler = GenericSyncValue
+        GenericSyncValue<CircuitComponentPacket, ?> contentsSyncHandler = GenericSyncValue
             .<CircuitComponentPacket>notNullBuilder()
             .getter(() -> machine.contents != null ? machine.contents : new CircuitComponentPacket())
             .setter(val -> machine.contents = val)
@@ -95,10 +94,11 @@ public class MTEHatchVacuumConveyorGui extends MTEHatchBaseGui<MTEHatchVacuumCon
             .equals(
                 (a, b) -> a.getComponents()
                     .equals(b.getComponents()))
-            .build();
+            .build()
+            .allowC2S();
         syncManager.syncValue("contents", contentsSyncHandler);
         syncManager.registerSyncedAction("dumpCCs", Side.SERVER, p -> {
-            GenericSyncValue<CircuitComponentPacket> syncContents = syncManager
+            GenericSyncValue<CircuitComponentPacket, ?> syncContents = syncManager
                 .findSyncHandler("contents", GenericSyncValue.class);
 
             ItemStack stack = machine.inventoryHandler.getStackInSlot(0);
@@ -130,14 +130,9 @@ public class MTEHatchVacuumConveyorGui extends MTEHatchBaseGui<MTEHatchVacuumCon
         });
     }
 
-    @Override
-    protected UITexture getLogoTexture() {
-        return GTGuiTextures.PICTURE_NANOCHIP_LOGO;
-    }
-
     private IWidget createCCSlotGroup(ModularPanel panel, PanelSyncManager syncManager) {
         @SuppressWarnings("unchecked")
-        GenericSyncValue<CircuitComponentPacket> componentSyncer = syncManager
+        GenericSyncValue<CircuitComponentPacket, ?> componentSyncer = syncManager
             .findSyncHandler("contents", GenericSyncValue.class);
 
         final String[] matrix = new String[machine.getRowCount()];
@@ -166,7 +161,8 @@ public class MTEHatchVacuumConveyorGui extends MTEHatchBaseGui<MTEHatchVacuumCon
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        });
+        })
+            .allowC2S();
         componentSyncer.setChangeListener(
             () -> componentHandler.notifyUpdate(
                 (packet -> packet.writeNBTTagCompoundToBuffer(
@@ -202,7 +198,7 @@ public class MTEHatchVacuumConveyorGui extends MTEHatchBaseGui<MTEHatchVacuumCon
 
     protected ButtonWidget<?> createVoidButton(PanelSyncManager syncManager) {
         @SuppressWarnings("unchecked")
-        GenericSyncValue<CircuitComponentPacket> syncContents = syncManager
+        GenericSyncValue<CircuitComponentPacket, ?> syncContents = syncManager
             .findSyncHandler("contents", GenericSyncValue.class);
 
         return new ButtonWidget<>().overlay(GuiTextures.CODE)
@@ -210,7 +206,7 @@ public class MTEHatchVacuumConveyorGui extends MTEHatchBaseGui<MTEHatchVacuumCon
                 syncContents.setValue(new CircuitComponentPacket());
                 return true;
             })
-            .addTooltipLine(GTUtility.translate("GT5U.tooltip.nac.interface.delete_stored"));
+            .addTooltipLine(StatCollector.translateToLocal("GT5U.tooltip.nac.interface.delete_stored"));
     }
 
     protected Flow createCellDrainRow(PanelSyncManager syncManager) {

@@ -68,38 +68,43 @@ public class MTEExoFoundryGui extends MTEMultiBlockBaseGui<MTEExoFoundry> {
 
         syncManager.syncValue(
             "Module1",
-            new IntSyncValue(() -> multiblock.getModuleSynced(0), ordinal -> multiblock.setModule(0, ordinal)));
+            new IntSyncValue(() -> multiblock.getModuleSynced(0), ordinal -> multiblock.setModule(0, ordinal))
+                .allowC2S());
         syncManager.syncValue(
             "Module2",
-            new IntSyncValue(() -> multiblock.getModuleSynced(1), ordinal -> multiblock.setModule(1, ordinal)));
+            new IntSyncValue(() -> multiblock.getModuleSynced(1), ordinal -> multiblock.setModule(1, ordinal))
+                .allowC2S());
         syncManager.syncValue(
             "Module3",
-            new IntSyncValue(() -> multiblock.getModuleSynced(2), ordinal -> multiblock.setModule(2, ordinal)));
+            new IntSyncValue(() -> multiblock.getModuleSynced(2), ordinal -> multiblock.setModule(2, ordinal))
+                .allowC2S());
         syncManager.syncValue(
             "Module4",
-            new IntSyncValue(() -> multiblock.getModuleSynced(3), ordinal -> multiblock.setModule(3, ordinal)));
+            new IntSyncValue(() -> multiblock.getModuleSynced(3), ordinal -> multiblock.setModule(3, ordinal))
+                .allowC2S());
         syncManager.syncValue(
             "Tier",
             new IntSyncValue(() -> multiblock.foundryData.tier, val -> multiblock.foundryData.tier = val));
 
-        BooleanSyncValue usingPreviewSync = new BooleanSyncValue(() -> usingPreview, val -> usingPreview = val);
+        BooleanSyncValue usingPreviewSync = new BooleanSyncValue(() -> usingPreview, val -> usingPreview = val)
+            .allowC2S();
         syncManager.syncValue("UsingPreview", usingPreviewSync);
         syncManager.syncValue("Module1Calc", new IntSyncValue(() -> calculatorData.modules[0].ordinal(), val -> {
             calculatorData.setModule(0, val);
             usingPreviewSync.setBoolValue(calculatorData.shouldUsePreview(multiblock.foundryData));
-        }));
+        }).allowC2S());
         syncManager.syncValue("Module2Calc", new IntSyncValue(() -> calculatorData.modules[1].ordinal(), val -> {
             calculatorData.setModule(1, val);
             usingPreviewSync.setBoolValue(calculatorData.shouldUsePreview(multiblock.foundryData));
-        }));
+        }).allowC2S());
         syncManager.syncValue("Module3Calc", new IntSyncValue(() -> calculatorData.modules[2].ordinal(), val -> {
             calculatorData.setModule(2, val);
             usingPreviewSync.setBoolValue(calculatorData.shouldUsePreview(multiblock.foundryData));
-        }));
+        }).allowC2S());
         syncManager.syncValue("Module4Calc", new IntSyncValue(() -> calculatorData.modules[3].ordinal(), val -> {
             calculatorData.setModule(3, val);
             usingPreviewSync.setBoolValue(calculatorData.shouldUsePreview(multiblock.foundryData));
-        }));
+        }).allowC2S());
     }
 
     @Override
@@ -334,7 +339,7 @@ public class MTEExoFoundryGui extends MTEMultiBlockBaseGui<MTEExoFoundry> {
                                         return "Speed: " + TooltipHelper.SPEED_COLOR + data.getSpeedStr();
                                     })
                                         .asWidget()
-                                        .widgetTheme(GTWidgetThemes.DISPLAY_TEXT)
+                                        .widgetTheme(GTWidgetThemes.DISPLAY_TEXT_WHITE)
                                         .size(120, 20)
                                         .marginBottom(2))
                                     .child(IKey.dynamic(() -> {
@@ -344,7 +349,7 @@ public class MTEExoFoundryGui extends MTEMultiBlockBaseGui<MTEExoFoundry> {
                                             + data.getParallelsString();
                                     })
                                         .asWidget()
-                                        .widgetTheme(GTWidgetThemes.DISPLAY_TEXT)
+                                        .widgetTheme(GTWidgetThemes.DISPLAY_TEXT_WHITE)
                                         .size(120, 20)
                                         .marginBottom(2))
                                     .child(IKey.dynamic(() -> {
@@ -353,7 +358,7 @@ public class MTEExoFoundryGui extends MTEMultiBlockBaseGui<MTEExoFoundry> {
                                         return "EU Consumption: " + TooltipHelper.EFF_COLOR + data.getEuEFFString();
                                     })
                                         .asWidget()
-                                        .widgetTheme(GTWidgetThemes.DISPLAY_TEXT)
+                                        .widgetTheme(GTWidgetThemes.DISPLAY_TEXT_WHITE)
                                         .size(120, 20)
                                         .marginBottom(2))
                                     .child(IKey.dynamic(() -> {
@@ -363,7 +368,7 @@ public class MTEExoFoundryGui extends MTEMultiBlockBaseGui<MTEExoFoundry> {
                                             + data.getOCFactorString();
                                     })
                                         .asWidget()
-                                        .widgetTheme(GTWidgetThemes.DISPLAY_TEXT)
+                                        .widgetTheme(GTWidgetThemes.DISPLAY_TEXT_WHITE)
                                         .size(120, 20)
                                         .marginBottom(2)))
                             .child(createPairHoldingColumn(calculatorData, true)))
@@ -385,7 +390,7 @@ public class MTEExoFoundryGui extends MTEMultiBlockBaseGui<MTEExoFoundry> {
                     })
                         .scale(0.9f)
                         .asWidget()
-                        .widgetTheme(GTWidgetThemes.DISPLAY_TEXT)
+                        .widgetTheme(GTWidgetThemes.DISPLAY_TEXT_WHITE)
                         .size(120, 20)));
     }
 
@@ -636,21 +641,26 @@ public class MTEExoFoundryGui extends MTEMultiBlockBaseGui<MTEExoFoundry> {
                         TooltipHelper.EFF_COLOR));
                 t.addLine(
                     StatCollector.translateToLocalFormatted(
-                        "gt.blockmachines.multimachine.foundry.heliocastreinforcement.tooltip6"));
+                        "gt.blockmachines.multimachine.foundry.heliocastreinforcement.tooltip6",
+                        TooltipHelper.SPEED_COLOR));
                 t.addLine(
                     StatCollector.translateToLocalFormatted(
                         "gt.blockmachines.multimachine.foundry.heliocastreinforcement.tooltip7",
-                        TooltipHelper.PARALLEL_COLOR,
-                        TooltipHelper.TIER_COLOR));
+                        TooltipHelper.EFF_COLOR));
                 t.addLine(
                     StatCollector.translateToLocalFormatted(
-                        "gt.blockmachines.multimachine.foundry.heliocastreinforcement.tooltip8"));
+                        "gt.blockmachines.multimachine.foundry.heliocastreinforcement.tooltip8",
+                        TooltipHelper.PARALLEL_COLOR,
+                        TooltipHelper.TIER_COLOR));
                 t.addLine(
                     StatCollector.translateToLocalFormatted(
                         "gt.blockmachines.multimachine.foundry.heliocastreinforcement.tooltip9"));
                 t.addLine(
                     StatCollector.translateToLocalFormatted(
                         "gt.blockmachines.multimachine.foundry.heliocastreinforcement.tooltip10"));
+                t.addLine(
+                    StatCollector.translateToLocalFormatted(
+                        "gt.blockmachines.multimachine.foundry.heliocastreinforcement.tooltip11"));
             }
             case UNIVERSAL_COLLAPSER -> {
                 t.addLine(createModuleLimitText());
@@ -666,11 +676,14 @@ public class MTEExoFoundryGui extends MTEMultiBlockBaseGui<MTEExoFoundry> {
                         "gt.blockmachines.multimachine.foundry.universalcollapser.tooltip3"));
                 t.addLine(
                     StatCollector.translateToLocalFormatted(
-                        "gt.blockmachines.multimachine.foundry.universalcollapser.tooltip4",
+                        "gt.blockmachines.multimachine.foundry.universalcollapser.tooltip4"));
+                t.addLine(
+                    StatCollector.translateToLocalFormatted(
+                        "gt.blockmachines.multimachine.foundry.universalcollapser.tooltip5",
                         TooltipHelper.SPEED_COLOR));
                 t.addLine(
                     StatCollector.translateToLocalFormatted(
-                        "gt.blockmachines.multimachine.foundry.universalcollapser.tooltip5"));
+                        "gt.blockmachines.multimachine.foundry.universalcollapser.tooltip6"));
             }
         }
         if (module != FoundryModule.UNSET) t.addLine(createTierLine(module.voltageTier));
@@ -780,45 +793,48 @@ public class MTEExoFoundryGui extends MTEMultiBlockBaseGui<MTEExoFoundry> {
                         .tooltipDynamic(t -> {
                             t.addLine(
                                 StatCollector
-                                    .translateToLocalFormatted("GT5U.gui.text.foundry.pairings.superstablecore.title"));
+                                    .translateToLocalFormatted("GT5U.gui.text.foundry.pairings.entropiccore.title"));
                             t.addLine(
-                                StatCollector.translateToLocalFormatted(
-                                    "GT5U.gui.text.foundry.pairings.superstablecore.required"));
+                                StatCollector
+                                    .translateToLocalFormatted("GT5U.gui.text.foundry.pairings.entropiccore.required"));
                             t.addLine(
                                 StatCollector.translateToLocalFormatted(
                                     data.isHRPairPresent ? "GT5U.gui.text.foundry.pairings.activity.on"
                                         : "GT5U.gui.text.foundry.pairings.activity.off"));
                             t.addLine(
-                                StatCollector.translateToLocalFormatted(
-                                    "GT5U.gui.text.foundry.pairings.superstablecore.tooltip1"));
+                                StatCollector
+                                    .translateToLocalFormatted("GT5U.gui.text.foundry.pairings.entropiccore.tooltip1"));
+                            t.addLine(
+                                StatCollector
+                                    .translateToLocalFormatted("GT5U.gui.text.foundry.pairings.entropiccore.tooltip2"));
+                            t.addLine(
+                                StatCollector
+                                    .translateToLocalFormatted("GT5U.gui.text.foundry.pairings.entropiccore.tooltip3"));
+                            t.addLine(
+                                StatCollector
+                                    .translateToLocalFormatted("GT5U.gui.text.foundry.pairings.entropiccore.tooltip4"));
                             t.addLine(
                                 StatCollector.translateToLocalFormatted(
-                                    "GT5U.gui.text.foundry.pairings.superstablecore.tooltip2"));
-                            t.addLine(
-                                StatCollector.translateToLocalFormatted(
-                                    "GT5U.gui.text.foundry.pairings.superstablecore.tooltip3",
+                                    "GT5U.gui.text.foundry.pairings.entropiccore.tooltip5",
                                     TooltipHelper.SPEED_COLOR));
                             t.addLine(
                                 StatCollector.translateToLocalFormatted(
-                                    "GT5U.gui.text.foundry.pairings.superstablecore.tooltip4",
+                                    "GT5U.gui.text.foundry.pairings.entropiccore.tooltip6",
                                     TooltipHelper.EFF_COLOR));
                             t.addLine(
                                 StatCollector.translateToLocalFormatted(
-                                    "GT5U.gui.text.foundry.pairings.superstablecore.tooltip5"));
-                            t.addLine(
-                                StatCollector.translateToLocalFormatted(
-                                    "GT5U.gui.text.foundry.pairings.superstablecore.tooltip6",
+                                    "GT5U.gui.text.foundry.pairings.entropiccore.tooltip7",
                                     TooltipHelper.PARALLEL_COLOR,
                                     TooltipHelper.TIER_COLOR));
                             t.addLine(
-                                StatCollector.translateToLocalFormatted(
-                                    "GT5U.gui.text.foundry.pairings.superstablecore.tooltip7"));
+                                StatCollector
+                                    .translateToLocalFormatted("GT5U.gui.text.foundry.pairings.entropiccore.tooltip8"));
+                            t.addLine(
+                                StatCollector
+                                    .translateToLocalFormatted("GT5U.gui.text.foundry.pairings.entropiccore.tooltip9"));
                             t.addLine(
                                 StatCollector.translateToLocalFormatted(
-                                    "GT5U.gui.text.foundry.pairings.superstablecore.tooltip8"));
-                            t.addLine(
-                                StatCollector.translateToLocalFormatted(
-                                    "GT5U.gui.text.foundry.pairings.superstablecore.tooltip9"));
+                                    "GT5U.gui.text.foundry.pairings.entropiccore.tooltip10"));
                         }));
         column.child(
             new DynamicDrawable(
