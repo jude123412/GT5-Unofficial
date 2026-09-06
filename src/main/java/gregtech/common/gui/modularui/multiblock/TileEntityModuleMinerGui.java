@@ -121,7 +121,7 @@ public class TileEntityModuleMinerGui extends TileEntityModuleBaseGui<TileEntity
                 .marginBottom(2)
                 .leftRel(0));
 
-        // New Cycle Distance Readout Widget
+        // New Cycle Distance Widget
         minerInfo.child(IKey.dynamic(() -> {
             if (!cycleSyncer.getValue())
                 return EnumChatFormatting.GRAY + StatCollector.translateToLocal("tt.spaceminer.textFieldCycleDistance")
@@ -131,16 +131,20 @@ public class TileEntityModuleMinerGui extends TileEntityModuleBaseGui<TileEntity
             int range = rangeSyncer.getValue();
             int step = stepSyncer.getValue();
 
+            // Compute the same lower and upper bounds used by cycleDistance():
             int lowerBound = Math.max(0, dist - range);
             int maxThreshold = (int) Math.min(MAX_DISTANCE, dist + range);
 
+            // Compute the highest reachable value using the same stepping logic as cycleDistance().
             if (step <= 0 || lowerBound >= maxThreshold) {
                 return EnumChatFormatting.GRAY + StatCollector.translateToLocal("tt.spaceminer.textFieldCycleDistance")
                     + "Invalid Config";
             }
 
-            // Replicates the Math.min(MAX_DISTANCE, dist + range) condition in cycleDistance()
+            // Number of valid increments from lowerBound before exceeding maxThreshold.
             int totalSteps = (maxThreshold - lowerBound) / step;
+
+            // The maximum value the cycle will actually reach before wrapping.
             int practicalMax = lowerBound + (totalSteps * step);
 
             return EnumChatFormatting.WHITE + StatCollector.translateToLocal("tt.spaceminer.textFieldCycleDistance")
