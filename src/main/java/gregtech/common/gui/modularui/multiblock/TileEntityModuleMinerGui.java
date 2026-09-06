@@ -8,6 +8,7 @@ import static gtnhintergalactic.recipe.SpaceMiningRecipes.uniqueAsteroidList;
 import static gtnhintergalactic.tile.multi.elevatormodules.TileEntityModuleMiner.CYCLE_DISTANCE_PARAMETER;
 import static gtnhintergalactic.tile.multi.elevatormodules.TileEntityModuleMiner.CYCLE_PARAMETER;
 import static gtnhintergalactic.tile.multi.elevatormodules.TileEntityModuleMiner.DISTANCE_PARAMETER;
+import static gtnhintergalactic.tile.multi.elevatormodules.TileEntityModuleMiner.MAX_DISTANCE;
 import static gtnhintergalactic.tile.multi.elevatormodules.TileEntityModuleMiner.RANGE_PARAMETER;
 import static gtnhintergalactic.tile.multi.elevatormodules.TileEntityModuleMiner.STEP_PARAMETER;
 import static java.util.stream.Collectors.toList;
@@ -131,7 +132,7 @@ public class TileEntityModuleMinerGui extends TileEntityModuleBaseGui<TileEntity
             int step = stepSyncer.getValue();
 
             int lowerBound = Math.max(0, dist - range);
-            int maxThreshold = dist + range;
+            int maxThreshold = (int) Math.min(MAX_DISTANCE, dist + range);
 
             if (step <= 0 || lowerBound >= maxThreshold) {
                 return EnumChatFormatting.GRAY + StatCollector.translateToLocal("tt.spaceminer.textFieldCycleDistance")
@@ -139,7 +140,7 @@ public class TileEntityModuleMinerGui extends TileEntityModuleBaseGui<TileEntity
             }
 
             // Replicates the Math.min(MAX_DISTANCE, dist + range) condition in cycleDistance()
-            int totalSteps = (maxThreshold - lowerBound - 1) / step;
+            int totalSteps = (maxThreshold - lowerBound) / step;
             int practicalMax = lowerBound + (totalSteps * step);
 
             return EnumChatFormatting.WHITE + StatCollector.translateToLocal("tt.spaceminer.textFieldCycleDistance")
