@@ -1809,6 +1809,7 @@ tt.spaceminer.asteroidButtonFilter=Right click to add asteroid to filter
 tt.spaceminer.textFieldOre=Ore
 tt.spaceminer.textFieldDistance=Distance
 tt.spaceminer.textFieldTier=Tier
+tt.spaceminer.textFieldCycleDistance=Cycle Distance: 
 tt.spaceminer.calculatorButtonTooltip=Open Space Miner Calculator
 tt.spaceminer.asteroidutilitypanel.miningDrones=Can be mined by:
 tt.spaceminer.asteroidutilitypanel.itemUsage=Uses 4 of each per parallel

@@ -9,6 +9,7 @@ import static gtnhintergalactic.tile.multi.elevatormodules.TileEntityModuleMiner
 import static gtnhintergalactic.tile.multi.elevatormodules.TileEntityModuleMiner.CYCLE_PARAMETER;
 import static gtnhintergalactic.tile.multi.elevatormodules.TileEntityModuleMiner.DISTANCE_PARAMETER;
 import static gtnhintergalactic.tile.multi.elevatormodules.TileEntityModuleMiner.RANGE_PARAMETER;
+import static gtnhintergalactic.tile.multi.elevatormodules.TileEntityModuleMiner.STEP_PARAMETER;
 import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
@@ -105,6 +106,10 @@ public class TileEntityModuleMinerGui extends TileEntityModuleBaseGui<TileEntity
         IntSyncValue cycleDistanceSyncer = syncManager.findSyncHandler(CYCLE_DISTANCE_PARAMETER, IntSyncValue.class);
         BooleanSyncValue cycleSyncer = syncManager.findSyncHandler(CYCLE_PARAMETER, BooleanSyncValue.class);
 
+        // Grab the values needed for calculating bounds
+        IntSyncValue rangeSyncer = syncManager.findSyncHandler(RANGE_PARAMETER, IntSyncValue.class);
+        IntSyncValue stepSyncer = syncManager.findSyncHandler(STEP_PARAMETER, IntSyncValue.class);
+
         ListWidget<IWidget, ?> minerInfo = new ListWidget<>().child(
             IKey.dynamic(
                 () -> EnumChatFormatting.WHITE + StatCollector.translateToLocal("tt.spaceminer.textFieldDistance")
@@ -114,6 +119,41 @@ public class TileEntityModuleMinerGui extends TileEntityModuleBaseGui<TileEntity
                 .asWidget()
                 .marginBottom(2)
                 .leftRel(0));
+
+        // New Cycle Distance Readout Widget
+        minerInfo.child(IKey.dynamic(() -> {
+            if (!cycleSyncer.getValue())
+                return EnumChatFormatting.GRAY + StatCollector.translateToLocal("tt.spaceminer.textFieldCycleDistance")
+                    + "Disabled";
+
+            int dist = distanceSyncer.getValue();
+            int range = rangeSyncer.getValue();
+            int step = stepSyncer.getValue();
+
+            int lowerBound = Math.max(0, dist - range);
+            int maxThreshold = dist + range;
+
+            if (step <= 0 || lowerBound >= maxThreshold) {
+                return EnumChatFormatting.GRAY + StatCollector.translateToLocal("tt.spaceminer.textFieldCycleDistance")
+                    + "Invalid Config";
+            }
+
+            // Replicates the Math.min(MAX_DISTANCE, dist + range) condition in cycleDistance()
+            int totalSteps = (maxThreshold - lowerBound - 1) / step;
+            int practicalMax = lowerBound + (totalSteps * step);
+
+            return EnumChatFormatting.WHITE + StatCollector.translateToLocal("tt.spaceminer.textFieldCycleDistance")
+                + EnumChatFormatting.YELLOW
+                + lowerBound
+                + EnumChatFormatting.WHITE
+                + " -> "
+                + EnumChatFormatting.YELLOW
+                + practicalMax;
+        })
+            .asWidget()
+            .marginBottom(2)
+            .leftRel(0));
+
         return minerInfo.children(super.createTerminalTextWidget(syncManager, parent).getChildren());
     }
 
@@ -816,7 +856,7 @@ public class TileEntityModuleMinerGui extends TileEntityModuleBaseGui<TileEntity
     private IWidget createDistanceText(AsteroidData data) {
         return IKey
             .lang(
-                "tt.spaceminer.asteroidutilitypanel.distanceRange",
+                "tt.spaceminer.asteroidutilitypanel.CycleRange",
                 EnumChatFormatting.GREEN,
                 data.minDistance,
                 data.maxDistance,
@@ -1340,6 +1380,8 @@ public class TileEntityModuleMinerGui extends TileEntityModuleBaseGui<TileEntity
         IntSyncValue moduleTierFilterSyncer = new IntSyncValue(moduleTierFilter::get, moduleTierFilter::set).allowC2S();
         syncManager.syncValue("moduleTierFilter", moduleTierFilterSyncer);
 
+        IntSyncValue rangeReadoutSyncer = syncManager.findSyncHandler(RANGE_PARAMETER, IntSyncValue.class);
+        IntSyncValue stepReadoutSyncer = syncManager.findSyncHandler(STEP_PARAMETER, IntSyncValue.class);
     }
 
     @Override
