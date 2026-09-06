@@ -1845,6 +1845,7 @@ tt.gui.tooltip.plasma_module.debug_window.parallel=parallel
 tt.gui.text.debug.set_mode=Click to Set Machine to %s
 tt.gui.text.debug.status.inactive=Inactive
 tt.gui.text.debug.status.disabled=Disabled
+tt.gui.text.debug.config_error=Config Error
 
 tt.gui.text.debug_power.status.produce=Producing
 tt.gui.text.debug_power.status.consume=Consuming

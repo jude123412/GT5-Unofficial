@@ -123,23 +123,22 @@ public class TileEntityModuleMinerGui extends TileEntityModuleBaseGui<TileEntity
 
         // New Cycle Distance Widget
         minerInfo.child(IKey.dynamic(() -> {
-            if (!cycleSyncer.getValue())
-                return EnumChatFormatting.GRAY + StatCollector.translateToLocal("tt.spaceminer.textFieldCycleDistance")
-                    + "Disabled";
+            String distanceLocal = EnumChatFormatting.WHITE + StatCollector.translateToLocal("tt.spaceminer.textFieldCycleDistance");
+            String incorrectLocal = StatCollector.translateToLocal("tt.gui.text.debug.config_error");
+            String disabledLocal = StatCollector.translateToLocal("tt.gui.text.debug.status.disabled");
 
             int dist = distanceSyncer.getValue();
             int range = rangeSyncer.getValue();
             int step = stepSyncer.getValue();
+
+            if (!cycleSyncer.getValue()) return distanceLocal + EnumChatFormatting.RED + disabledLocal;
 
             // Compute the same lower and upper bounds used by cycleDistance():
             int lowerBound = Math.max(0, dist - range);
             int maxThreshold = (int) Math.min(MAX_DISTANCE, dist + range);
 
             // Compute the highest reachable value using the same stepping logic as cycleDistance().
-            if (step <= 0 || lowerBound >= maxThreshold) {
-                return EnumChatFormatting.GRAY + StatCollector.translateToLocal("tt.spaceminer.textFieldCycleDistance")
-                    + "Invalid Config";
-            }
+            if (step <= 0 || lowerBound >= maxThreshold) return distanceLocal + EnumChatFormatting.RED + incorrectLocal;
 
             // Number of valid increments from lowerBound before exceeding maxThreshold.
             int totalSteps = (maxThreshold - lowerBound) / step;
@@ -147,7 +146,7 @@ public class TileEntityModuleMinerGui extends TileEntityModuleBaseGui<TileEntity
             // The maximum value the cycle will actually reach before wrapping.
             int practicalMax = lowerBound + (totalSteps * step);
 
-            return EnumChatFormatting.WHITE + StatCollector.translateToLocal("tt.spaceminer.textFieldCycleDistance")
+            return distanceLocal
                 + EnumChatFormatting.YELLOW
                 + lowerBound
                 + EnumChatFormatting.WHITE
