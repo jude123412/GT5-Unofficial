@@ -21,6 +21,7 @@ import static gregtech.api.util.GTRecipeBuilder.WILDCARD;
 
 import java.util.Locale;
 
+import gregtech.common.render.items.InfinityMetaItemRenderer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -730,6 +731,18 @@ public class LoaderGTBlockFluid implements Runnable {
                 ItemList.DepletedRodTiberium4.get(1),
                 false,
                 1F));
+
+        // Infinity Catalyst
+        ItemList.DepletedRodInfinityCatalyst.set(new ItemDepletedCell("depletedRodInfinityCatalyst", "Fuel Rod (Infinity)", 4));
+        ItemList.RodInfinityCatalyst.set(
+            new ItemBreederCell(
+                "rodInfinityCatalyst",
+                "Fuel Rod (Infinity Catalyst)",
+                "Source of infinity",
+                3_000,
+                1,
+                50_000,
+                () -> ItemList.DepletedRodInfinityCatalyst.get(1))).setRender(new InfinityMetaItemRenderer());
 
         GT_FML_LOGGER.debug("GTMod: Adding Blocks.");
         GregTechAPI.sBlockMachines = new BlockMachines();

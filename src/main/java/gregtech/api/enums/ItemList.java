@@ -1892,6 +1892,7 @@ public enum ItemList implements IItemContainer {
     RodTiberium,
     RodTiberium2,
     RodTiberium4,
+    RodInfinityCatalyst,
 
     DepletedRodLithium, // tritium
     DepletedRodGlowstone, // sunnarium
@@ -1926,6 +1927,7 @@ public enum ItemList implements IItemContainer {
     DepletedRodTiberium,
     DepletedRodTiberium2,
     DepletedRodTiberium4,
+    DepletedRodInfinityCatalyst, // infinity
 
     Hatch_AutoMaintenance,
     Machine_Multi_Cleanroom,
