@@ -519,6 +519,16 @@ public class NaquadahRecipeLoader {
             .metadata(ADDITIVE_AMOUNT, 1000)
             .addTo(BlastFurnaceWithGas);
 
+        GTValues.RA.stdBuilder()
+            .itemInputs(GGMaterial.naquadahEarth.get(OrePrefixes.dust, 18))
+            .circuit(9)
+            .itemOutputs(Materials.Naquadah.getIngots(1))
+            .duration(18 * MINUTES)
+            .eut(TierEU.RECIPE_IV * 9)
+            .metadata(COIL_HEAT, 5000)
+            .metadata(ADDITIVE_AMOUNT, 9000)
+            .addTo(BlastFurnaceWithGas);
+
         // C2H4 + H2O(g) = C2H6O
         GTValues.RA.stdBuilder()
             .circuit(24)

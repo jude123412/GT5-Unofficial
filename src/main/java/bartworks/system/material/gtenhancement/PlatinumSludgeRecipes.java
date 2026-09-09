@@ -307,6 +307,14 @@ public final class PlatinumSludgeRecipes {
             .metadata(COIL_HEAT, Materials.Platinum.mMeltingPoint)
             .addTo(blastFurnaceRecipes);
         GTValues.RA.stdBuilder()
+            .itemInputs(PTMetallicPowder.get(dust, 27))
+            .circuit(9)
+            .itemOutputs(Materials.Platinum.getIngots(1))
+            .duration(4 * MINUTES + 30 * SECONDS)
+            .eut(TierEU.RECIPE_MV * 9)
+            .metadata(COIL_HEAT, Materials.Platinum.mMeltingPoint)
+            .addTo(blastFurnaceRecipes);
+        GTValues.RA.stdBuilder()
             .itemInputs(PTMetallicPowder.get(dust))
             .circuit(1)
             .itemOutputs(PTResidue.get(dustTiny))
