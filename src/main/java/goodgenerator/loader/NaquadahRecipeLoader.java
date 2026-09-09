@@ -511,7 +511,7 @@ public class NaquadahRecipeLoader {
 
         GTValues.RA.stdBuilder()
             .itemInputs(GGMaterial.naquadahEarth.get(OrePrefixes.dust, 2))
-            .circuit(2)
+            .circuit(11)
             .itemOutputs(Materials.Naquadah.getNuggets(1))
             .duration(2 * MINUTES)
             .eut(TierEU.RECIPE_IV)
