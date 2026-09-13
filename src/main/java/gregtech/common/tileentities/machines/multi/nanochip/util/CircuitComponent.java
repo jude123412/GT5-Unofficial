@@ -159,6 +159,10 @@ public enum CircuitComponent {
         406,
         "gt.circuitcomponent.livingbiochip",
         () -> ItemList.Circuit_Parts_Chip_Bioware.get(1)),
+    BoardExotic(
+        407,
+        "gt.circuitcomponent.board.exotic",
+        () -> ItemList.Circuit_Board_Exotic.get(1)),
 
     ProcessedBoardMultifiberglassElite(500, "gt.circuitcomponent.processed.board.multifiberelite", () -> BoardMultifiberglassElite, true),
     ProcessedBoardWetwareLifesupport(501, "gt.circuitcomponent.processed.board.wetwarelifesupport", () -> BoardWetwareLifesupport, true),
@@ -545,6 +549,22 @@ public enum CircuitComponent {
         2119,
         "gt.circuitcomponent.planckmanifold",
         () -> ItemList.Planck_Manifold.get(1), CircuitCalibration.NONE),
+    ExoticProcessor(
+        2120,
+        "gt.circuitcomponent.exoticprocessor",
+        () ->ItemList.Circuit_ExoticProcessor.get(1), CircuitCalibration.EXOTIC),
+    ExoticAssembly(
+        2121,
+            "gt.circuitcomponent.exoticprocessor",
+            () ->ItemList.Circuit_ExoticAssembly.get(1), CircuitCalibration.EXOTIC),
+    ExoticComputer(
+        2122,
+            "gt.circuitcomponent.exoticprocessor",
+            () ->ItemList.Circuit_ExoticComputer.get(1), CircuitCalibration.EXOTIC),
+    ExoticMainframe(
+        2123,
+            "gt.circuitcomponent.exoticprocessor",
+            () ->ItemList.Circuit_ExoticMainframe.get(1), CircuitCalibration.EXOTIC),
     ;
 
     // spotless:on
