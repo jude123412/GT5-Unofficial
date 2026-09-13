@@ -3125,12 +3125,9 @@ public enum ItemList implements IItemContainer {
     ComplexNanochipGlass,
     Gravitational_Lens,
     Planck_Manifold,
-    ExoticMatterProcessingUnit,
-    ExoticMatterWafer,
-    ExoticMatterLogicArray,
-    ExoticMatterProcessingModule,
-    ExoticMatterLogicArrayWafer,
-    ExoticMatterProcessingModuleWafer,
+
+    ExoticMatterCPU,
+    ExoticMatterCPUHousing,
 
     CultureNullBioCulture,
     CultureSaccharomycesCerevisiae,

@@ -183,12 +183,8 @@ import static gregtech.common.items.IDMetaItem03.Cover_SolarPanel_UEV;
 import static gregtech.common.items.IDMetaItem03.Cover_SolarPanel_UHV;
 import static gregtech.common.items.IDMetaItem03.Cover_SolarPanel_UIV;
 import static gregtech.common.items.IDMetaItem03.EV_Coil;
-import static gregtech.common.items.IDMetaItem03.ExoticMatterLogicArray;
-import static gregtech.common.items.IDMetaItem03.ExoticMatterLogicArrayWafer;
-import static gregtech.common.items.IDMetaItem03.ExoticMatterProcessingModule;
-import static gregtech.common.items.IDMetaItem03.ExoticMatterProcessingModuleWafer;
-import static gregtech.common.items.IDMetaItem03.ExoticMatterProcessingUnit;
-import static gregtech.common.items.IDMetaItem03.ExoticMatterWafer;
+import static gregtech.common.items.IDMetaItem03.ExoticMatterCPU;
+import static gregtech.common.items.IDMetaItem03.ExoticMatterCPUHousing;
 import static gregtech.common.items.IDMetaItem03.GalliumArsenideCrystal;
 import static gregtech.common.items.IDMetaItem03.GalliumArsenideCrystalSmallPart;
 import static gregtech.common.items.IDMetaItem03.Gravitational_Lens;
@@ -1971,44 +1967,16 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFi
                     "gt.item.planck_manifold.tooltip"))
             .setRender(new CosmicNeutroniumMetaItemRenderer());
 
-        ItemList.ExoticMatterProcessingUnit.set(
+        ItemList.ExoticMatterCPU.set(
             addItemWithLocalizationKeys(
-                ExoticMatterProcessingUnit.ID,
+                ExoticMatterCPU.ID,
                 "gt.item.circuit.exotic_matter.cpu.name",
                 "gt.item.circuit.exotic_matter.cpu.tooltip"));
-        ItemList.ExoticMatterWafer.set(
+        ItemList.ExoticMatterCPUHousing.set(
             addItemWithLocalizationKeys(
-                ExoticMatterWafer.ID,
-                "gt.item.circuit.wafer.exotic_matter.name",
-                RAW,
-                "waferExoticMatter",
-                "wafer"));
-        ItemList.ExoticMatterLogicArrayWafer.set(
-            addItemWithLocalizationKeys(
-                ExoticMatterLogicArrayWafer.ID,
-                "gt.item.circuit.wafer.emla.name",
-                RAW,
-                "waferEMLA",
-                "wafer"));
-        ItemList.ExoticMatterProcessingModuleWafer.set(
-            addItemWithLocalizationKeys(
-                ExoticMatterProcessingModuleWafer.ID,
-                "gt.item.circuit.wafer.empm.name",
-                RAW,
-                "waferEMPM",
-                "wafer"));
-        ItemList.ExoticMatterLogicArray.set(
-            addItemWithLocalizationKeys(
-                ExoticMatterLogicArray.ID,
-                "gt.item.circuit.chip.emla.name",
-                "gt.item.circuit.chip.emla.tooltip",
-                "chipEMLA"));
-        ItemList.ExoticMatterProcessingModule.set(
-            addItemWithLocalizationKeys(
-                ExoticMatterProcessingModule.ID,
-                "gt.item.circuit.chip.empm.name",
-                "gt.item.circuit.chip.empm.tooltip",
-                "chipEMPM"));
+                ExoticMatterCPUHousing.ID,
+                "gt.item.circuit.exotic_matter.cpu_housing.name",
+                "gt.item.circuit.exotic_matter.cpu_housing.tooltip"));
 
         registerMetaMaterials();
 
