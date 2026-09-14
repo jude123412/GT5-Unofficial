@@ -19,6 +19,7 @@ import bartworks.common.loaders.recipes.Autoclave;
 import bartworks.common.loaders.recipes.Centrifuge;
 import bartworks.common.loaders.recipes.ChemicalReactor;
 import bartworks.common.loaders.recipes.CraftingRecipes;
+import bartworks.common.loaders.recipes.ElectricBlastFurnace;
 import bartworks.common.loaders.recipes.Electrolyzer;
 import bartworks.common.loaders.recipes.Extractor;
 import bartworks.common.loaders.recipes.FluidHeater;
@@ -48,5 +49,6 @@ public class RecipeLoader {
         new LaserEngraver().run();
         new Mixer().run();
         new Pulverizer().run();
+        new ElectricBlastFurnace().run();
     }
 }
