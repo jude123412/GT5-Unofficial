@@ -3128,6 +3128,7 @@ public enum ItemList implements IItemContainer {
 
     ExoticMatterCPU,
     ExoticMatterCPUHousing,
+    ExoticMatterCPURaw,
 
     CultureNullBioCulture,
     CultureSaccharomycesCerevisiae,

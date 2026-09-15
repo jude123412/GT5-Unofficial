@@ -268,6 +268,7 @@ public enum IDMetaItem03 {
 
     ExoticMatterCPU(335),
     ExoticMatterCPUHousing(336),
+    ExoticMatterCPURaw(337),
 
     Circuit_Silicon_Ingot6(721),
     Circuit_Silicon_Wafer6(722),

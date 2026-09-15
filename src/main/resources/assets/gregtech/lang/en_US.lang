@@ -5457,8 +5457,10 @@ gt.item.circuit.chip.plpic.tooltip=Planck Power Circuit
 ## Exotic Circuit Components
 gt.item.circuit.exotic_matter.cpu.name=Exotic CPU
 gt.item.circuit.exotic_matter.cpu.tooltip=Megalomaniac CPU
-gt.item.circuit.exotic_matter.cpu_housing.name=Exotic CPU Containment Housing
-gt.item.circuit.exotic_matter.cpu_housing.tooltip=Exotic CPU housing
+gt.item.circuit.exotic_matter.cpu.housing.name=Exotic CPU Containment Housing
+gt.item.circuit.exotic_matter.cpu.housing.tooltip=Exotic CPU housing
+gt.item.circuit.exotic_matter.cpu.raw.name=Raw Exotic CPU
+gt.item.circuit.exotic_matter.cpu.raw.tooltip=A Quantum Anomaly, cannibalised into a computational engine
 
 ## Crystal and Bio chips
 gt.item.circuit.chip.crystal_soc2.name=Raw Advanced Crystal Chip

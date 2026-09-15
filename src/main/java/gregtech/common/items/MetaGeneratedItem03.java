@@ -185,6 +185,7 @@ import static gregtech.common.items.IDMetaItem03.Cover_SolarPanel_UIV;
 import static gregtech.common.items.IDMetaItem03.EV_Coil;
 import static gregtech.common.items.IDMetaItem03.ExoticMatterCPU;
 import static gregtech.common.items.IDMetaItem03.ExoticMatterCPUHousing;
+import static gregtech.common.items.IDMetaItem03.ExoticMatterCPURaw;
 import static gregtech.common.items.IDMetaItem03.GalliumArsenideCrystal;
 import static gregtech.common.items.IDMetaItem03.GalliumArsenideCrystalSmallPart;
 import static gregtech.common.items.IDMetaItem03.Gravitational_Lens;
@@ -1975,8 +1976,13 @@ public class MetaGeneratedItem03 extends MetaGeneratedItemX32 implements IItemFi
         ItemList.ExoticMatterCPUHousing.set(
             addItemWithLocalizationKeys(
                 ExoticMatterCPUHousing.ID,
-                "gt.item.circuit.exotic_matter.cpu_housing.name",
-                "gt.item.circuit.exotic_matter.cpu_housing.tooltip"));
+                "gt.item.circuit.exotic_matter.cpu.housing.name",
+                "gt.item.circuit.exotic_matter.cpu.housing.tooltip"));
+        ItemList.ExoticMatterCPURaw.set(
+            addItemWithLocalizationKeys(
+                ExoticMatterCPURaw.ID,
+                "gt.item.circuit.exotic_matter.cpu.raw.name",
+                "gt.item.circuit.exotic_matter.cpu.raw.tooltip"));
 
         registerMetaMaterials();
 
