@@ -9113,6 +9113,15 @@ public class LoaderMetaTileEntities implements Runnable { // TODO CHECK CIRCUIT 
         ItemList.Machine_UV_SolarPanel.set(
             new MTESolarGenerator(SOLAR_PANEL_UV.ID, "basicgenerator.solarpanel.08", "Ultimate Solar Panel", 8)
                 .getStackForm(1));
+        ItemList.Machine_UHV_SolarPanel.set(
+            new MTESolarGenerator(SOLAR_PANEL_UHV.ID, "basicgenerator.solarpanel.08", "Ultimate Solar Panel II", 9)
+                .getStackForm(1));
+        ItemList.Machine_UEV_SolarPanel.set(
+            new MTESolarGenerator(SOLAR_PANEL_UEV.ID, "basicgenerator.solarpanel.09", "Mythic Solar Panel", 10)
+                .getStackForm(1));
+        ItemList.Machine_UIV_SolarPanel.set(
+            new MTESolarGenerator(SOLAR_PANEL_UIV.ID, "basicgenerator.solarpanel.10", "Mythic Solar Panel II", 11)
+                .getStackForm(1));
     }
 
     private static void registerCombustionGenerators() {

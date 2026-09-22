@@ -2126,6 +2126,9 @@ public enum ItemList implements IItemContainer {
     Machine_LuV_SolarPanel,
     Machine_ZPM_SolarPanel,
     Machine_UV_SolarPanel,
+    Machine_UHV_SolarPanel,
+    Machine_UEV_SolarPanel,
+    Machine_UIV_SolarPanel,
 
     ULV_Coil,
     LV_Coil,
