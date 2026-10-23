@@ -20,9 +20,6 @@ import gtnhintergalactic.item.ItemCasingDysonSwarm;
 public class BlockCasingDysonSwarm extends Block {
 
     private IIcon[][] textures;
-    public static final String[] names = { "ReceiverCasing", "ReceiverDish", "DeploymentUnitCasing",
-        "DeploymentUnitCore", "DeploymentUnitMagnet", "ControlCasing", "ControlPrimary", "ControlSecondary",
-        "ControlToroid", "Floor" };
 
     public BlockCasingDysonSwarm() {
         super(Material.iron);
@@ -46,22 +43,26 @@ public class BlockCasingDysonSwarm extends Block {
 
     @Override
     public void registerBlockIcons(IIconRegister register) {
-        textures = new IIcon[names.length][2];
-        for (int i = 0; i < names.length; i++) {
-            textures[i][0] = register
-                .registerIcon(GTNHIntergalactic.ASSET_PREFIX + ":dysonSwarm/" + names[i] + "_Side");
-            textures[i][1] = register.registerIcon(GTNHIntergalactic.ASSET_PREFIX + ":dysonSwarm/" + names[i]);
+        textures = new IIcon[DysonPart.values().length][2];
+        for (DysonPart part : DysonPart.values()) {
+            int i = part.ordinal();
+            if (part.isSided()) {
+                textures[i][0] = register
+                    .registerIcon(GTNHIntergalactic.ASSET_PREFIX + ":dysonSwarm/" + part.getName() + "_Side");
+            }
+            textures[i][1] = register.registerIcon(GTNHIntergalactic.ASSET_PREFIX + ":dysonSwarm/" + part.getName());
         }
     }
 
     @Override
     public IIcon getIcon(int side, int meta) {
-        return textures[meta % textures.length][side < 2 ? 1 : 0];
+        DysonPart part = DysonPart.fromMeta(meta);
+        return part.isSided() && side >= 2 ? textures[meta][0] : textures[meta][1];
     }
 
     @Override
     public void getSubBlocks(Item item, CreativeTabs tab, List<ItemStack> variants) {
-        for (int i = 0; i < names.length; i++) {
+        for (int i = 0; i < DysonPart.values().length; i++) {
             variants.add(new ItemStack(item, 1, i));
         }
     }
@@ -91,5 +92,41 @@ public class BlockCasingDysonSwarm extends Block {
     @Override
     public int damageDropped(int meta) {
         return meta;
+    }
+
+    public enum DysonPart {
+
+        RECEIVER_CASING("ReceiverCasing", true),
+        RECEIVER_DISH("ReceiverDish", false),
+        DEPLOYMENT_UNIT_CASING("DeploymentUnitCasing", true),
+        DEPLOYMENT_UNIT_CORE("DeploymentUnitCore", true),
+        DEPLOYMENT_UNIT_MAGNET("DeploymentUnitMagnet", true),
+        CONTROL_CASING("ControlCasing", true),
+        CONTROL_PRIMARY("ControlPrimary", true),
+        CONTROL_SECONDARY("ControlSecondary", true),
+        CONTROL_TOROID("ControlToroid", false),
+        FLOOR("Floor", false);
+
+        private static final DysonPart[] VALUES = values();
+
+        private final String name;
+        private final boolean sided;
+
+        DysonPart(String name, boolean isSided) {
+            this.name = name;
+            this.sided = isSided;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public boolean isSided() {
+            return sided;
+        }
+
+        public static DysonPart fromMeta(int meta) {
+            return VALUES[meta];
+        }
     }
 }
