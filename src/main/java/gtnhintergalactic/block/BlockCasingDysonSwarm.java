@@ -101,7 +101,7 @@ public class BlockCasingDysonSwarm extends Block {
         DEPLOYMENT_UNIT_CASING("DeploymentUnitCasing", true),
         DEPLOYMENT_UNIT_CORE("DeploymentUnitCore", true),
         DEPLOYMENT_UNIT_MAGNET("DeploymentUnitMagnet", true),
-        CONTROL_CASING("ControlCasing", true),
+        CONTROL_CASING("ControlCasing", false),
         CONTROL_PRIMARY("ControlPrimary", true),
         CONTROL_SECONDARY("ControlSecondary", true),
         CONTROL_TOROID("ControlToroid", false),
